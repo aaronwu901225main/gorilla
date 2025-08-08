@@ -117,6 +117,21 @@ class ModelConfig:
 
 # Inference through API calls
 api_inference_model_map = {
+    ################################自定義模型##################################
+    "my-openai-like-FC": ModelConfig(
+        model_name="gpt-oss-20b",             # 這是 API 裡的 model 名稱
+        display_name="gpt-oss-20b",             # 只是顯示用
+        url=None,
+        org="YourOrg",
+        license="",
+        model_handler=OpenAICompletionsHandler,   # 用這個 handler
+        input_price=None,
+        output_price=None,
+        is_fc_model=True,                         # 要跑 function calling 設 True
+        underscore_to_dot=False,
+    ),
+    ################################自定義模型##################################
+    
     "gorilla-openfunctions-v2": ModelConfig(
         model_name="gorilla-openfunctions-v2",
         display_name="Gorilla-OpenFunctions-v2 (FC)",
