@@ -118,16 +118,16 @@ class ModelConfig:
 # Inference through API calls
 api_inference_model_map = {
     ################################自定義模型##################################
-    "my-openai-like-FC": ModelConfig(
-        model_name="gpt-oss-20b",             # 這是 API 裡的 model 名稱
-        display_name="gpt-oss-20b",             # 只是顯示用
+    "gpt-oss-20b-FC": ModelConfig(
+        model_name="gpt-oss-20b",      # 給 handler 參考；不是 CLI 的名字
+        display_name="GPT-OSS-20B (FC)",
         url=None,
-        org="YourOrg",
+        org="Local",
         license="",
-        model_handler=OpenAICompletionsHandler,   # 用這個 handler
+        model_handler=VLLMHandler,     # 或 SGLangHandler
         input_price=None,
         output_price=None,
-        is_fc_model=True,                         # 要跑 function calling 設 True
+        is_fc_model=True,              # 要做 function calling 建議 True
         underscore_to_dot=False,
     ),
     ################################自定義模型##################################
