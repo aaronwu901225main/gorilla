@@ -1,0 +1,11 @@
+CUDA_VISIBLE_DEVICES=0,1 python translate_bfcl_with_vllm.py \
+  --model Qwen/Qwen3-8B \
+  --tensor-parallel-size 2 \
+  --input-folder ./ \
+  --glob 'BFCL_v3_*.json' \
+  --input-format jsonl \
+  --output-folder ./zh_out \
+  --output-format jsonl \
+  --temperature 0.0 \
+  --max-new-tokens 1024 \
+  --trust-remote-code
