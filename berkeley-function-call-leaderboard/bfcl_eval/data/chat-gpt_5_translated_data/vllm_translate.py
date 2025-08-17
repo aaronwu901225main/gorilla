@@ -8,7 +8,6 @@ import orjson
 from tqdm import tqdm
 from vllm import LLM, SamplingParams
 import glob
-import orjson
 import re
 
 def escape_braces(s: str) -> str:
@@ -41,8 +40,10 @@ def build_prompts(texts: List[str]) -> List[str]:
     tpl = (
         "你是一位專業翻譯，請將下面文字精準翻譯為繁體中文，"
         "保留專有名詞與數學符號，維持原意與語氣。\n"
-        "只輸出翻譯內容，不要任何額外說明或標註，也不需要任何接收命令的提示。\n"
-        "最終請只輸出 \\boxed{你的翻譯結果}。\n"
+        "只輸出翻譯內容，不要任何額外說明或標註，並且不要回答輸入的問題。\n"
+        "將最終的輸出結果放在 \\boxed{{...}} 中。\n"
+        "舉例來說，如果輸入為Calculate the area of a triangle given the base is 10 meters and height is 5 meters.\n"
+        "最終請只輸出 \\boxed{{計算一個三角形的面積，已知底為 10 公尺，高為 5 公尺。}}，其他問題以此類推。\n"
         "原文：\n{content}\n"
     )
     prompts = []
@@ -162,24 +163,29 @@ def process_one_file(
     for batch in tqdm(chunked(idxs, batch_size), desc=f"Translating {os.path.basename(in_path)}"):
         texts = [all_texts[i] for i in batch]
         prompts = build_prompts(texts)
+        
+        # 第一次：產生草稿
+        out_1 = llm.generate(prompts, sampling)
+        drafts = [(o.outputs[0].text or "").strip() for o in out_1]
 
-        # 一次丟一個 list 的 prompts，vLLM 會回傳等長的 outputs
-        outs = llm.generate(prompts, sampling)
+        # 為每一筆組第二階段的 prompt（等長 list）
+        refine_prompts = [
+            f"{p}{d}\n最終翻譯結果為: \\boxed{{"
+            for p, d in zip(prompts, drafts)
+        ]
 
-        for out in outs:
-            raw = out.outputs[0].text if (out and out.outputs) else ""
-            raw = raw.strip() if isinstance(raw, str) else ""
-            boxed = extract_boxed_answer(raw)
-            zh = boxed if (isinstance(boxed, str) and boxed.strip()) else raw
-            # （可選）若仍含英文字母，標記為原文回退或做重試策略
-            # if re.search(r"[A-Za-z]", zh):
-            #     zh = raw  # 或者 zh = None 以便後續人工檢查
+        # 第二次：產生最終結果
+        out_2 = llm.generate(refine_prompts, sampling)
+
+        # 逐筆擷取 boxed 內容
+        for o in out_2:
+            raw = (o.outputs[0].text or "").strip()
+            zh = extract_boxed_answer(raw) or raw
             translations.append(zh)
+            write_back_translation(records, mapping, translations, question_key=question_key)
+            save_records(out_path, records, out_fmt)
+            print(f"[ok] {in_path} -> {out_path}  已寫回 {min(len(mapping), len(translations))} 段")
 
-    write_back_translation(records, mapping, translations, question_key=question_key)
-    save_records(out_path, records, out_fmt)
-    print(f"[ok] {in_path} -> {out_path}  已寫回 {min(len(mapping), len(translations))} 段")
-    
 def main():
     ap = argparse.ArgumentParser(
         description="使用 vLLM 將 BFCL 類巢狀 question.content 翻譯為繁體中文（直接覆蓋原文）"
@@ -202,7 +208,7 @@ def main():
     ap.add_argument("--model", required=True)
     ap.add_argument("--tensor-parallel-size", type=int, default=1)
     ap.add_argument("--trust-remote-code", action="store_true")
-    ap.add_argument("--max-new-tokens", type=int, default=512)
+    ap.add_argument("--max-new-tokens", type=int, default=2048)
     ap.add_argument("--temperature", type=float, default=0.0)
     ap.add_argument("--top-p", type=float, default=1.0)
     ap.add_argument("--batch-size", type=int, default=32)
