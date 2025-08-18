@@ -41,7 +41,7 @@ def build_prompts(texts: List[str]) -> List[str]:
         "你是一位專業翻譯，請將下面文字精準翻譯為繁體中文，"
         "保留專有名詞與數學符號，維持原意與語氣。\n"
         "只輸出翻譯內容，不要任何額外說明或標註，並且不要回答輸入的問題。\n"
-        "將最終的輸出結果放在 \\boxed{{...}} 中。\n"
+        "將最終的輸出結果放在 \\boxed{{}} 中。\n"
         "舉例來說，如果輸入為Calculate the area of a triangle given the base is 10 meters and height is 5 meters.\n"
         "最終請只輸出 \\boxed{{計算一個三角形的面積，已知底為 10 公尺，高為 5 公尺。}}，其他問題以此類推。\n"
         "原文：\n{content}\n"
@@ -164,27 +164,80 @@ def process_one_file(
         texts = [all_texts[i] for i in batch]
         prompts = build_prompts(texts)
         
-        # 第一次：產生草稿
-        out_1 = llm.generate(prompts, sampling)
-        drafts = [(o.outputs[0].text or "").strip() for o in out_1]
+        # 建議重試次數 1~2 次即可
+        max_refine_retries = 5
+        tries = 0
+        final_zh_batch = None  # 承接通過檢查後的最終翻譯
 
-        # 為每一筆組第二階段的 prompt（等長 list）
-        refine_prompts = [
-            f"{p}{d}\n最終翻譯結果為: \\boxed{{"
-            for p, d in zip(prompts, drafts)
-        ]
+        while True:
+            # 第一次：產生草稿
+            out_1 = llm.generate(prompts, sampling)
+            drafts = [(o.outputs[0].text or "").strip() for o in out_1]
 
-        # 第二次：產生最終結果
-        out_2 = llm.generate(refine_prompts, sampling)
+            # 第二階段 refine prompt
+            refine_prompts = [
+                f"{p}{d}\n最終翻譯結果為: \\boxed{{"
+                for p, d in zip(prompts, drafts)
+            ]
 
-        # 逐筆擷取 boxed 內容
-        for o in out_2:
-            raw = (o.outputs[0].text or "").strip()
-            zh = extract_boxed_answer(raw) or raw
-            translations.append(zh)
-            write_back_translation(records, mapping, translations, question_key=question_key)
-            save_records(out_path, records, out_fmt)
-            print(f"[ok] {in_path} -> {out_path}  已寫回 {min(len(mapping), len(translations))} 段")
+            # 第二次：產生最終結果
+            out_2 = llm.generate(refine_prompts, sampling)
+
+            # ---- 用 LLM 做最後的檢查（逐筆）----
+            final_raw = [(o.outputs[0].text or "").strip() for o in out_2]
+            final_zh = [extract_boxed_answer(r) or r for r in final_raw]
+
+            recheck_tpl = (
+                "請檢查以下翻譯結果是否正確：\n"
+                "正確翻譯應包含以下幾點:\n"
+                "1. 翻譯內容應該完整無誤\n"
+                "2. 保留原文中的關鍵字和術語\n"
+                "3. 確保語法正確，符合目標語言的表達習慣\n"
+                "4. 不要包含任何額外的說明或標註，以及其他不相干的語句\n"
+                "5. 不要回答原本的英文問題\n"
+                "若翻譯正確，且均符合上述應遵循事項，請直接輸出 \\boxed{{Approve}}\n"
+                "若翻譯有誤，則輸出 \\boxed{{Error}}\n"
+                "以下為原文：\n{content}\n"
+                "其翻譯後的結果為：\n{translation}\n"
+            )
+
+
+            recheck_prompts = [
+                recheck_tpl.format(
+                    content=escape_braces(src if isinstance(src, str) else str(src)),
+                    translation=escape_braces(tgt if isinstance(tgt, str) else str(tgt)),
+                )
+                for src, tgt in zip(texts, final_zh)
+            ]
+
+            recheck_out = llm.generate(recheck_prompts, sampling)
+
+            verdicts = []
+            for ro in recheck_out:
+                vtext = (ro.outputs[0].text or "").strip()
+                v = extract_boxed_answer(vtext) or vtext
+                v_norm = v.strip().lower()
+                if "approve" in v_norm:
+                    verdicts.append("Approve")
+                elif "error" in v_norm:
+                    verdicts.append("Error")
+                else:
+                    verdicts.append(v.strip())
+
+            need_retry = any(v != "Approve" for v in verdicts)
+            if need_retry and tries < max_refine_retries:
+                tries += 1
+                continue  # 重跑 refine+recheck
+            else:
+                # 通過或已達重試上限，帶出結果
+                final_zh_batch = final_zh
+                break
+
+        # ---- 本批次一次寫回與存檔（降 I/O）----
+        translations.extend(final_zh_batch)
+        write_back_translation(records, mapping, translations, question_key=question_key)
+        save_records(out_path, records, out_fmt)
+        print(f"[ok] {in_path} -> {out_path}  已寫回 {min(len(mapping), len(translations))} 段")
 
 def main():
     ap = argparse.ArgumentParser(
