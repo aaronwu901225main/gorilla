@@ -68,7 +68,7 @@ from bfcl_eval.model_handler.local_inference.salesforce_qwen import (
     SalesforceQwenHandler,
 )
 from bfcl_eval.model_handler.local_inference.think_agent import ThinkAgentHandler
-
+from bfcl_eval.model_handler.local_inference.gpt_oss import GPTOSSHandler
 # -----------------------------------------------------------------------------
 # A mapping of model identifiers to their respective model configurations.
 # Each key corresponds to the model id passed to the `--model` argument
@@ -117,21 +117,6 @@ class ModelConfig:
 
 # Inference through API calls
 api_inference_model_map = {
-    ################################自定義模型##################################
-    "gpt-oss-20b-FC": ModelConfig(
-        model_name="gpt-oss-20b",      # 給 handler 參考；不是 CLI 的名字
-        display_name="GPT-OSS-20B (FC)",
-        url=None,
-        org="Local",
-        license="",
-        model_handler=VLLMHandler,     # 或 SGLangHandler
-        input_price=None,
-        output_price=None,
-        is_fc_model=True,              # 要做 function calling 建議 True
-        underscore_to_dot=False,
-    ),
-    ################################自定義模型##################################
-    
     "gorilla-openfunctions-v2": ModelConfig(
         model_name="gorilla-openfunctions-v2",
         display_name="Gorilla-OpenFunctions-v2 (FC)",
@@ -1120,6 +1105,21 @@ api_inference_model_map = {
 
 # Inference through local hosting
 local_inference_model_map = {
+    ################################ 自定義模型 ################################
+    "gpt-oss-20b": ModelConfig(
+        model_name="gpt-oss-20b",               # handler 內用到的模型識別（HF id 或本地目錄名）
+        display_name="GPT-OSS-20B (Prompt)",    # 顯示在 leaderboard 的名稱
+        url="",                                 # 有 repo/文件就填網址；沒有就先留空字串
+        org="Local",
+        license="Proprietary",                  # 或 "Apache-2.0" / "OpenRAIL" 等，依實際
+        model_handler=GPTOSSHandler,            # 指向你的子類別（不是字串）
+        input_price=None,
+        output_price=None,
+        is_fc_model=False,                      # ★ Prompt 模式 → False
+        underscore_to_dot=False,
+    ),
+    ################################ 自定義模型 ################################
+    
     "deepseek-ai/DeepSeek-R1": ModelConfig(
         model_name="deepseek-ai/DeepSeek-R1",
         display_name="DeepSeek-R1 (Prompt) (Local)",
