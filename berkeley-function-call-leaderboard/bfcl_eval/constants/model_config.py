@@ -68,7 +68,8 @@ from bfcl_eval.model_handler.local_inference.salesforce_qwen import (
     SalesforceQwenHandler,
 )
 from bfcl_eval.model_handler.local_inference.think_agent import ThinkAgentHandler
-from bfcl_eval.model_handler.local_inference.gpt_oss import GPTOSSHandler
+from bfcl_eval.model_handler.api_inference.openai_chat_fc_via_prompt import OpenAIChatFCViaPromptHandler
+
 # -----------------------------------------------------------------------------
 # A mapping of model identifiers to their respective model configurations.
 # Each key corresponds to the model id passed to the `--model` argument
@@ -117,6 +118,20 @@ class ModelConfig:
 
 # Inference through API calls
 api_inference_model_map = {
+###############################自訂模型###################################
+    "gpt-oss-20b-transformers-serve": ModelConfig(
+        model_name="openai/gpt-oss-20b",
+        display_name="gpt-oss-20b (Transformers Serve, Prompt-FC)",
+        url="https://huggingface.co/openai/gpt-oss-20b",
+        org="OpenAI (open-weight)",
+        license="Apache-2.0",
+        model_handler=OpenAIChatFCViaPromptHandler,  # ← 換成這個
+        input_price=None,
+        output_price=None,
+        is_fc_model=False,      # 這裡仍是 False（走 Prompt）
+        underscore_to_dot=False,
+    ),
+###############################自訂模型###################################
     "gorilla-openfunctions-v2": ModelConfig(
         model_name="gorilla-openfunctions-v2",
         display_name="Gorilla-OpenFunctions-v2 (FC)",
@@ -1105,21 +1120,6 @@ api_inference_model_map = {
 
 # Inference through local hosting
 local_inference_model_map = {
-    ################################ 自定義模型 ################################
-    "gpt-oss-20b": ModelConfig(
-        model_name="gpt-oss-20b",               # handler 內用到的模型識別（HF id 或本地目錄名）
-        display_name="GPT-OSS-20B (Prompt)",    # 顯示在 leaderboard 的名稱
-        url="",                                 # 有 repo/文件就填網址；沒有就先留空字串
-        org="Local",
-        license="Proprietary",                  # 或 "Apache-2.0" / "OpenRAIL" 等，依實際
-        model_handler=GPTOSSHandler,            # 指向你的子類別（不是字串）
-        input_price=None,
-        output_price=None,
-        is_fc_model=False,                      # ★ Prompt 模式 → False
-        underscore_to_dot=False,
-    ),
-    ################################ 自定義模型 ################################
-    
     "deepseek-ai/DeepSeek-R1": ModelConfig(
         model_name="deepseek-ai/DeepSeek-R1",
         display_name="DeepSeek-R1 (Prompt) (Local)",
