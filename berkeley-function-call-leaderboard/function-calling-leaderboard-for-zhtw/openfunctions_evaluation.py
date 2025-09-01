@@ -5,6 +5,7 @@ from model_handler.handler_map import handler_map
 from model_handler.model_style import ModelStyle
 from model_handler.constant import USE_COHERE_OPTIMIZATION
 from eval_checker.eval_checker_constant import TEST_COLLECTION_MAPPING
+from bfcl_eval.constants.model_config import MODEL_CONFIG_MAPPING
 
 # Set UTF-8 encoding for standard input, output, and error
 sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
@@ -43,8 +44,11 @@ TEST_FILE_MAPPING = {
 }
 
 
-def build_handler(model_name, temperature, top_p, max_tokens):
-    handler = handler_map[model_name](model_name, temperature, top_p, max_tokens)
+def build_handler(model_name, temperature):
+    config = MODEL_CONFIG_MAPPING[model_name]
+    handler = config.model_handler(model_name, temperature)
+    # Propagate config flags to the handler instance
+    handler.is_fc_model = config.is_fc_model
     return handler
 
 
