@@ -7,10 +7,25 @@ SYSTEM_PROMPT_FOR_CHAT_MODEL = """
     also point it out. You should only return the function call in tools call sections.
     """
 
+# Traditional Chinese system prompt for better accuracy with Chinese language models
+SYSTEM_PROMPT_FOR_CHAT_MODEL_ZHTW = """
+    你是一位函數組合專家。你會收到一個問題以及一組可用的函數。
+    根據問題內容，你需要進行一次或多次函數/工具呼叫來達成目標。
+    如果沒有任何函數可以使用，請明確指出。如果給定的問題缺少函數所需的參數，
+    也請指出。你應該只在工具呼叫區段中返回函數呼叫。
+    """
+
 USER_PROMPT_FOR_CHAT_MODEL = """
     Questions:{user_prompt}\nHere is a list of functions in JSON format that you can invoke:\n{functions}. 
     Should you decide to return the function call(s),Put it in the format of [func1(params_name=params_value, params_name2=params_value2...), func2(params)]\n
     NO other text MUST be included. 
+"""
+
+# Traditional Chinese user prompt for better accuracy with Chinese language models
+USER_PROMPT_FOR_CHAT_MODEL_ZHTW = """
+    問題：{user_prompt}\n以下是你可以呼叫的函數列表（JSON 格式）：\n{functions}。
+    如果你決定返回函數呼叫，請使用以下格式：[func1(params_name=params_value, params_name2=params_value2...), func2(params)]\n
+    不得包含其他任何文字。
 """
 GORILLA_TO_OPENAPI = {
     "integer": "integer",
@@ -167,3 +182,31 @@ TEST_CATEGORIES = {
     "rest": "gorilla_openfunctions_v1_test_rest.json",
     "sql": "gorilla_openfunctions_v1_test_sql.json",
 }
+
+def get_system_prompt(language="en"):
+    """
+    Get the system prompt based on the language.
+    
+    Args:
+        language (str): Language code ('en' for English, 'zhtw' for Traditional Chinese)
+    
+    Returns:
+        str: The appropriate system prompt
+    """
+    if language == "zhtw":
+        return SYSTEM_PROMPT_FOR_CHAT_MODEL_ZHTW
+    return SYSTEM_PROMPT_FOR_CHAT_MODEL
+
+def get_user_prompt(language="en"):
+    """
+    Get the user prompt template based on the language.
+    
+    Args:
+        language (str): Language code ('en' for English, 'zhtw' for Traditional Chinese)
+    
+    Returns:
+        str: The appropriate user prompt template
+    """
+    if language == "zhtw":
+        return USER_PROMPT_FOR_CHAT_MODEL_ZHTW
+    return USER_PROMPT_FOR_CHAT_MODEL

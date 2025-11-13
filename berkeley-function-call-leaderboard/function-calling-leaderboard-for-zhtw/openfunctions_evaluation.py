@@ -6,6 +6,13 @@ from model_handler.model_style import ModelStyle
 from model_handler.constant import USE_COHERE_OPTIMIZATION
 from eval_checker.eval_checker_constant import TEST_COLLECTION_MAPPING
 from bfcl_eval.constants.model_config import MODEL_CONFIG_MAPPING
+from accuracy_config import (
+    get_optimal_temperature,
+    get_optimal_top_p,
+    get_optimal_max_tokens,
+    GPU_OPTIMIZATION,
+    RETRY_CONFIG
+)
 
 # Set UTF-8 encoding for standard input, output, and error
 sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
@@ -20,12 +27,14 @@ def get_args():
     parser.add_argument("--test-category", type=str, default="all", nargs="+")
     parser.add_argument("--language", type=str, default="zhtw", help="Specify the language for the test cases and results")
     # Parameters for the model that you want to test.
-    parser.add_argument("--temperature", type=float, default=0.7)
-    parser.add_argument("--top-p", type=float, default=1)
-    parser.add_argument("--max-tokens", type=int, default=1200)
+    # Note: Defaults will be overridden by accuracy_config.py optimizations if --optimize-accuracy is set
+    parser.add_argument("--temperature", type=float, default=None, help="Temperature (default: optimized per model)")
+    parser.add_argument("--top-p", type=float, default=None, help="Top-p (default: optimized per model)")
+    parser.add_argument("--max-tokens", type=int, default=None, help="Max tokens (default: optimized per model)")
     parser.add_argument("--num-gpus", default=1, type=int)
-    parser.add_argument("--timeout", default=60, type=int)
-    parser.add_argument("--gpu-memory-utilization", default=0.9, type=float)
+    parser.add_argument("--timeout", default=None, type=int, help="Timeout in seconds (default: optimized)")
+    parser.add_argument("--gpu-memory-utilization", default=None, type=float, help="GPU memory utilization (default: optimized for H200)")
+    parser.add_argument("--optimize-accuracy", action="store_true", default=True, help="Use optimized accuracy settings (default: True)")
     args = parser.parse_args()
     return args
 
@@ -44,9 +53,21 @@ TEST_FILE_MAPPING = {
 }
 
 
-def build_handler(model_name, temperature):
+def build_handler(model_name, temperature, top_p=None, max_tokens=None):
+    """
+    Build a handler for the specified model with optimized parameters.
+    
+    Args:
+        model_name (str): Name of the model
+        temperature (float): Temperature parameter
+        top_p (float, optional): Top-p parameter
+        max_tokens (int, optional): Max tokens parameter
+        
+    Returns:
+        Handler instance for the model
+    """
     config = MODEL_CONFIG_MAPPING[model_name]
-    handler = config.model_handler(model_name, temperature)
+    handler = config.model_handler(model_name, temperature, top_p=top_p or 1.0, max_tokens=max_tokens or 1200)
     # Propagate config flags to the handler instance
     handler.is_fc_model = config.is_fc_model
     return handler
@@ -97,11 +118,15 @@ def collect_test_cases(test_filename_total, model_name):
 
 
 def generate_results(args, model_name, test_cases_total):
-    RETRY_LIMIT = 3
-    # 60s for the timer to complete. But often we find that even with 60 there is a conflict. So 65 is a safe no.
-    RETRY_DELAY = 65  # Delay in seconds
+    # Use optimized retry settings if accuracy optimization is enabled
+    if args.optimize_accuracy:
+        RETRY_LIMIT = RETRY_CONFIG["max_retries"]
+        RETRY_DELAY = RETRY_CONFIG["retry_delay"]
+    else:
+        RETRY_LIMIT = 3
+        RETRY_DELAY = 65  # Delay in seconds
     
-    handler = build_handler(model_name, args.temperature)#, args.top_p, args.max_tokens)
+    handler = build_handler(model_name, args.temperature, args.top_p, args.max_tokens)
 
     if handler.model_style == ModelStyle.OSSMODEL:
         result, metadata = handler.inference(
@@ -125,6 +150,8 @@ def generate_results(args, model_name, test_cases_total):
                 functions = [functions]
 
             retry_count = 0
+            result = None
+            metadata = None
 
             while retry_count < RETRY_LIMIT:
                 try:
@@ -133,34 +160,81 @@ def generate_results(args, model_name, test_cases_total):
                     )
                     break  # Success, exit the loop
                 except Exception as e:
-                    # TODO: It might be better to handle the exception in the handler itself rather than a universal catch block here, as each handler use different ways to call the endpoint.
-                    # OpenAI has openai.RateLimitError while Anthropic has anthropic.RateLimitError. It would be more robust in the long run. 
-                    if "rate limit reached" in str(e).lower() or (
-                        hasattr(e, "status_code")
-                        and (
-                            e.status_code == 429
-                            or e.status_code == 503
-                            or e.status_code == 500
-                        )
-                    ):
-                        print(f"Rate limit reached. Sleeping for 65 seconds. Retry {retry_count + 1}/{RETRY_LIMIT}")
-                        time.sleep(RETRY_DELAY)
+                    # Improved error handling for different API providers
+                    # Check for rate limiting errors (429, 503, 500) or rate limit in error message
+                    is_rate_limit = (
+                        "rate limit" in str(e).lower() or
+                        "too many requests" in str(e).lower() or
+                        (hasattr(e, "status_code") and e.status_code in [429, 503, 500])
+                    )
+                    
+                    if is_rate_limit:
                         retry_count += 1
+                        if retry_count < RETRY_LIMIT:
+                            print(f"Rate limit reached for {test_case['id']}. Sleeping for {RETRY_DELAY} seconds. Retry {retry_count}/{RETRY_LIMIT}")
+                            time.sleep(RETRY_DELAY)
+                        else:
+                            print(f"Maximum retries ({RETRY_LIMIT}) reached for {test_case['id']}. Skipping this test case.")
+                            print(f"Error: {str(e)}")
+                            result = "ERROR: Rate limit exceeded after retries"
+                            metadata = {"input_tokens": 0, "output_tokens": 0, "latency": 0}
+                            break
                     else:
-                        print("Maximum retries reached or other error encountered.")
-                        raise e  # Rethrow the last caught exception
-            result_to_write = {
-                "id": test_case["id"],
-                "result": result,
-                "input_token_count": metadata["input_tokens"],
-                "output_token_count": metadata["output_tokens"],
-                "latency": metadata["latency"],
-            }
-            handler.write(result_to_write,args.language)
+                        # For non-rate-limit errors, log and skip
+                        print(f"Error processing {test_case['id']}: {str(e)}")
+                        result = f"ERROR: {str(e)}"
+                        metadata = {"input_tokens": 0, "output_tokens": 0, "latency": 0}
+                        break
+            
+            # Ensure result and metadata are set even if all retries fail
+            if result is not None and metadata is not None:
+                result_to_write = {
+                    "id": test_case["id"],
+                    "result": result,
+                    "input_token_count": metadata["input_tokens"],
+                    "output_token_count": metadata["output_tokens"],
+                    "latency": metadata["latency"],
+                }
+                handler.write(result_to_write,args.language)
 
 
 if __name__ == "__main__":
     args = get_args()
+
+    # Apply optimized accuracy settings if enabled
+    if args.optimize_accuracy:
+        print("Using optimized accuracy settings...")
+        for model_name in args.model if isinstance(args.model, list) else [args.model]:
+            if args.temperature is None:
+                args.temperature = get_optimal_temperature(model_name)
+            if args.top_p is None:
+                args.top_p = get_optimal_top_p(model_name)
+            if args.max_tokens is None:
+                args.max_tokens = get_optimal_max_tokens(model_name)
+            if args.timeout is None:
+                args.timeout = RETRY_CONFIG["timeout"]
+            if args.gpu_memory_utilization is None:
+                args.gpu_memory_utilization = GPU_OPTIMIZATION["gpu_memory_utilization"]
+            
+            print(f"  Model: {model_name}")
+            print(f"  Temperature: {args.temperature}")
+            print(f"  Top-p: {args.top_p}")
+            print(f"  Max tokens: {args.max_tokens}")
+            print(f"  GPU memory utilization: {args.gpu_memory_utilization}")
+            print(f"  Language: {args.language}")
+            break  # Just show settings once for the first model
+    else:
+        # Set defaults if not specified
+        if args.temperature is None:
+            args.temperature = 0.7
+        if args.top_p is None:
+            args.top_p = 1.0
+        if args.max_tokens is None:
+            args.max_tokens = 1200
+        if args.timeout is None:
+            args.timeout = 60
+        if args.gpu_memory_utilization is None:
+            args.gpu_memory_utilization = 0.9
 
     if type(args.model) is not list:
         args.model = [args.model]
