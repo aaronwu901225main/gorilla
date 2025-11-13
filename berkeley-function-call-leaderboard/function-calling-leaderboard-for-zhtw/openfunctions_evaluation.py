@@ -13,6 +13,7 @@ from accuracy_config import (
     GPU_OPTIMIZATION,
     RETRY_CONFIG
 )
+from language_context import set_language_context
 
 # Set UTF-8 encoding for standard input, output, and error
 sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
@@ -200,6 +201,10 @@ def generate_results(args, model_name, test_cases_total):
 
 if __name__ == "__main__":
     args = get_args()
+    
+    # Set language context for proper prompt selection
+    set_language_context(args.language)
+    print(f"Language context set to: {args.language}")
 
     # Apply optimized accuracy settings if enabled
     if args.optimize_accuracy:
