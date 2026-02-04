@@ -878,6 +878,14 @@ SUPPORTED_MODELS.append("meta-llama/Llama-3.1-8B-Instruct-checkpoint-6860-merged
 # openai/gpt-oss-20b
 # Base
 SUPPORTED_MODELS.append("openai/gpt-oss-20b")
+# 1epoch-all-zhtw-lr1e-5
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-50-merged-1epoch-all-zhtw-lr1e-5")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-100-merged-1epoch-all-zhtw-lr1e-5")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-149-merged-1epoch-all-zhtw-lr1e-5")
+# 1epoch-all-zhtw-lr5e-7
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-50-merged-1epoch-all-zhtw-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-100-merged-1epoch-all-zhtw-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-149-merged-1epoch-all-zhtw-lr5e-7")
 
 # openai/gpt-oss-120b
 # Base
