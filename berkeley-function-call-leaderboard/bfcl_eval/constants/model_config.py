@@ -7552,6 +7552,44 @@ local_inference_model_map = {
             is_fc_model=False,
             underscore_to_dot=False,
         ),
+        # 1epoch-all-zhtw-lr1e-5-16-32-128
+        "meta-llama/Llama-3.1-8B-Instruct-checkpoint-50-merged-1epoch-all-zhtw-lr1e-5-16-32-128": ModelConfig(
+            model_name="meta-llama/Llama-3.1-8B-Instruct-checkpoint-50-merged-1epoch-all-zhtw-lr1e-5-16-32-128",
+            display_name="Meta Llama 3.1-8B-Instruct LoRA ckpt50-1epoch-all-zhtw-lr1e-5-16-32-128",
+            url="self",
+            org="Meta",
+            license="Meta Llama 3 Community",
+            model_handler=LlamaHandler,
+            input_price=None,
+            output_price=None,
+            is_fc_model=False,
+            underscore_to_dot=False,
+        ),
+        "meta-llama/Llama-3.1-8B-Instruct-checkpoint-100-merged-1epoch-all-zhtw-lr1e-5-16-32-128": ModelConfig(
+            model_name="meta-llama/Llama-3.1-8B-Instruct-checkpoint-100-merged-1epoch-all-zhtw-lr1e-5-16-32-128",
+            display_name="Meta Llama 3.1-8B-Instruct LoRA ckpt100-1epoch-all-zhtw-lr1e-5-16-32-128",
+            url="self",
+            org="Meta",
+            license="Meta Llama 3 Community",
+            model_handler=LlamaHandler,
+            input_price=None,
+            output_price=None,
+            is_fc_model=False,
+            underscore_to_dot=False,
+        ),
+        "meta-llama/Llama-3.1-8B-Instruct-checkpoint-149-merged-1epoch-all-zhtw-lr1e-5-16-32-128": ModelConfig(
+            model_name="meta-llama/Llama-3.1-8B-Instruct-checkpoint-149-merged-1epoch-all-zhtw-lr1e-5-16-32-128",
+            display_name="Meta Llama 3.1-8B-Instruct LoRA ckpt149-1epoch-all-zhtw-lr1e-5-16-32-128",
+            url="self",
+            org="Meta",
+            license="Meta Llama 3 Community",
+            model_handler=LlamaHandler,
+            input_price=None,
+            output_price=None,
+            is_fc_model=False,
+            underscore_to_dot=False,
+        ),
+
          
         # Qwen/Qwen2.5-7B-Instruct 
         # Base
