@@ -7592,7 +7592,7 @@ local_inference_model_map = {
         # 1epoch-all-zhtw-lr1e-5-16-32-128-turn-tokenize
         "meta-llama/Llama-3.1-8B-Instruct-checkpoint-50-merged-1epoch-all-zhtw-lr1e-5-16-32-128-turn-tokenize": ModelConfig(
             model_name="meta-llama/Llama-3.1-8B-Instruct-checkpoint-50-merged-1epoch-all-zhtw-lr1e-5-16-32-128-turn-tokenize",
-            display_name="Meta Llama 3.1-8B-Instruct LoRA ckpt50-1epoch-all-zhtw-lr1e-5-16-32-128-turn-tokenize",
+            display_name="Meta Llama 3.1-8B-Instruct LoRA ckpt50-1epoch-all-zhtw-lr1e-5-16-32-128-turn",
             url="self",
             org="Meta",
             license="Meta Llama 3 Community",
@@ -7604,7 +7604,7 @@ local_inference_model_map = {
         ),
         "meta-llama/Llama-3.1-8B-Instruct-checkpoint-100-merged-1epoch-all-zhtw-lr1e-5-16-32-128-turn-tokenize": ModelConfig(
             model_name="meta-llama/Llama-3.1-8B-Instruct-checkpoint-100-merged-1epoch-all-zhtw-lr1e-5-16-32-128-turn-tokenize",
-            display_name="Meta Llama 3.1-8B-Instruct LoRA ckpt100-1epoch-all-zhtw-lr1e-5-16-32-128-turn-tokenize",
+            display_name="Meta Llama 3.1-8B-Instruct LoRA ckpt100-1epoch-all-zhtw-lr1e-5-16-32-128-turn",
             url="self",
             org="Meta",
             license="Meta Llama 3 Community",
@@ -7616,7 +7616,7 @@ local_inference_model_map = {
         ),
         "meta-llama/Llama-3.1-8B-Instruct-checkpoint-155-merged-1epoch-all-zhtw-lr1e-5-16-32-128-turn-tokenize": ModelConfig(
             model_name="meta-llama/Llama-3.1-8B-Instruct-checkpoint-155-merged-1epoch-all-zhtw-lr1e-5-16-32-128-turn-tokenize",
-            display_name="Meta Llama 3.1-8B-Instruct LoRA ckpt155-1epoch-all-zhtw-lr1e-5-16-32-128-turn-tokenize",
+            display_name="Meta Llama 3.1-8B-Instruct LoRA ckpt155-1epoch-all-zhtw-lr1e-5-16-32-128-turn",
             url="self",
             org="Meta",
             license="Meta Llama 3 Community",
@@ -7629,7 +7629,7 @@ local_inference_model_map = {
         # 1epoch-all-zhtw-split-turn-lr1e-5-16-32-128
         "meta-llama/Llama-3.1-8B-Instruct-checkpoint-70-merged-1epoch-all-zhtw-split-turn-lr1e-5-16-32-128": ModelConfig(
             model_name="meta-llama/Llama-3.1-8B-Instruct-checkpoint-70-merged-1epoch-all-zhtw-split-turn-lr1e-5-16-32-128",
-            display_name="Meta Llama 3.1-8B-Instruct LoRA ckpt70-1epoch-all-zhtw-split-turn-lr1e-5-16-32-128",
+            display_name="Meta Llama 3.1-8B-Instruct LoRA ckpt70-1epoch-all-zhtw-split-lr1e-5-16-32-128_turn-old_way ",
             url="self",
             org="Meta",
             license="Meta Llama 3 Community",
@@ -7641,7 +7641,7 @@ local_inference_model_map = {
         ),
         "meta-llama/Llama-3.1-8B-Instruct-checkpoint-140-merged-1epoch-all-zhtw-split-turn-lr1e-5-16-32-128": ModelConfig(
             model_name="meta-llama/Llama-3.1-8B-Instruct-checkpoint-140-merged-1epoch-all-zhtw-split-turn-lr1e-5-16-32-128",
-            display_name="Meta Llama 3.1-8B-Instruct LoRA ckpt140-1epoch-all-zhtw-split-turn-lr1e-5-16-32-128",
+            display_name="Meta Llama 3.1-8B-Instruct LoRA ckpt140-1epoch-all-zhtw-split-lr1e-5-16-32-128_turn-old_way ",
             url="self",
             org="Meta",
             license="Meta Llama 3 Community",
@@ -7653,7 +7653,7 @@ local_inference_model_map = {
         ),
         "meta-llama/Llama-3.1-8B-Instruct-checkpoint-215-merged-1epoch-all-zhtw-split-turn-lr1e-5-16-32-128": ModelConfig(
             model_name="meta-llama/Llama-3.1-8B-Instruct-checkpoint-215-merged-1epoch-all-zhtw-split-turn-lr1e-5-16-32-128",
-            display_name="Meta Llama 3.1-8B-Instruct LoRA ckpt215-1epoch-all-zhtw-split-turn-lr1e-5-16-32-128",
+            display_name="Meta Llama 3.1-8B-Instruct LoRA ckpt215-1epoch-all-zhtw-split-lr1e-5-16-32-128_turn-old_way ",
             url="self",
             org="Meta",
             license="Meta Llama 3 Community",
