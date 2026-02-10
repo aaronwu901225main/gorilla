@@ -87,6 +87,7 @@ BASE_MODELS = [
     # Llama-3.1-8B-Instruct (Prompt)
     (r"(meta[/_-]llama[/_-]|Meta\s+Llama\s+)3\.1-8B-Instruct", "meta-llama_Llama-3.1-8B-Instruct"),
     (r"Qwen[/_-]Qwen3-8B-FC", "Qwen_Qwen3-8B-FC"),
+    (r"(openai[/_-])?gpt-oss-20b", "gpt-oss-20b"),
 ]
 
 def pick_acc_col(df: pd.DataFrame) -> str:
@@ -176,6 +177,9 @@ def find_baseline(df: pd.DataFrame, acc_col: str, base_model: str = None):
                            ~s.str.contains(r"LoRA|ckpt", case=False, regex=True)]
         elif base_model == "Qwen_Qwen3-8B-FC":
             base_rows = df[s.str.contains(r"Qwen[/_-]Qwen3-8B-FC", case=False, regex=True) &
+                           ~s.str.contains(r"LoRA|ckpt", case=False, regex=True)]
+        elif base_model == "gpt-oss-20b":
+            base_rows = df[s.str.contains(r"(openai[/_-])?gpt-oss-20b", case=False, regex=True) &
                            ~s.str.contains(r"LoRA|ckpt", case=False, regex=True)]
         else:
             # 通用方法：將資料夾名稱轉回 model 名稱格式

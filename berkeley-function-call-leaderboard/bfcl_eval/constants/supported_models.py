@@ -878,6 +878,14 @@ SUPPORTED_MODELS.append("meta-llama/Llama-3.1-8B-Instruct-checkpoint-6860-merged
 SUPPORTED_MODELS.append("meta-llama/Llama-3.1-8B-Instruct-checkpoint-50-merged-1epoch-all-zhtw-lr1e-5-16-32-128")
 SUPPORTED_MODELS.append("meta-llama/Llama-3.1-8B-Instruct-checkpoint-100-merged-1epoch-all-zhtw-lr1e-5-16-32-128")
 SUPPORTED_MODELS.append("meta-llama/Llama-3.1-8B-Instruct-checkpoint-149-merged-1epoch-all-zhtw-lr1e-5-16-32-128")
+# 1epoch-all-zhtw-lr1e-5-16-32-128-turn-tokenize
+SUPPORTED_MODELS.append("meta-llama/Llama-3.1-8B-Instruct-checkpoint-50-merged-1epoch-all-zhtw-lr1e-5-16-32-128-turn-tokenize")
+SUPPORTED_MODELS.append("meta-llama/Llama-3.1-8B-Instruct-checkpoint-100-merged-1epoch-all-zhtw-lr1e-5-16-32-128-turn-tokenize")
+SUPPORTED_MODELS.append("meta-llama/Llama-3.1-8B-Instruct-checkpoint-155-merged-1epoch-all-zhtw-lr1e-5-16-32-128-turn-tokenize")
+# 1epoch-all-zhtw-split-turn-lr1e-5-16-32-128
+SUPPORTED_MODELS.append("meta-llama/Llama-3.1-8B-Instruct-checkpoint-70-merged-1epoch-all-zhtw-split-turn-lr1e-5-16-32-128")
+SUPPORTED_MODELS.append("meta-llama/Llama-3.1-8B-Instruct-checkpoint-140-merged-1epoch-all-zhtw-split-turn-lr1e-5-16-32-128")
+SUPPORTED_MODELS.append("meta-llama/Llama-3.1-8B-Instruct-checkpoint-215-merged-1epoch-all-zhtw-split-turn-lr1e-5-16-32-128")
 
 # openai/gpt-oss-20b
 # Base
