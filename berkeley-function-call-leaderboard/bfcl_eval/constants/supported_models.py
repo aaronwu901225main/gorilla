@@ -772,6 +772,10 @@ SUPPORTED_MODELS.append("Salesforce/Llama-xLAM-2-8b-fc-r-checkpoint-14361-merged
 SUPPORTED_MODELS.append("Salesforce/Llama-xLAM-2-8b-fc-r-checkpoint-2275-merged-1epoch-all-zhtw-split-turn-lr5e-7")
 SUPPORTED_MODELS.append("Salesforce/Llama-xLAM-2-8b-fc-r-checkpoint-4550-merged-1epoch-all-zhtw-split-turn-lr5e-7")
 SUPPORTED_MODELS.append("Salesforce/Llama-xLAM-2-8b-fc-r-checkpoint-6860-merged-1epoch-all-zhtw-split-turn-lr5e-7")
+# 1epoch-all-zhtw-lr5e-7-16-32
+SUPPORTED_MODELS.append("Salesforce/Llama-xLAM-2-8b-fc-r-checkpoint-1550-merged-1epoch-all-zhtw-lr5e-7-16-32")
+SUPPORTED_MODELS.append("Salesforce/Llama-xLAM-2-8b-fc-r-checkpoint-3100-merged-1epoch-all-zhtw-lr5e-7-16-32")
+SUPPORTED_MODELS.append("Salesforce/Llama-xLAM-2-8b-fc-r-checkpoint-4787-merged-1epoch-all-zhtw-lr5e-7-16-32")
 
 # Qwen/Qwen2.5-7B-Instruct 
 # Base
