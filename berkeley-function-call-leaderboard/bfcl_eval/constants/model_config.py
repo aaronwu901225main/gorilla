@@ -7107,10 +7107,10 @@ local_inference_model_map = {
             underscore_to_dot=False,
             url="self",
         ),
-        # 1epoch-all-zhtw-lr5e-7-16-32
-        "Salesforce/Llama-xLAM-2-8b-fc-r-checkpoint-1550-merged-1epoch-all-zhtw-lr5e-7-16-32": ModelConfig(
-            model_name="Salesforce/Llama-xLAM-2-8b-fc-r-checkpoint-1550-merged-1epoch-all-zhtw-lr5e-7-16-32",
-            display_name="xLAM-2-8b-fc-r LoRA ckpt1550-1epoch-all-zhtw-lr5e-7-16-32",
+        # 1epoch-all-zhtw-lr1e-5-16-32
+        "Salesforce/Llama-xLAM-2-8b-fc-r-checkpoint-1550-merged-1epoch-all-zhtw-lr1e-5-16-32": ModelConfig(
+            model_name="Salesforce/Llama-xLAM-2-8b-fc-r-checkpoint-1550-merged-1epoch-all-zhtw-lr1e-5-16-32",
+            display_name="xLAM-2-8b-fc-r LoRA ckpt1550-1epoch-all-zhtw-lr1e-5-16-32",
             org="Salesforce",
             license="cc-by-nc-4.0",
             model_handler=SalesforceLlamaHandler,
@@ -7120,9 +7120,9 @@ local_inference_model_map = {
             underscore_to_dot=False,
             url="self",
         ),
-        "Salesforce/Llama-xLAM-2-8b-fc-r-checkpoint-3100-merged-1epoch-all-zhtw-lr5e-7-16-32": ModelConfig(
-            model_name="Salesforce/Llama-xLAM-2-8b-fc-r-checkpoint-3100-merged-1epoch-all-zhtw-lr5e-7-16-32",
-            display_name="xLAM-2-8b-fc-r LoRA ckpt3100-1epoch-all-zhtw-lr5e-7-16-32",
+        "Salesforce/Llama-xLAM-2-8b-fc-r-checkpoint-3100-merged-1epoch-all-zhtw-lr1e-5-16-32": ModelConfig(
+            model_name="Salesforce/Llama-xLAM-2-8b-fc-r-checkpoint-3100-merged-1epoch-all-zhtw-lr1e-5-16-32",
+            display_name="xLAM-2-8b-fc-r LoRA ckpt3100-1epoch-all-zhtw-lr1e-5-16-32",
             org="Salesforce",
             license="cc-by-nc-4.0",
             model_handler=SalesforceLlamaHandler,
@@ -7132,9 +7132,9 @@ local_inference_model_map = {
             underscore_to_dot=False,
             url="self",
         ),
-        "Salesforce/Llama-xLAM-2-8b-fc-r-checkpoint-4787-merged-1epoch-all-zhtw-lr5e-7-16-32": ModelConfig(
-            model_name="Salesforce/Llama-xLAM-2-8b-fc-r-checkpoint-4787-merged-1epoch-all-zhtw-lr5e-7-16-32",
-            display_name="xLAM-2-8b-fc-r LoRA ckpt4787-1epoch-all-zhtw-lr5e-7-16-32",
+        "Salesforce/Llama-xLAM-2-8b-fc-r-checkpoint-4787-merged-1epoch-all-zhtw-lr1e-5-16-32": ModelConfig(
+            model_name="Salesforce/Llama-xLAM-2-8b-fc-r-checkpoint-4787-merged-1epoch-all-zhtw-lr1e-5-16-32",
+            display_name="xLAM-2-8b-fc-r LoRA ckpt4787-1epoch-all-zhtw-lr1e-5-16-32",
             org="Salesforce",
             license="cc-by-nc-4.0",
             model_handler=SalesforceLlamaHandler,
