@@ -917,6 +917,9 @@ SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-210-merged-5epoch-all-zht
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-280-merged-5epoch-all-zhtw-split-turn-lr5e-7-16-64-128")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-350-merged-5epoch-all-zhtw-split-turn-lr5e-7-16-64-128")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-420-merged-5epoch-all-zhtw-split-turn-lr5e-7-16-64-128")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-490-merged-5epoch-all-zhtw-split-turn-lr5e-7-16-64-128")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-560-merged-5epoch-all-zhtw-split-turn-lr5e-7-16-64-128")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-630-merged-5epoch-all-zhtw-split-turn-lr5e-7-16-64-128")
 
 # openai/gpt-oss-120b
 # Base
