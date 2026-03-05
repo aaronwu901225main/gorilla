@@ -931,6 +931,9 @@ SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1075-merged-5epoch-all-zh
 # Base
 SUPPORTED_MODELS.append("openai/gpt-oss-120b")
 
+# twinkle-ai
+SUPPORTED_MODELS.append("twinkle-ai/gemma-3-4B-T1-it")
+
 # Qwen/Qwen3-8B-FC LoRA finetune checkpoints
 # 2epoch-pythonic-production-v2-normal-10K-multirow-4K
 SUPPORTED_MODELS.append("Qwen/Qwen3-8B-FC-checkpoint-85-merged-2epoch-pythonic-production-v2-normal-10K-multirow-4K")

@@ -8518,6 +8518,19 @@ local_inference_model_map = {
             is_fc_model=True,
             underscore_to_dot=True,
         ),
+        # twinkle-ai
+        "twinkle-ai/gemma-3-4B-T1-it": ModelConfig(
+            model_name="twinkle-ai/gemma-3-4B-T1-it",
+            display_name="twinkle gemma-3-4B-T1-it",
+            url="https://huggingface.co/twinkle-ai/gemma-3-4B-T1-it",
+            org="twinkle-ai",
+            license="gemma-terms-of-use",
+            model_handler=GemmaHandler,
+            input_price=None,
+            output_price=None,
+            is_fc_model=False,
+            underscore_to_dot=False,
+        ),
 
         # Qwen/Qwen3-8B-FC LoRA finetune checkpoints
         # 2epoch-pythonic-production-v2-normal-10K-multirow-4K

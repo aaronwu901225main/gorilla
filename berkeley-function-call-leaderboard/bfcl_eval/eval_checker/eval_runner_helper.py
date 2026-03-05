@@ -284,6 +284,11 @@ def write_score_csv_file(
                 f.write(",".join(row))
 
 
+def _is_gpt_oss(name: str) -> bool:
+    """Check if a model name belongs to the GPT-OSS family."""
+    return "gpt-oss" in name.lower() or "gpt_oss" in name.lower()
+
+
 def generate_leaderboard_csv(leaderboard_table, output_path):
     print("📈 Aggregating data to generate leaderboard score table...")
     # Prepare format sensitivity configuration list once
@@ -298,6 +303,12 @@ def generate_leaderboard_csv(leaderboard_table, output_path):
     data_chinese = []
     data_chinese_multi_turn = []
     data_chinese_overall = []
+    # === No-parallel 版本 (所有模型不計 parallel 的表格) ===
+    data_non_live_no_parallel = []
+    data_live_no_parallel = []
+    data_combined_no_parallel = []
+    data_chinese_no_parallel = []
+    data_chinese_overall_no_parallel = []
     for model_name, value in leaderboard_table.items():
         model_name_escaped = model_name.replace("_", "/")
         # Skip models that are present in score folders but not registered in MODEL_CONFIG_MAPPING
@@ -351,12 +362,44 @@ def generate_leaderboard_csv(leaderboard_table, output_path):
             ],
             display_na_if_category_missing=False,
         )
+
+        # --- No-parallel 版本 (Non-Live) ---
+        summary_ast_non_live_no_parallel = calculate_unweighted_accuracy(
+            [simple_ast_non_live, multiple_ast_non_live]
+        )
+        overall_accuracy_non_live_no_parallel = calculate_unweighted_accuracy(
+            [simple_ast_non_live, multiple_ast_non_live],
+            display_na_if_category_missing=False,
+        )
+
+        # GPT-OSS: 用 no-parallel 版本覆蓋排名用分數
+        is_gpt_oss = _is_gpt_oss(model_name) or _is_gpt_oss(model_config.display_name)
+        _nl_overall = overall_accuracy_non_live_no_parallel if is_gpt_oss else overall_accuracy_non_live
+        _nl_summary = summary_ast_non_live_no_parallel if is_gpt_oss else summary_ast_non_live
+
         data_non_live.append(
             [
                 "N/A",
                 model_config.display_name,
-                overall_accuracy_non_live["display_accuracy"],
-                summary_ast_non_live["display_accuracy"],
+                _nl_overall["display_accuracy"],
+                _nl_summary["display_accuracy"],
+                simple_ast_non_live["display_accuracy"],
+                python_simple_ast_non_live["display_accuracy"],
+                java_simple_ast_non_live["display_accuracy"],
+                javascript_simple_ast_non_live["display_accuracy"],
+                multiple_ast_non_live["display_accuracy"],
+                parallel_ast_non_live["display_accuracy"],
+                parallel_multiple_ast_non_live["display_accuracy"],
+                irrelevance_non_live["display_accuracy"],
+            ]
+        )
+        # No-parallel 版本表格（所有模型都用 no-parallel）
+        data_non_live_no_parallel.append(
+            [
+                "N/A",
+                model_config.display_name,
+                overall_accuracy_non_live_no_parallel["display_accuracy"],
+                summary_ast_non_live_no_parallel["display_accuracy"],
                 simple_ast_non_live["display_accuracy"],
                 python_simple_ast_non_live["display_accuracy"],
                 java_simple_ast_non_live["display_accuracy"],
@@ -396,12 +439,39 @@ def generate_leaderboard_csv(leaderboard_table, output_path):
             display_na_if_category_missing=False,
         )
 
+        # --- No-parallel 版本 (Live) ---
+        summary_ast_live_no_parallel = calculate_weighted_accuracy(
+            [python_simple_ast_live, python_multiple_ast_live]
+        )
+        overall_accuracy_live_no_parallel = calculate_weighted_accuracy(
+            [python_simple_ast_live, python_multiple_ast_live],
+            display_na_if_category_missing=False,
+        )
+
+        _live_overall = overall_accuracy_live_no_parallel if is_gpt_oss else overall_accuracy_live
+        _live_summary = summary_ast_live_no_parallel if is_gpt_oss else summary_ast_live
+
         data_live.append(
             [
                 "N/A",
                 model_config.display_name,
-                overall_accuracy_live["display_accuracy"],
-                summary_ast_live["display_accuracy"],
+                _live_overall["display_accuracy"],
+                _live_summary["display_accuracy"],
+                python_simple_ast_live["display_accuracy"],
+                python_multiple_ast_live["display_accuracy"],
+                python_parallel_ast_live["display_accuracy"],
+                python_parallel_multiple_ast_live["display_accuracy"],
+                irrelevance_live["display_accuracy"],
+                relevance_live["display_accuracy"],
+            ]
+        )
+        # No-parallel 版本表格（所有模型都用 no-parallel）
+        data_live_no_parallel.append(
+            [
+                "N/A",
+                model_config.display_name,
+                overall_accuracy_live_no_parallel["display_accuracy"],
+                summary_ast_live_no_parallel["display_accuracy"],
                 python_simple_ast_live["display_accuracy"],
                 python_multiple_ast_live["display_accuracy"],
                 python_parallel_ast_live["display_accuracy"],
@@ -491,12 +561,31 @@ def generate_leaderboard_csv(leaderboard_table, output_path):
         zh_summary = calculate_unweighted_accuracy(
             [zh_simple_python, zh_multiple, zh_parallel, zh_parallel_multiple]
         )
+        # --- No-parallel 版本 (Chinese single-turn) ---
+        zh_summary_no_parallel = calculate_unweighted_accuracy(
+            [zh_simple_python, zh_multiple]
+        )
+        _zh_summary = zh_summary_no_parallel if is_gpt_oss else zh_summary
+
         # 寫入該 model 的中文資料列
         data_chinese.append(
             [
                 "N/A",
                 model_config.display_name,
-                zh_summary["display_accuracy"],
+                _zh_summary["display_accuracy"],
+                zh_simple_python["display_accuracy"],
+                zh_multiple["display_accuracy"],
+                zh_parallel["display_accuracy"],
+                zh_parallel_multiple["display_accuracy"],
+                zh_irrelevance["display_accuracy"],
+            ]
+        )
+        # No-parallel 版本
+        data_chinese_no_parallel.append(
+            [
+                "N/A",
+                model_config.display_name,
+                zh_summary_no_parallel["display_accuracy"],
                 zh_simple_python["display_accuracy"],
                 zh_multiple["display_accuracy"],
                 zh_parallel["display_accuracy"],
@@ -544,24 +633,60 @@ def generate_leaderboard_csv(leaderboard_table, output_path):
         zh_single_overall_w = _weighted_by_count([zh_simple_python, zh_multiple, zh_parallel, zh_parallel_multiple, zh_irrelevance])
         zh_multi_overall_w = _weighted_by_count([zh_mt_base, zh_mt_miss_func, zh_mt_miss_param, zh_mt_long_context])
 
+        # --- No-parallel 版本 (Chinese Overall) ---
+        zh_single_overall_w_no_parallel = _weighted_by_count([zh_simple_python, zh_multiple, zh_irrelevance])
+
+        # GPT-OSS: 用 no-parallel
+        _zh_single_w = zh_single_overall_w_no_parallel if is_gpt_oss else zh_single_overall_w
+
         # 最終 Overall (ZH) 以「中文單輪 + 中文多輪」的題數加權平均
         overall_zh = None
-        if zh_single_overall_w["total_count"] + zh_multi_overall_w["total_count"] > 0:
-            total = zh_single_overall_w["total_count"] + zh_multi_overall_w["total_count"]
+        if _zh_single_w["total_count"] + zh_multi_overall_w["total_count"] > 0:
+            total = _zh_single_w["total_count"] + zh_multi_overall_w["total_count"]
             acc = (
-                zh_single_overall_w["accuracy"] * zh_single_overall_w["total_count"]
+                _zh_single_w["accuracy"] * _zh_single_w["total_count"]
                 + zh_multi_overall_w["accuracy"] * zh_multi_overall_w["total_count"]
             ) / total
             overall_zh = {"accuracy": acc, "display_accuracy": acc}
         else:
             overall_zh = {"accuracy": 0.0, "display_accuracy": "N/A"}
 
+        # No-parallel 版本的 overall_zh
+        if zh_single_overall_w_no_parallel["total_count"] + zh_multi_overall_w["total_count"] > 0:
+            _t = zh_single_overall_w_no_parallel["total_count"] + zh_multi_overall_w["total_count"]
+            _a = (
+                zh_single_overall_w_no_parallel["accuracy"] * zh_single_overall_w_no_parallel["total_count"]
+                + zh_multi_overall_w["accuracy"] * zh_multi_overall_w["total_count"]
+            ) / _t
+            overall_zh_no_parallel = {"accuracy": _a, "display_accuracy": _a}
+        else:
+            overall_zh_no_parallel = {"accuracy": 0.0, "display_accuracy": "N/A"}
+
         data_chinese_overall.append(
             [
                 "N/A",
                 overall_zh["display_accuracy"],
                 model_config.display_name,
-                zh_single_overall_w["display_accuracy"],
+                _zh_single_w["display_accuracy"],
+                zh_simple_python["display_accuracy"],
+                zh_multiple["display_accuracy"],
+                zh_parallel["display_accuracy"],
+                zh_parallel_multiple["display_accuracy"],
+                zh_irrelevance["display_accuracy"],
+                zh_mt_overall["display_accuracy"],
+                zh_mt_base["display_accuracy"],
+                zh_mt_miss_func["display_accuracy"],
+                zh_mt_miss_param["display_accuracy"],
+                zh_mt_long_context["display_accuracy"],
+            ]
+        )
+        # No-parallel 版本
+        data_chinese_overall_no_parallel.append(
+            [
+                "N/A",
+                overall_zh_no_parallel["display_accuracy"],
+                model_config.display_name,
+                zh_single_overall_w_no_parallel["display_accuracy"],
                 zh_simple_python["display_accuracy"],
                 zh_multiple["display_accuracy"],
                 zh_parallel["display_accuracy"],
@@ -607,15 +732,32 @@ def generate_leaderboard_csv(leaderboard_table, output_path):
         )
 
         # TODO: @HuanzhiMao adjust the weights
+        # GPT-OSS: 使用 no-parallel 版本的 non_live / live 分數
+        _combined_non_live = overall_accuracy_non_live_no_parallel if is_gpt_oss else overall_accuracy_non_live
+        _combined_live = overall_accuracy_live_no_parallel if is_gpt_oss else overall_accuracy_live
+
         total_overall_accuracy = calculate_percentage_weighted_accuracy(
             [
-                overall_accuracy_non_live,
-                overall_accuracy_live,
+                _combined_non_live,
+                _combined_live,
                 total_irrelevance,
                 overall_accuracy_multi_turn,
                 overall_accuracy_agentic,
             ],
             #[10, 10, 10, 30, 40],
+            [20, 20, 20, 40, 0],
+            display_na_if_category_missing=False,
+        )
+
+        # No-parallel 版本（所有模型）
+        total_overall_accuracy_no_parallel = calculate_percentage_weighted_accuracy(
+            [
+                overall_accuracy_non_live_no_parallel,
+                overall_accuracy_live_no_parallel,
+                total_irrelevance,
+                overall_accuracy_multi_turn,
+                overall_accuracy_agentic,
+            ],
             [20, 20, 20, 40, 0],
             display_na_if_category_missing=False,
         )
@@ -630,12 +772,12 @@ def generate_leaderboard_csv(leaderboard_table, output_path):
                 latency_mean,
                 latency_std,
                 percentile_95_latency,
-                summary_ast_non_live["display_accuracy"],
+                _nl_summary["display_accuracy"],
                 simple_ast_non_live["display_accuracy"],
                 multiple_ast_non_live["display_accuracy"],
                 parallel_ast_non_live["display_accuracy"],
                 parallel_multiple_ast_non_live["display_accuracy"],
-                overall_accuracy_live["display_accuracy"],
+                _live_overall["display_accuracy"],
                 python_simple_ast_live["display_accuracy"],
                 python_multiple_ast_live["display_accuracy"],
                 python_parallel_ast_live["display_accuracy"],
@@ -664,6 +806,47 @@ def generate_leaderboard_csv(leaderboard_table, output_path):
                 #zh_parallel["display_accuracy"],
                 #zh_parallel_multiple["display_accuracy"],
 
+                model_config.org,
+                model_config.license,
+            ]
+        )
+        # No-parallel 版本（所有模型都不計 parallel）
+        data_combined_no_parallel.append(
+            [
+                "N/A",
+                total_overall_accuracy_no_parallel["display_accuracy"],
+                model_config.display_name,
+                model_config.url,
+                cost,
+                latency_mean,
+                latency_std,
+                percentile_95_latency,
+                summary_ast_non_live_no_parallel["display_accuracy"],
+                simple_ast_non_live["display_accuracy"],
+                multiple_ast_non_live["display_accuracy"],
+                parallel_ast_non_live["display_accuracy"],
+                parallel_multiple_ast_non_live["display_accuracy"],
+                overall_accuracy_live_no_parallel["display_accuracy"],
+                python_simple_ast_live["display_accuracy"],
+                python_multiple_ast_live["display_accuracy"],
+                python_parallel_ast_live["display_accuracy"],
+                python_parallel_multiple_ast_live["display_accuracy"],
+                overall_accuracy_multi_turn["display_accuracy"],
+                multi_turn_base["display_accuracy"],
+                multi_turn_miss_func["display_accuracy"],
+                multi_turn_miss_param["display_accuracy"],
+                multi_turn_long_context["display_accuracy"],
+                summary_web_search["display_accuracy"],
+                web_search_base["display_accuracy"],
+                web_search_no_snippet["display_accuracy"],
+                summary_memory["display_accuracy"],
+                memory_kv["display_accuracy"],
+                memory_vector["display_accuracy"],
+                memory_rec_sum["display_accuracy"],
+                total_relevance["display_accuracy"],
+                total_irrelevance["display_accuracy"],
+                format_sensitivity_max_delta,
+                format_sensitivity_std,
                 model_config.org,
                 model_config.license,
             ]
@@ -740,6 +923,39 @@ def generate_leaderboard_csv(leaderboard_table, output_path):
     write_score_csv_file(
         data=data_chinese_overall,
         file_path=output_path / "data_chinese_overall.csv",
+        header=COLUMNS_OVERALL_ZH,
+        sort_column_index=1,
+    )
+
+    # ===== No-Parallel 版本 CSV（所有模型都不計 parallel 於 Overall/Summary）=====
+    write_score_csv_file(
+        data=data_non_live_no_parallel,
+        file_path=output_path / "data_non_live_no_parallel.csv",
+        header=COLUMNS_NON_LIVE,
+        sort_column_index=2,
+    )
+    write_score_csv_file(
+        data=data_live_no_parallel,
+        file_path=output_path / "data_live_no_parallel.csv",
+        header=COLUMNS_LIVE,
+        sort_column_index=2,
+    )
+    write_score_csv_file(
+        data=data_combined_no_parallel,
+        file_path=output_path / "data_overall_no_parallel.csv",
+        header=COLUMNS_OVERALL,
+        sort_column_index=1,
+        no_conversion_numeric_column_index=[4, 5, 6, 7, 32, 33],
+    )
+    write_score_csv_file(
+        data=data_chinese_no_parallel,
+        file_path=output_path / "data_chinese_no_parallel.csv",
+        header=COLUMNS_CHINESE,
+        sort_column_index=2,
+    )
+    write_score_csv_file(
+        data=data_chinese_overall_no_parallel,
+        file_path=output_path / "data_chinese_overall_no_parallel.csv",
         header=COLUMNS_OVERALL_ZH,
         sort_column_index=1,
     )
