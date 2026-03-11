@@ -39,6 +39,7 @@ from bfcl_eval.model_handler.local_inference.deepseek_reasoning import (
 )
 from bfcl_eval.model_handler.local_inference.falcon_fc import Falcon3FCHandler
 from bfcl_eval.model_handler.local_inference.gemma import GemmaHandler
+from bfcl_eval.model_handler.local_inference.gemma_t1 import GemmaT1Handler
 from bfcl_eval.model_handler.local_inference.functiongemma import FunctionGemmaHandler
 from bfcl_eval.model_handler.local_inference.glm import GLMHandler
 from bfcl_eval.model_handler.local_inference.granite import (
@@ -8525,7 +8526,7 @@ local_inference_model_map = {
             url="https://huggingface.co/twinkle-ai/gemma-3-4B-T1-it",
             org="twinkle-ai",
             license="gemma-terms-of-use",
-            model_handler=GemmaHandler,
+            model_handler=GemmaT1Handler,
             input_price=None,
             output_price=None,
             is_fc_model=False,
