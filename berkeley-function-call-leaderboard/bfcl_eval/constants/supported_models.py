@@ -940,6 +940,9 @@ SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-690-merged-3epoch-v5-data
 # Base
 SUPPORTED_MODELS.append("openai/gpt-oss-120b")
 
+# Mistral-Small-3.2-24B-Instruct-2506
+SUPPORTED_MODELS.append("Mistral-Small-3.2-24B-Instruct-2506")
+
 # twinkle-ai
 SUPPORTED_MODELS.append("twinkle-ai/gemma-3-4B-T1-it")
 

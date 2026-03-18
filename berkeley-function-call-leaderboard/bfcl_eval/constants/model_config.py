@@ -8628,6 +8628,20 @@ local_inference_model_map = {
             is_fc_model=True,
             underscore_to_dot=True,
         ),
+        # Mistral-Small-3.2-24B-Instruct-2506
+        "Mistral-Small-3.2-24B-Instruct-2506": ModelConfig(
+            model_name="Mistral-Small-3.2-24B-Instruct-2506",
+            display_name="Mistral-Small-3.2-24B-Instruct-2506",
+            url="https://huggingface.co/mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+            org="Mistral AI",
+            license="Proprietary",
+            model_handler=MistralFCHandler,
+            input_price=0.1,
+            output_price=0.3,
+            is_fc_model=True,
+            underscore_to_dot=True,
+        ),
+
         # twinkle-ai
         "twinkle-ai/gemma-3-4B-T1-it": ModelConfig(
             model_name="twinkle-ai/gemma-3-4B-T1-it",
