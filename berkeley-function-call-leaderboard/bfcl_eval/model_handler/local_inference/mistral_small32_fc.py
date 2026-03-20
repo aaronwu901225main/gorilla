@@ -35,11 +35,20 @@ class MistralSmall32FCHandler(MistralFCHandler):
     def _compile_tools(self, inference_data: dict, test_entry: dict) -> dict:
         functions: list = test_entry["function"]
         # Keep tool schema compatible with Mistral/OpenAI chat tools.
-        inference_data["tools"] = convert_to_tool(
+        tools = convert_to_tool(
             functions,
             GORILLA_TO_OPENAPI,
             ModelStyle.MISTRAL,
         )
+
+        # vLLM OpenAI-compatible chat tools reject BFCL's optional return schema field.
+        for tool in tools:
+            if isinstance(tool, dict):
+                function_obj = tool.get("function")
+                if isinstance(function_obj, dict):
+                    function_obj.pop("response", None)
+
+        inference_data["tools"] = tools
         return inference_data
 
     @override
@@ -126,9 +135,15 @@ class MistralSmall32FCHandler(MistralFCHandler):
     def _add_assistant_message_FC(
         self, inference_data: dict, model_response_data: dict
     ) -> dict:
-        inference_data["message"].append(
-            model_response_data["model_responses_message_for_chat_history"]
-        )
+        assistant_message = model_response_data["model_responses_message_for_chat_history"]
+        content = assistant_message.get("content", "")
+        tool_calls = assistant_message.get("tool_calls", None)
+
+        # vLLM rejects assistant messages with both empty content and no tool calls.
+        if content == "" and not tool_calls:
+            return inference_data
+
+        inference_data["message"].append(assistant_message)
         return inference_data
 
     @override
