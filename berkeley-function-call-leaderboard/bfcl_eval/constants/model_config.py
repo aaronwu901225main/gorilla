@@ -53,6 +53,9 @@ from bfcl_eval.model_handler.local_inference.llama_3_1 import LlamaHandler_3_1
 from bfcl_eval.model_handler.local_inference.minicpm import MiniCPMHandler
 from bfcl_eval.model_handler.local_inference.minicpm_fc import MiniCPMFCHandler
 from bfcl_eval.model_handler.local_inference.mistral_fc import MistralFCHandler
+from bfcl_eval.model_handler.local_inference.mistral_small32_fc import (
+    MistralSmall32FCHandler,
+)
 from bfcl_eval.model_handler.local_inference.phi import PhiHandler
 from bfcl_eval.model_handler.local_inference.phi_fc import PhiFCHandler
 from bfcl_eval.model_handler.local_inference.quick_testing_oss import (
@@ -8635,7 +8638,7 @@ local_inference_model_map = {
             url="https://huggingface.co/mistralai/Mistral-Small-3.2-24B-Instruct-2506",
             org="Mistral AI",
             license="Proprietary",
-            model_handler=MistralFCHandler,
+            model_handler=MistralSmall32FCHandler,
             input_price=0.1,
             output_price=0.3,
             is_fc_model=True,

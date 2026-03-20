@@ -149,6 +149,11 @@ class OSSHandler(BaseHandler, EnforceOverrides):
                 raise ValueError(
                     "Model does not have a max_position_embeddings attribute or tokenizer.model_max_length attribute. Please set the max_context_length attribute in the corresponding model handler."
                 )
+
+        # Some tokenizers report an effectively-unbounded sentinel integer.
+        # Clamp to a practical context window to avoid pathological arithmetic.
+        if self.max_context_length is not None and self.max_context_length > 10_000_000:
+            self.max_context_length = 131072
         print(f"Max context length: {self.max_context_length}")
 
         self._server_process = process = None
