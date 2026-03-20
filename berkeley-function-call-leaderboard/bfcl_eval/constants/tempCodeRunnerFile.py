@@ -1,1 +1,0 @@
-Salesforce/Llama-xLAM-2-8b-fc-r-checkpoint-1550-merged-3epoch-all-zhtw-lr5e-7
