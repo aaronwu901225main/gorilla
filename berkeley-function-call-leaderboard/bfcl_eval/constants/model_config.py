@@ -8616,6 +8616,43 @@ local_inference_model_map = {
             is_fc_model=True,
             underscore_to_dot=True,
         ),
+        # 5epoch-clean-data-v1-500-split-turn-lr5e-7
+        "openai/gpt-oss-20b-checkpoint-80-merged-5epoch-clean-data-v1-500-split-turn-lr5e-7": ModelConfig(
+            model_name="openai/gpt-oss-20b-checkpoint-80-merged-5epoch-clean-data-v1-500-split-turn-lr5e-7",
+            display_name="gpt-oss-20b LoRA ckpt80-5epoch-clean-data-v1-500-split-turn-lr5e-7",
+            url="https://huggingface.co/openai/gpt-oss-20b",
+            org="OpenAI",
+            license="apache-2.0",
+            model_handler=OpenAICompletionsHandler,
+            input_price=None,
+            output_price=None,
+            is_fc_model=True,
+            underscore_to_dot=True,
+        ),
+        "openai/gpt-oss-20b-checkpoint-160-merged-5epoch-clean-data-v1-500-split-turn-lr5e-7": ModelConfig(
+            model_name="openai/gpt-oss-20b-checkpoint-160-merged-5epoch-clean-data-v1-500-split-turn-lr5e-7",
+            display_name="gpt-oss-20b LoRA ckpt160-5epoch-clean-data-v1-500-split-turn-lr5e-7",
+            url="https://huggingface.co/openai/gpt-oss-20b",
+            org="OpenAI",
+            license="apache-2.0",
+            model_handler=OpenAICompletionsHandler,
+            input_price=None,
+            output_price=None,
+            is_fc_model=True,
+            underscore_to_dot=True,
+        ),
+        "openai/gpt-oss-20b-checkpoint-240-merged-5epoch-clean-data-v1-500-split-turn-lr5e-7": ModelConfig(
+            model_name="openai/gpt-oss-20b-checkpoint-240-merged-5epoch-clean-data-v1-500-split-turn-lr5e-7",
+            display_name="gpt-oss-20b LoRA ckpt240-5epoch-clean-data-v1-500-split-turn-lr5e-7",
+            url="https://huggingface.co/openai/gpt-oss-20b",
+            org="OpenAI",
+            license="apache-2.0",
+            model_handler=OpenAICompletionsHandler,
+            input_price=None,
+            output_price=None,
+            is_fc_model=True,
+            underscore_to_dot=True,
+        ),
 
         # openai/gpt-oss-120b
         # Base
