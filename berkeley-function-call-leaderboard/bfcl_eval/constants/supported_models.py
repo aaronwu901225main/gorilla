@@ -940,6 +940,12 @@ SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-690-merged-3epoch-v5-data
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-80-merged-5epoch-clean-data-v1-500-split-turn-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-160-merged-5epoch-clean-data-v1-500-split-turn-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-240-merged-5epoch-clean-data-v1-500-split-turn-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-320-merged-5epoch-clean-data-v1-500-split-turn-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-400-merged-5epoch-clean-data-v1-500-split-turn-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-480-merged-5epoch-clean-data-v1-500-split-turn-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-560-merged-5epoch-clean-data-v1-500-split-turn-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-640-merged-5epoch-clean-data-v1-500-split-turn-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-720-merged-5epoch-clean-data-v1-500-split-turn-lr5e-7")
 
 # openai/gpt-oss-120b
 # Base
