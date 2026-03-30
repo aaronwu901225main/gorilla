@@ -7,8 +7,8 @@ JOB1_SCRIPT="bfcl-gen-gptoss-merged.slurm"
 #JOB1_SCRIPT="bfcl-gen-mistral-merged.slurm"
 
 # 當前面有相依問題時可用下面這行測試
-#job1_id=$(sbatch --parsable --dependency=afterok:48025 "$JOB1_SCRIPT")
-job1_id=$(sbatch --parsable "$JOB1_SCRIPT")
+job1_id=$(sbatch --parsable --dependency=afterok:48417 "$JOB1_SCRIPT")
+#job1_id=$(sbatch --parsable "$JOB1_SCRIPT")
 echo "Submitted job1: $job1_id"
 
 # 等 job1 結束（不在 squeue 裡表示已結束）
