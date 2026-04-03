@@ -962,7 +962,32 @@ SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-540-merged-3epoch-all-zht
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-630-merged-3epoch-all-zhtw-split-turn-dup-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-720-merged-3epoch-all-zhtw-split-turn-dup-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-774-merged-3epoch-all-zhtw-split-turn-dup-lr5e-7")
-
+# 3epoch-all-zhtw-split-turn-dup-fix-special-token-lr5e-7
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-90-merged-3epoch-all-zhtw-split-turn-dup-fix-special-token-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-180-merged-3epoch-all-zhtw-split-turn-dup-fix-special-token-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-270-merged-3epoch-all-zhtw-split-turn-dup-fix-special-token-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-360-merged-3epoch-all-zhtw-split-turn-dup-fix-special-token-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-450-merged-3epoch-all-zhtw-split-turn-dup-fix-special-token-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-540-merged-3epoch-all-zhtw-split-turn-dup-fix-special-token-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-630-merged-3epoch-all-zhtw-split-turn-dup-fix-special-token-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-720-merged-3epoch-all-zhtw-split-turn-dup-fix-special-token-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-774-merged-3epoch-all-zhtw-split-turn-dup-fix-special-token-lr5e-7")
+# 5epoch-all-zhtw-split-turn-dup-fix-special-token-lr5e-7
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-90-merged-5epoch-all-zhtw-split-turn-dup-fix-special-token-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-180-merged-5epoch-all-zhtw-split-turn-dup-fix-special-token-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-270-merged-5epoch-all-zhtw-split-turn-dup-fix-special-token-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-360-merged-5epoch-all-zhtw-split-turn-dup-fix-special-token-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-450-merged-5epoch-all-zhtw-split-turn-dup-fix-special-token-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-540-merged-5epoch-all-zhtw-split-turn-dup-fix-special-token-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-630-merged-5epoch-all-zhtw-split-turn-dup-fix-special-token-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-720-merged-5epoch-all-zhtw-split-turn-dup-fix-special-token-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-810-merged-5epoch-all-zhtw-split-turn-dup-fix-special-token-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-900-merged-5epoch-all-zhtw-split-turn-dup-fix-special-token-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-990-merged-5epoch-all-zhtw-split-turn-dup-fix-special-token-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1080-merged-5epoch-all-zhtw-split-turn-dup-fix-special-token-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1170-merged-5epoch-all-zhtw-split-turn-dup-fix-special-token-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1260-merged-5epoch-all-zhtw-split-turn-dup-fix-special-token-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1290-merged-5epoch-all-zhtw-split-turn-dup-fix-special-token-lr5e-7")
 # openai/gpt-oss-120b
 # Base
 SUPPORTED_MODELS.append("openai/gpt-oss-120b")
