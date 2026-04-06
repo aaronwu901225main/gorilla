@@ -3,27 +3,54 @@ conda activate BFCL
 set -euo pipefail
 
 #JOB1_SCRIPT="bfcl-gen.slurm"
-JOB1_SCRIPT="bfcl-gen-gptoss-merged.slurm"
+JOB1_SCRIPT="bfcl-gen-gptoss-merged-1.slurm"
+JOB2_SCRIPT="bfcl-gen-gptoss-merged-2.slurm"
+JOB3_SCRIPT="bfcl-gen-gptoss-merged-3.slurm"
+JOB4_SCRIPT="bfcl-gen-gptoss-merged-4.slurm"
+JOB5_SCRIPT="bfcl-gen-gptoss-merged-5.slurm"
+
 #JOB1_SCRIPT="bfcl-gen-mistral-merged.slurm"
 
-# 當前面有相依問題時可用下面這行測試
-#job1_id=$(sbatch --parsable --dependency=afterok:48554 "$JOB1_SCRIPT")
-job1_id=$(sbatch --parsable "$JOB1_SCRIPT")
-echo "Submitted job1: $job1_id"
+JOB_SCRIPTS=(
+  "$JOB1_SCRIPT"
+  "$JOB2_SCRIPT"
+  "$JOB3_SCRIPT"
+  "$JOB4_SCRIPT"
+  "$JOB5_SCRIPT"
+)
 
-# 等 job1 結束（不在 squeue 裡表示已結束）
-while squeue -j "$job1_id" -h >/dev/null 2>&1 && squeue -j "$job1_id" -h | grep -q .; do
-  echo "[wait] job1 ($job1_id) still running/pending..."
-  sleep 20
+job_ids=()
+
+# 同時送出所有 jobs
+for i in "${!JOB_SCRIPTS[@]}"; do
+  script="${JOB_SCRIPTS[$i]}"
+  job_id=$(sbatch --parsable "$script")
+  job_ids+=("$job_id")
+  echo "Submitted job$((i + 1)): $job_id ($script)"
 done
 
-# 檢查 job1 最終狀態（COMPLETED 才繼續）
-state=$(sacct -j "${job1_id}.batch" --format=State -n | head -n 1 | awk '{print $1}')
-echo "[done] job1 state: $state"
+all_completed=true
 
-if [[ "$state" == "COMPLETED" ]]; then
+# 等每個 job 結束，並檢查最終狀態
+for i in "${!job_ids[@]}"; do
+  job_id="${job_ids[$i]}"
+
+  while squeue -j "$job_id" -h >/dev/null 2>&1 && squeue -j "$job_id" -h | grep -q .; do
+    echo "[wait] job$((i + 1)) ($job_id) still running/pending..."
+    sleep 20
+  done
+
+  state=$(sacct -j "${job_id}.batch" --format=State -n | head -n 1 | awk '{print $1}')
+  echo "[done] job$((i + 1)) ($job_id) state: $state"
+
+  if [[ "$state" != "COMPLETED" ]]; then
+    all_completed=false
+  fi
+done
+
+if [[ "$all_completed" == "true" ]]; then
   sh bfcl-eval.sh
 else
-  echo "job1 not completed, skip bfcl-eval.sh"
+  echo "Not all jobs completed successfully, skip bfcl-eval.sh"
   exit 1
 fi
