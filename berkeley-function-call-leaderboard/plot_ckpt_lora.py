@@ -115,6 +115,33 @@ def parse_percent(x):
     except Exception:
         return None
 
+def wrap_label_by_hyphen(text: str, max_len: int = 40) -> str:
+    """
+    將文字每約 max_len 字元斷行，優先在該長度前最後一個 '-' 斷開。
+    若前段找不到 '-'，則退回硬切，避免無限迴圈。
+    """
+    if text is None:
+        return ""
+    s = str(text).strip()
+    if len(s) <= max_len:
+        return s
+
+    lines = []
+    remaining = s
+    while len(remaining) > max_len:
+        cut = remaining.rfind("-", 0, max_len + 1)
+        if cut == -1:
+            cut = max_len
+            lines.append(remaining[:cut])
+            remaining = remaining[cut:]
+        else:
+            lines.append(remaining[:cut + 1])
+            remaining = remaining[cut + 1:]
+
+    if remaining:
+        lines.append(remaining)
+    return "\n".join(lines)
+
 def identify_base_model(model_name: str):
     """
     識別模型名稱中的 base model。
@@ -264,7 +291,8 @@ def plot_base_model_group(ckpt_df: pd.DataFrame, full_df: pd.DataFrame,
 
     for gkey, g in ckpt_df.groupby("group_key"):
         gg = g.sort_values("ckpt")
-        ax.plot(gg["ckpt"].values, gg["acc_pct"].values, marker="o", label=gkey)
+        line_label = wrap_label_by_hyphen(gkey, max_len=50)
+        ax.plot(gg["ckpt"].values, gg["acc_pct"].values, marker="o", label=line_label)
 
     # ---- 為此 base model 的非 checkpoint 模型加水平線 ----
     non_ckpt_df = full_df[full_df["ckpt_info"].isna()].copy()
@@ -300,8 +328,9 @@ def plot_base_model_group(ckpt_df: pd.DataFrame, full_df: pd.DataFrame,
 
     # 畫 baseline
     if baseline_acc is not None:
+        baseline_label = wrap_label_by_hyphen(f"Baseline: {baseline_name}", max_len=40)
         ax.axhline(baseline_acc, linestyle="--", linewidth=1.5,
-                   label=f"Baseline: {baseline_name}")
+                   label=baseline_label)
 
     ax.set_xlabel("Checkpoint 編號", fontsize=16)
     ax.set_ylabel("準確度(%)", fontsize=16)
