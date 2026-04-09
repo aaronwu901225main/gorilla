@@ -1040,6 +1040,11 @@ SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1170-merged-5epoch-all-zh
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1260-merged-5epoch-all-zhtw-split-turn-new-lenfiltered-fix-special-token-and-leak-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1290-merged-5epoch-all-zhtw-split-turn-new-lenfiltered-fix-special-token-and-leak-lr5e-7")
 
+# gemma-4-31B-it (prompt)
+SUPPORTED_MODELS.append("google/gemma-4-31B-it")
+
+# gemma-4-31B-it (FC)
+SUPPORTED_MODELS.append("google/gemma-4-31B-it-FC")
 
 # openai/gpt-oss-120b
 # Base

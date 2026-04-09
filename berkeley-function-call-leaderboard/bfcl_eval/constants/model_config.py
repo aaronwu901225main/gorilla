@@ -9764,8 +9764,33 @@ local_inference_model_map = {
             underscore_to_dot=True,
         ),
 
+        # gemma-4-31B-it (prompt)
+        "google/gemma-4-31B-it": ModelConfig(
+            model_name="google/gemma-4-31B-it",
+            display_name="Gemma-4-31B-it(Prompt)",
+            url="self",
+            org="Google",
+            license="gemma-terms-of-use",
+            model_handler=GemmaHandler,
+            input_price=None,
+            output_price=None,
+            is_fc_model=False,
+            underscore_to_dot=False,
+        ),
 
-
+        # gemma-4-31B-it (FC)
+        "google/gemma-4-31B-it-FC": ModelConfig(
+            model_name="google/gemma-4-31B-it-FC",
+            display_name="Gemma-4-31B-it(FC)",
+            url="self",
+            org="Google",
+            license="gemma-terms-of-use",
+            model_handler=FunctionGemmaHandler,
+            input_price=None,
+            output_price=None,
+            is_fc_model=True,
+            underscore_to_dot=False,
+        ),
 
         # openai/gpt-oss-120b
         # Base
