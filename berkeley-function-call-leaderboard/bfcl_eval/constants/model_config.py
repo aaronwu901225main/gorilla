@@ -39,6 +39,10 @@ from bfcl_eval.model_handler.local_inference.deepseek_reasoning import (
 )
 from bfcl_eval.model_handler.local_inference.falcon_fc import Falcon3FCHandler
 from bfcl_eval.model_handler.local_inference.gemma import GemmaHandler
+from bfcl_eval.model_handler.local_inference.gemma_4 import (
+    Gemma4FCHandler,
+    Gemma4Handler,
+)
 from bfcl_eval.model_handler.local_inference.gemma_t1 import GemmaT1Handler
 from bfcl_eval.model_handler.local_inference.functiongemma import FunctionGemmaHandler
 from bfcl_eval.model_handler.local_inference.glm import GLMHandler
@@ -9771,7 +9775,7 @@ local_inference_model_map = {
             url="self",
             org="Google",
             license="gemma-terms-of-use",
-            model_handler=GemmaHandler,
+            model_handler=Gemma4Handler,
             input_price=None,
             output_price=None,
             is_fc_model=False,
@@ -9785,7 +9789,7 @@ local_inference_model_map = {
             url="self",
             org="Google",
             license="gemma-terms-of-use",
-            model_handler=FunctionGemmaHandler,
+            model_handler=Gemma4FCHandler,
             input_price=None,
             output_price=None,
             is_fc_model=True,
