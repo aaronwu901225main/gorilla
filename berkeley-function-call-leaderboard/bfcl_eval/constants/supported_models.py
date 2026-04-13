@@ -1039,6 +1039,15 @@ SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1080-merged-5epoch-all-zh
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1170-merged-5epoch-all-zhtw-split-turn-new-lenfiltered-fix-special-token-and-leak-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1260-merged-5epoch-all-zhtw-split-turn-new-lenfiltered-fix-special-token-and-leak-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1290-merged-5epoch-all-zhtw-split-turn-new-lenfiltered-fix-special-token-and-leak-lr5e-7")
+# 5epoch-all-zhtw-turn-simple-thinking-test-lr5e-7
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-80-merged-5epoch-all-zhtw-turn-simple-thinking-test-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-160-merged-5epoch-all-zhtw-turn-simple-thinking-test-lr5e-7")
+# 5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-80-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-160-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7")
+# 5epoch-all-zhtw-turn-simple-thinking-test-v51-lr5e-7
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-80-merged-5epoch-all-zhtw-turn-simple-thinking-test-v51-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-160-merged-5epoch-all-zhtw-turn-simple-thinking-test-v51-lr5e-7")
 
 # gemma-4-31B-it (prompt)
 SUPPORTED_MODELS.append("google/gemma-4-31B-it")
