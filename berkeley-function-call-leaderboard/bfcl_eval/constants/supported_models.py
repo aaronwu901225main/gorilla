@@ -1045,6 +1045,20 @@ SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-160-merged-5epoch-all-zht
 # 5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-80-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-160-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-240-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-320-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-400-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-480-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-560-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-640-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-720-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-800-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-880-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-960-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1040-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1120-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1200-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7")
+
 # 5epoch-all-zhtw-turn-simple-thinking-test-v51-lr5e-7
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-80-merged-5epoch-all-zhtw-turn-simple-thinking-test-v51-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-160-merged-5epoch-all-zhtw-turn-simple-thinking-test-v51-lr5e-7")
