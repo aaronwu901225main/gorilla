@@ -10026,7 +10026,21 @@ local_inference_model_map = {
             is_fc_model=True,
             underscore_to_dot=False,
         ),
-
+        
+        # gemma-4-26B-A4B-it
+        "google/gemma-4-26B-A4B-it": ModelConfig(
+            model_name="google/gemma-4-26B-A4B-it",
+            display_name="Gemma-4-26B-A4B-it",
+            url="self",
+            org="Google",
+            license="gemma-terms-of-use",
+            model_handler=Gemma4Handler,
+            input_price=None,
+            output_price=None,
+            is_fc_model=False,
+            underscore_to_dot=False,
+        ),
+        
         # openai/gpt-oss-120b
         # Base
         "openai/gpt-oss-120b": ModelConfig(
