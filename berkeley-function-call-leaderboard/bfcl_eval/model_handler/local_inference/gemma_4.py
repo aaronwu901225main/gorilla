@@ -1,10 +1,13 @@
 import ast
 import json
 import re
+import time
 from typing import Any, Optional
+from uuid import uuid4
 
 from bfcl_eval.constants.enums import ModelStyle, ReturnFormat
 from bfcl_eval.constants.type_mappings import GORILLA_TO_OPENAPI
+from bfcl_eval.model_handler.base_handler import BaseHandler
 from bfcl_eval.model_handler.local_inference.base_oss_handler import OSSHandler
 from bfcl_eval.model_handler.utils import (
     combine_consecutive_user_prompts,
@@ -403,3 +406,263 @@ class Gemma4FCHandler(Gemma4Handler):
             dtype,
             **kwargs,
         )
+
+    @override
+    def inference(
+        self,
+        test_entry: dict,
+        include_input_log: bool,
+        exclude_state_log: bool,
+    ):
+        # OSSHandler always routes to prompting. FC models should use BaseHandler's FC path.
+        return BaseHandler.inference(
+            self,
+            test_entry=test_entry,
+            include_input_log=include_input_log,
+            exclude_state_log=exclude_state_log,
+        )
+
+    @override
+    def decode_ast(self, result, language, has_tool_call_tag):
+        if isinstance(result, list):
+            return result
+        return super().decode_ast(result, language, has_tool_call_tag)
+
+    @override
+    def decode_execute(self, result, has_tool_call_tag):
+        if isinstance(result, list):
+            return convert_to_function_call(result)
+        return super().decode_execute(result, has_tool_call_tag)
+
+    @override
+    def _pre_query_processing_FC(self, inference_data: dict, test_entry: dict) -> dict:
+        inference_data["message"] = []
+        return inference_data
+
+    @override
+    def _compile_tools(self, inference_data: dict, test_entry: dict) -> dict:
+        functions: list = test_entry["function"]
+        tools = convert_to_tool(functions, GORILLA_TO_OPENAPI, ModelStyle.OPENAI_COMPLETIONS)
+
+        # Keep a reversible mapping because OpenAI-compatible tools sanitize some names.
+        alias_to_original: dict[str, str] = {}
+        original_to_alias: dict[str, str] = {}
+
+        for original_func, tool in zip(functions, tools):
+            if not isinstance(tool, dict):
+                continue
+
+            function_obj = tool.get("function")
+            if not isinstance(function_obj, dict):
+                continue
+
+            function_obj.pop("response", None)
+
+            original_name = str(original_func.get("name", ""))
+            alias_name = str(function_obj.get("name", original_name))
+
+            if original_name:
+                alias_to_original[alias_name] = original_name
+                original_to_alias[original_name] = alias_name
+
+        self._tool_name_alias_to_original = alias_to_original
+        self._tool_name_original_to_alias = original_to_alias
+
+        inference_data["tools"] = tools
+        return inference_data
+
+    @override
+    def _query_FC(self, inference_data: dict):
+        message = inference_data["message"]
+        tools = inference_data["tools"]
+
+        inference_data["inference_input_log"] = {
+            "message": message,
+            "tools": tools,
+        }
+
+        kwargs = {
+            "model": self.model_path_or_id,
+            "messages": message,
+            "temperature": self.temperature,
+            "timeout": 72000,
+        }
+        if tools:
+            kwargs["tools"] = tools
+
+        start_time = time.time()
+        api_response = self.client.chat.completions.create(**kwargs)
+        end_time = time.time()
+
+        return api_response, end_time - start_time
+
+    @override
+    def _parse_query_response_FC(self, api_response: Any) -> dict:
+        message = api_response.choices[0].message
+        content = message.content or ""
+        parsed_calls: list[dict] = []
+        tool_call_ids: list[str] = []
+        tool_call_func_names: list[str] = []
+        assistant_tool_calls: list[dict] = []
+
+        raw_tool_calls = getattr(message, "tool_calls", None) or []
+        for raw_tool_call in raw_tool_calls:
+            if isinstance(raw_tool_call, dict):
+                function_obj = raw_tool_call.get("function", {})
+                alias_name = str(function_obj.get("name", ""))
+                raw_arguments = function_obj.get("arguments", {})
+                tool_call_id = str(raw_tool_call.get("id") or self._new_tool_call_id())
+            else:
+                alias_name = str(raw_tool_call.function.name)
+                raw_arguments = raw_tool_call.function.arguments
+                tool_call_id = str(raw_tool_call.id or self._new_tool_call_id())
+
+            func_name = self._restore_tool_name(alias_name)
+            if not func_name:
+                continue
+
+            normalized_args = self._normalize_arguments(raw_arguments)
+            parsed_calls.append({func_name: normalized_args})
+            tool_call_ids.append(tool_call_id)
+            tool_call_func_names.append(func_name)
+            assistant_tool_calls.append(
+                {
+                    "id": tool_call_id,
+                    "type": "function",
+                    "function": {
+                        "name": alias_name,
+                        "arguments": json.dumps(normalized_args, ensure_ascii=True),
+                    },
+                }
+            )
+
+        # Some responses may still return tool calls in plain text. Re-parse from content as fallback.
+        if len(parsed_calls) == 0 and content:
+            fallback_calls = self._robust_decode(
+                result=content,
+                language=ReturnFormat.PYTHON,
+                has_tool_call_tag=False,
+            )
+
+            for item in fallback_calls:
+                if not isinstance(item, dict) or len(item) != 1:
+                    continue
+
+                func_name = str(list(item.keys())[0])
+                normalized_args = item[func_name]
+                if not isinstance(normalized_args, dict):
+                    normalized_args = {}
+
+                alias_name = self._tool_name_original_to_alias.get(func_name, func_name)
+                tool_call_id = self._new_tool_call_id()
+
+                parsed_calls.append({func_name: normalized_args})
+                tool_call_ids.append(tool_call_id)
+                tool_call_func_names.append(func_name)
+                assistant_tool_calls.append(
+                    {
+                        "id": tool_call_id,
+                        "type": "function",
+                        "function": {
+                            "name": alias_name,
+                            "arguments": json.dumps(normalized_args, ensure_ascii=True),
+                        },
+                    }
+                )
+
+        assistant_message: dict[str, Any] = {
+            "role": "assistant",
+            "content": content,
+        }
+        if assistant_tool_calls:
+            assistant_message["tool_calls"] = assistant_tool_calls
+
+        usage = getattr(api_response, "usage", None)
+        input_token = getattr(usage, "prompt_tokens", 0)
+        output_token = getattr(usage, "completion_tokens", 0)
+
+        response_data = {
+            "model_responses": parsed_calls if parsed_calls else content,
+            "model_responses_message_for_chat_history": assistant_message,
+            "tool_call_ids": tool_call_ids,
+            "tool_call_func_names": tool_call_func_names,
+            "input_token": input_token,
+            "output_token": output_token,
+        }
+
+        reasoning_content = getattr(message, "reasoning_content", None)
+        if reasoning_content:
+            response_data["reasoning_content"] = reasoning_content
+
+        return response_data
+
+    @override
+    def add_first_turn_message_FC(
+        self, inference_data: dict, first_turn_message: list[dict]
+    ) -> dict:
+        inference_data["message"].extend(first_turn_message)
+        return inference_data
+
+    @override
+    def _add_next_turn_user_message_FC(
+        self, inference_data: dict, user_message: list[dict]
+    ) -> dict:
+        inference_data["message"].extend(user_message)
+        return inference_data
+
+    @override
+    def _add_assistant_message_FC(
+        self, inference_data: dict, model_response_data: dict
+    ) -> dict:
+        assistant_message = model_response_data["model_responses_message_for_chat_history"]
+        content = assistant_message.get("content", "")
+        tool_calls = assistant_message.get("tool_calls", None)
+
+        # vLLM chat API rejects assistant messages with neither textual content nor tool calls.
+        if content == "" and not tool_calls:
+            return inference_data
+
+        inference_data["message"].append(assistant_message)
+        return inference_data
+
+    @override
+    def _add_execution_results_FC(
+        self, inference_data: dict, execution_results: list[str], model_response_data: dict
+    ) -> dict:
+        for execution_result, func_name, tool_call_id in zip(
+            execution_results,
+            model_response_data.get("tool_call_func_names", []),
+            model_response_data.get("tool_call_ids", []),
+        ):
+            inference_data["message"].append(
+                {
+                    "role": "tool",
+                    "name": func_name,
+                    "content": execution_result,
+                    "tool_call_id": tool_call_id,
+                }
+            )
+        return inference_data
+
+    @staticmethod
+    def _normalize_arguments(arguments: Any) -> dict:
+        if isinstance(arguments, dict):
+            return arguments
+        if isinstance(arguments, str):
+            try:
+                parsed = json.loads(arguments)
+                if isinstance(parsed, dict):
+                    return parsed
+            except json.JSONDecodeError:
+                return {}
+        return {}
+
+    @staticmethod
+    def _new_tool_call_id() -> str:
+        return f"call_{uuid4().hex[:24]}"
+
+    def _restore_tool_name(self, alias_name: str) -> str:
+        if not isinstance(alias_name, str):
+            return ""
+        alias_map = getattr(self, "_tool_name_alias_to_original", {})
+        return alias_map.get(alias_name, alias_name)

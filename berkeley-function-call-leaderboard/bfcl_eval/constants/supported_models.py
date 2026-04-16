@@ -1072,6 +1072,9 @@ SUPPORTED_MODELS.append("google/gemma-4-31B-it-FC")
 # gemma-4-26B-A4B-it
 SUPPORTED_MODELS.append("google/gemma-4-26B-A4B-it")
 
+# gemma-4-26B-A4B-it (FC)
+SUPPORTED_MODELS.append("google/gemma-4-26B-A4B-it-FC")
+
 # openai/gpt-oss-120b
 # Base
 SUPPORTED_MODELS.append("openai/gpt-oss-120b")
