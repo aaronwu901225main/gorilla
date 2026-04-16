@@ -1,4 +1,5 @@
 import ast
+import copy
 import json
 import re
 import time
@@ -476,15 +477,22 @@ class Gemma4FCHandler(Gemma4Handler):
         message = inference_data["message"]
         tools = inference_data["tools"]
 
+        query_message, max_tokens = self._fit_messages_and_budget(message, tools)
+        inference_data["message"] = query_message
+
         inference_data["inference_input_log"] = {
-            "message": message,
+            "message": query_message,
             "tools": tools,
+            "max_tokens": max_tokens,
+            "message_count_before_trim": len(message),
+            "message_count_after_trim": len(query_message),
         }
 
         kwargs = {
             "model": self.model_path_or_id,
-            "messages": message,
+            "messages": query_message,
             "temperature": self.temperature,
+            "max_tokens": max_tokens,
             "timeout": 72000,
         }
         if tools:
@@ -666,3 +674,68 @@ class Gemma4FCHandler(Gemma4Handler):
             return ""
         alias_map = getattr(self, "_tool_name_alias_to_original", {})
         return alias_map.get(alias_name, alias_name)
+
+    def _fit_messages_and_budget(self, message: list[dict], tools: list[dict]) -> tuple[list[dict], int]:
+        max_ctx = getattr(self, "max_context_length", None)
+        if not isinstance(max_ctx, int) or max_ctx <= 0:
+            return message, 1024
+
+        safe_margin = 32
+        min_completion = 1
+        max_completion_cap = 2048
+
+        trimmed_message = copy.deepcopy(message)
+        token_count = self._estimate_chat_tokens(trimmed_message, tools)
+
+        has_system = len(trimmed_message) > 0 and trimmed_message[0].get("role") == "system"
+        min_keep = 2 if has_system else 1
+        budget_limit = max_ctx - safe_margin - min_completion
+
+        # Drop the oldest history first, but preserve the newest message.
+        while token_count > budget_limit and len(trimmed_message) > min_keep:
+            drop_idx = 1 if has_system else 0
+            if drop_idx >= len(trimmed_message) - 1:
+                break
+            trimmed_message.pop(drop_idx)
+            token_count = self._estimate_chat_tokens(trimmed_message, tools)
+
+        # Edge case: if even the minimum kept messages overflow, truncate oldest kept user content.
+        if token_count > budget_limit:
+            candidate_idx = 1 if has_system and len(trimmed_message) > 1 else 0
+            candidate = trimmed_message[candidate_idx]
+            content = candidate.get("content", "")
+            if isinstance(content, str) and len(content) > 32:
+                low, high = 32, len(content)
+                best = content[-32:]
+                while low <= high:
+                    mid = (low + high) // 2
+                    trial_message = copy.deepcopy(trimmed_message)
+                    trial_message[candidate_idx]["content"] = content[-mid:]
+                    trial_tokens = self._estimate_chat_tokens(trial_message, tools)
+                    if trial_tokens <= budget_limit:
+                        best = content[-mid:]
+                        low = mid + 1
+                    else:
+                        high = mid - 1
+
+                trimmed_message[candidate_idx]["content"] = best
+                token_count = self._estimate_chat_tokens(trimmed_message, tools)
+
+        leftover = max_ctx - token_count - safe_margin
+        max_tokens = max(min_completion, min(max_completion_cap, leftover))
+        return trimmed_message, int(max_tokens)
+
+    def _estimate_chat_tokens(self, message: list[dict], tools: list[dict]) -> int:
+        try:
+            payload = json.dumps(
+                {
+                    "messages": message,
+                    "tools": tools,
+                },
+                ensure_ascii=True,
+                separators=(",", ":"),
+            )
+            return len(self.tokenizer.tokenize(payload))
+        except Exception:
+            approx_chars = len(str(message)) + len(str(tools))
+            return max(1, approx_chars // 4)
