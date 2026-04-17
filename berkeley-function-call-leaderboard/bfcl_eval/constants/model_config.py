@@ -9961,9 +9961,9 @@ local_inference_model_map = {
             is_fc_model=True,
             underscore_to_dot=True,
         ),
-        "openai/gpt-oss-20b-checkpoint-1200-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7": ModelConfig(
-            model_name="openai/gpt-oss-20b-checkpoint-1200-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7",
-            display_name="gpt-oss-20b LoRA ckpt1200-5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7",
+        "openai/gpt-oss-20b-checkpoint-1290-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7": ModelConfig(
+            model_name="openai/gpt-oss-20b-checkpoint-1290-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7",
+            display_name="gpt-oss-20b LoRA ckpt1290-5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7",
             url="self",
             org="OpenAI",
             license="apache-2.0",
