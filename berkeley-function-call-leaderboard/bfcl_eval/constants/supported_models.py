@@ -1074,6 +1074,22 @@ SUPPORTED_MODELS.append("google/gemma-4-26B-A4B-it")
 
 # gemma-4-26B-A4B-it (FC)
 SUPPORTED_MODELS.append("google/gemma-4-26B-A4B-it-FC")
+# 5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7
+SUPPORTED_MODELS.append("google/gemma-4-26B-A4B-it-FC-checkpoint-80-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-26B-A4B-it-FC-checkpoint-160-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-26B-A4B-it-FC-checkpoint-240-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-26B-A4B-it-FC-checkpoint-320-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-26B-A4B-it-FC-checkpoint-400-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-26B-A4B-it-FC-checkpoint-480-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-26B-A4B-it-FC-checkpoint-560-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-26B-A4B-it-FC-checkpoint-640-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-26B-A4B-it-FC-checkpoint-720-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-26B-A4B-it-FC-checkpoint-800-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-26B-A4B-it-FC-checkpoint-880-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-26B-A4B-it-FC-checkpoint-960-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-26B-A4B-it-FC-checkpoint-1040-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-26B-A4B-it-FC-checkpoint-1120-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-26B-A4B-it-FC-checkpoint-1200-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7")
 
 # openai/gpt-oss-120b
 # Base
