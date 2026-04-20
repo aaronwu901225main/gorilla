@@ -29,6 +29,19 @@ LORA_DIR = args.LORA_DIR
 OUTPUT_DIR = args.OUTPUT_DIR
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
+BASE_MODEL_IS_DIR = os.path.isdir(BASE_MODEL)
+
+BASE_TOKENIZER = None
+BASE_PROCESSOR = None
+
+if not BASE_MODEL_IS_DIR:
+    # 若 BASE_MODEL 是 HF repo id，改用 from_pretrained 載入再落地。
+    BASE_TOKENIZER = AutoTokenizer.from_pretrained(BASE_MODEL)
+    try:
+        BASE_PROCESSOR = AutoProcessor.from_pretrained(BASE_MODEL, trust_remote_code=True)
+    except Exception:
+        BASE_PROCESSOR = None
+
 DTYPE_MAP = {
     'bf16': torch.bfloat16,
     'fp16': torch.float16,
@@ -78,12 +91,6 @@ for ckpt_name in sorted(os.listdir(LORA_DIR)):
     # 以指定精度儲存
     merged_model = merged_model.to(target_dtype)
 
-    # tokenizer 優先使用 checkpoint 內設定，失敗時回退 BASE_MODEL
-    try:
-        tokenizer = AutoTokenizer.from_pretrained(ckpt_path)
-    except Exception:
-        tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL)
-
     # 存成完整模型
     save_path = os.path.join(OUTPUT_DIR, ckpt_name + "_merged")
     merged_model.save_pretrained(
@@ -91,34 +98,29 @@ for ckpt_name in sorted(os.listdir(LORA_DIR)):
         max_shard_size=args.MAX_SHARD_SIZE,
         safe_serialization=args.SAFE_SERIALIZATION,
     )
-    tokenizer.save_pretrained(save_path)  # 把 tokenizer 一起存
 
-    # 優先嘗試儲存 processor；若模型不支援則回退為直接補 config 檔。
-    processor = None
-    processor_source = None
-    for source in (ckpt_path, BASE_MODEL):
-        try:
-            processor = AutoProcessor.from_pretrained(source, trust_remote_code=True)
-            processor_source = source
-            break
-        except Exception:
-            continue
-
-    if processor is not None:
-        processor.save_pretrained(save_path)
-        print(f"已儲存 processor 設定（來源: {processor_source}）")
+    # 非權重檔一律以 BASE_MODEL 為準，避免 checkpoint 內 tokenizer 設定漂移。
+    if BASE_MODEL_IS_DIR:
+        for cfg_name in (
+            "tokenizer.json",
+            "tokenizer_config.json",
+            "special_tokens_map.json",
+            "added_tokens.json",
+            "chat_template.jinja",
+            "generation_config.json",
+            "processor_config.json",
+            "preprocessor_config.json",
+        ):
+            if _copy_config_if_exists(BASE_MODEL, cfg_name, save_path):
+                print(f"已從 BASE_MODEL 複製 {cfg_name}")
     else:
-        print("警告: 無法載入 AutoProcessor，改用檔案複製補齊 processor/preprocessor 設定。")
-
-    # 確保 merged 目錄內有 processor/preprocessor 設定。
-    for cfg_name in ("processor_config.json", "preprocessor_config.json"):
-        cfg_target = os.path.join(save_path, cfg_name)
-        if os.path.isfile(cfg_target):
-            continue
-        if _copy_config_if_exists(ckpt_path, cfg_name, save_path):
-            print(f"已從 checkpoint 複製 {cfg_name}")
-        elif _copy_config_if_exists(BASE_MODEL, cfg_name, save_path):
-            print(f"已從 BASE_MODEL 複製 {cfg_name}")
+        # BASE_MODEL 非本機資料夾時，退回 transformers 落地。
+        if BASE_TOKENIZER is not None:
+            BASE_TOKENIZER.save_pretrained(save_path)
+            print("已從 BASE_MODEL 載入並儲存 tokenizer 設定")
+        if BASE_PROCESSOR is not None:
+            BASE_PROCESSOR.save_pretrained(save_path)
+            print("已從 BASE_MODEL 載入並儲存 processor 設定")
 
     processor_cfg = os.path.join(save_path, "processor_config.json")
     preprocessor_cfg = os.path.join(save_path, "preprocessor_config.json")
@@ -134,9 +136,6 @@ for ckpt_name in sorted(os.listdir(LORA_DIR)):
         print(f"警告: {save_path} 仍缺少 preprocessor_config.json，Gemma4 vLLM 可能無法啟動。")
 
     del merged_model
-    del tokenizer
-    if processor is not None:
-        del processor
     gc.collect()
     if torch.cuda.is_available():
         torch.cuda.empty_cache()

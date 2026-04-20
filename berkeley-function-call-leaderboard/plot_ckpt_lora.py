@@ -77,7 +77,7 @@ ACC_COL_CANDIDATES = [
 ]
 
 # 解析 ckpt 的正則：抓出 ckpt 數字與後綴超參數字串
-CKPT_RE = re.compile(r"(?P<tag>ckpt|checkpoint)[-_]?(?P<ckpt>\d+)", re.IGNORECASE)
+CKPT_RE = re.compile(r"^(?P<prefix>.*?\bLoRA\s+)?ckpt(?P<ckpt>\d+)-(?P<rest>.+)$", re.IGNORECASE)
 
 # 支援的 base model 列表（每個元素為 (pattern, folder_name) tuple）
 # pattern 用於匹配，folder_name 用於建立資料夾
@@ -87,8 +87,8 @@ BASE_MODELS = [
     # Llama-3.1-8B-Instruct (Prompt)
     (r"(meta[/_-]llama[/_-]|Meta\s+Llama\s+)3\.1-8B-Instruct", "meta-llama_Llama-3.1-8B-Instruct"),
     (r"Qwen[/_-]Qwen3-8B-FC", "Qwen_Qwen3-8B-FC"),
+    (r"((google[/_-])?gemma-4-26B-A4B-it(-FC|\(FC\)))", "google_gemma-4-26B-A4B-it-FC"),
     (r"(openai[/_-])?gpt-oss-20b", "gpt-oss-20b"),
-    (r"(google[/_-])?gemma-4-26B-A4B-it(?:\s*\(\s*FC\s*\)|[/_-]FC)\b", "google_gemma-4-26B-A4B-it-FC"),
 ]
 
 def pick_acc_col(df: pd.DataFrame) -> str:
@@ -161,27 +161,19 @@ def identify_base_model(model_name: str):
 def extract_ckpt_info(model_name: str):
     """
     從 Model 名稱抽出 (prefix, ckpt_int, rest)；失敗回 None。
-    支援 ckpt 或 checkpoint 出現在字串中段。
-    rest = ckpt/checkpoint 後面的字串，用來當分組鍵（同一條線）。
+    rest = '1batch-2560seq-1epoch-apigen' 等，用來當分組鍵（同一條線）。
     """
     if not isinstance(model_name, str):
         return None
-    s = model_name.strip()
-    m = CKPT_RE.search(s)
+    m = CKPT_RE.search(model_name.strip())
     if not m:
         return None
     try:
         ckpt = int(m.group("ckpt"))
     except Exception:
         return None
-
-    prefix = s[:m.start()].strip(" -_/")
-    rest = s[m.end():].strip()
-    if rest.startswith("-") or rest.startswith("_"):
-        rest = rest[1:].strip()
-    if not rest:
-        rest = "__no_suffix__"
-
+    prefix = (m.group("prefix") or "").strip()
+    rest = m.group("rest").strip()
     return prefix, ckpt, rest
 
 def find_baseline(df: pd.DataFrame, acc_col: str, base_model: str = None):
@@ -195,7 +187,6 @@ def find_baseline(df: pd.DataFrame, acc_col: str, base_model: str = None):
         return None, None
 
     s = df[mcol].astype(str)
-    non_lora_ckpt_mask = ~s.str.contains(r"LoRA|ckpt|checkpoint", case=False, regex=True)
 
     if base_model and base_model != "unknown":
         # 根據不同的 base model 使用對應的搜尋 pattern
@@ -204,28 +195,28 @@ def find_baseline(df: pd.DataFrame, acc_col: str, base_model: str = None):
             base_rows = df[s.str.contains(r"xLAM-2-8b-fc-r\s*\(FC\).*原版", case=False, regex=True)]
             if base_rows.empty:
                 base_rows = df[s.str.contains(r"xLAM-2-8b-fc-r", case=False, regex=True) &
-                               non_lora_ckpt_mask]
+                               ~s.str.contains(r"LoRA|ckpt", case=False, regex=True)]
         elif base_model == "Qwen_Qwen2.5-7B-Instruct":
             base_rows = df[s.str.contains(r"Qwen[/_-]Qwen2\.5-7B-Instruct", case=False, regex=True) &
-                           non_lora_ckpt_mask]
+                           ~s.str.contains(r"LoRA|ckpt", case=False, regex=True)]
         elif base_model == "meta-llama_Llama-3.1-8B-Instruct":
             # 匹配 "Llama-3.1-8B-Instruct (Prompt)"
             base_rows = df[s.str.contains(r"Llama[/_\s-]*3\.1-8B-Instruct\s*\(Prompt\)", case=False, regex=True) &
-                           non_lora_ckpt_mask]
+                           ~s.str.contains(r"LoRA|ckpt", case=False, regex=True)]
         elif base_model == "Qwen_Qwen3-8B-FC":
             base_rows = df[s.str.contains(r"Qwen[/_-]Qwen3-8B-FC", case=False, regex=True) &
-                           non_lora_ckpt_mask]
+                           ~s.str.contains(r"LoRA|ckpt", case=False, regex=True)]
+        elif base_model == "google_gemma-4-26B-A4B-it-FC":
+            base_rows = df[s.str.contains(r"((google[/_-])?gemma-4-26B-A4B-it(-FC|\(FC\)))", case=False, regex=True) &
+                           ~s.str.contains(r"LoRA|ckpt", case=False, regex=True)]
         elif base_model == "gpt-oss-20b":
             base_rows = df[s.str.contains(r"(openai[/_-])?gpt-oss-20b", case=False, regex=True) &
-                           non_lora_ckpt_mask]
-        elif base_model == "google_gemma-4-26B-A4B-it-FC":
-            base_rows = df[s.str.contains(r"(google[/_-])?gemma-4-26B-A4B-it(?:\s*\(\s*FC\s*\)|[/_-]FC)\b", case=False, regex=True) &
-                           non_lora_ckpt_mask]
+                           ~s.str.contains(r"LoRA|ckpt", case=False, regex=True)]
         else:
             # 通用方法：將資料夾名稱轉回 model 名稱格式
             model_pattern = base_model.replace("_", "[/_-]")
             base_rows = df[s.str.contains(model_pattern, case=False, regex=True) &
-                           non_lora_ckpt_mask]
+                           ~s.str.contains(r"LoRA|ckpt", case=False, regex=True)]
     else:
         # 預設行為：找 xLAM-2-8b-fc-r
         # 優先 (FC)(原版)
@@ -233,7 +224,7 @@ def find_baseline(df: pd.DataFrame, acc_col: str, base_model: str = None):
         if base_rows.empty:
             # 次選：不含 LoRA 或 ckpt 的 xLAM-2-8b-fc-r
             base_rows = df[s.str.contains(r"xLAM-2-8b-fc-r", case=False, regex=True) &
-                           non_lora_ckpt_mask]
+                           ~s.str.contains(r"LoRA|ckpt", case=False, regex=True)]
 
     if base_rows.empty:
         return None, None
