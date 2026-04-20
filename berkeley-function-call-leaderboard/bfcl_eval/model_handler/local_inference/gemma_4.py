@@ -556,12 +556,13 @@ class Gemma4FCHandler(Gemma4Handler):
                 if not isinstance(item, dict) or len(item) != 1:
                     continue
 
-                func_name = str(list(item.keys())[0])
-                normalized_args = item[func_name]
+                func_name_raw = str(list(item.keys())[0])
+                func_name = self._restore_tool_name(func_name_raw)
+                normalized_args = item[func_name_raw]
                 if not isinstance(normalized_args, dict):
                     normalized_args = {}
 
-                alias_name = self._tool_name_original_to_alias.get(func_name, func_name)
+                alias_name = self._tool_name_original_to_alias.get(func_name, func_name_raw)
                 tool_call_id = self._new_tool_call_id()
 
                 parsed_calls.append({func_name: normalized_args})

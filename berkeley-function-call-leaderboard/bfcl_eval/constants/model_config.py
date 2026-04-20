@@ -10010,7 +10010,7 @@ local_inference_model_map = {
             input_price=None,
             output_price=None,
             is_fc_model=False,
-            underscore_to_dot=False,
+            underscore_to_dot=True,
         ),
 
         # gemma-4-31B-it (FC)
@@ -10024,7 +10024,7 @@ local_inference_model_map = {
             input_price=None,
             output_price=None,
             is_fc_model=True,
-            underscore_to_dot=False,
+            underscore_to_dot=True,
         ),
         
         # gemma-4-26B-A4B-it
@@ -10038,7 +10038,7 @@ local_inference_model_map = {
             input_price=None,
             output_price=None,
             is_fc_model=False,
-            underscore_to_dot=False,
+            underscore_to_dot=True,
         ),
 
         # gemma-4-26B-A4B-it (FC)
@@ -10052,7 +10052,7 @@ local_inference_model_map = {
             input_price=None,
             output_price=None,
             is_fc_model=True,
-            underscore_to_dot=False,
+            underscore_to_dot=True,
         ),
         # 5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7
         "google/gemma-4-26B-A4B-it-FC-checkpoint-80-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7": ModelConfig(
@@ -10065,7 +10065,7 @@ local_inference_model_map = {
             input_price=None,
             output_price=None,
             is_fc_model=True,
-            underscore_to_dot=False,
+            underscore_to_dot=True,
         ),
         "google/gemma-4-26B-A4B-it-FC-checkpoint-160-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7": ModelConfig(
             model_name="google/gemma-4-26B-A4B-it-FC-checkpoint-160-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7",
@@ -10077,7 +10077,7 @@ local_inference_model_map = {
             input_price=None,
             output_price=None,
             is_fc_model=True,
-            underscore_to_dot=False,
+            underscore_to_dot=True,
         ),
         "google/gemma-4-26B-A4B-it-FC-checkpoint-240-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7": ModelConfig(
             model_name="google/gemma-4-26B-A4B-it-FC-checkpoint-240-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7",
@@ -10089,7 +10089,7 @@ local_inference_model_map = {
             input_price=None,
             output_price=None,
             is_fc_model=True,
-            underscore_to_dot=False,
+            underscore_to_dot=True,
         ),
         "google/gemma-4-26B-A4B-it-FC-checkpoint-320-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7": ModelConfig(
             model_name="google/gemma-4-26B-A4B-it-FC-checkpoint-320-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7",
@@ -10101,7 +10101,7 @@ local_inference_model_map = {
             input_price=None,
             output_price=None,
             is_fc_model=True,
-            underscore_to_dot=False,
+            underscore_to_dot=True,
         ),
         "google/gemma-4-26B-A4B-it-FC-checkpoint-400-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7": ModelConfig(
             model_name="google/gemma-4-26B-A4B-it-FC-checkpoint-400-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7",
@@ -10113,7 +10113,7 @@ local_inference_model_map = {
             input_price=None,
             output_price=None,
             is_fc_model=True,
-            underscore_to_dot=False,
+            underscore_to_dot=True,
         ),
         "google/gemma-4-26B-A4B-it-FC-checkpoint-480-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7": ModelConfig(
             model_name="google/gemma-4-26B-A4B-it-FC-checkpoint-480-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7",
@@ -10125,7 +10125,7 @@ local_inference_model_map = {
             input_price=None,
             output_price=None,
             is_fc_model=True,
-            underscore_to_dot=False,
+            underscore_to_dot=True,
         ),
         "google/gemma-4-26B-A4B-it-FC-checkpoint-560-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7": ModelConfig(
             model_name="google/gemma-4-26B-A4B-it-FC-checkpoint-560-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7",
@@ -10137,7 +10137,7 @@ local_inference_model_map = {
             input_price=None,
             output_price=None,
             is_fc_model=True,
-            underscore_to_dot=False,
+            underscore_to_dot=True,
         ),
         "google/gemma-4-26B-A4B-it-FC-checkpoint-640-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7": ModelConfig(
             model_name="google/gemma-4-26B-A4B-it-FC-checkpoint-640-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7",
@@ -10149,7 +10149,7 @@ local_inference_model_map = {
             input_price=None,
             output_price=None,
             is_fc_model=True,
-            underscore_to_dot=False,
+            underscore_to_dot=True,
         ),
         "google/gemma-4-26B-A4B-it-FC-checkpoint-720-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7": ModelConfig(
             model_name="google/gemma-4-26B-A4B-it-FC-checkpoint-720-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7",
@@ -10161,7 +10161,7 @@ local_inference_model_map = {
             input_price=None,
             output_price=None,
             is_fc_model=True,
-            underscore_to_dot=False,
+            underscore_to_dot=True,
         ),
         "google/gemma-4-26B-A4B-it-FC-checkpoint-800-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7": ModelConfig(
             model_name="google/gemma-4-26B-A4B-it-FC-checkpoint-800-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7",
@@ -10173,7 +10173,7 @@ local_inference_model_map = {
             input_price=None,
             output_price=None,
             is_fc_model=True,
-            underscore_to_dot=False,
+            underscore_to_dot=True,
         ),
         "google/gemma-4-26B-A4B-it-FC-checkpoint-880-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7": ModelConfig(
             model_name="google/gemma-4-26B-A4B-it-FC-checkpoint-880-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7",
@@ -10185,7 +10185,7 @@ local_inference_model_map = {
             input_price=None,
             output_price=None,
             is_fc_model=True,
-            underscore_to_dot=False,
+            underscore_to_dot=True,
         ),
         "google/gemma-4-26B-A4B-it-FC-checkpoint-960-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7": ModelConfig(
             model_name="google/gemma-4-26B-A4B-it-FC-checkpoint-960-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7",
@@ -10197,7 +10197,7 @@ local_inference_model_map = {
             input_price=None,
             output_price=None,
             is_fc_model=True,
-            underscore_to_dot=False,
+            underscore_to_dot=True,
         ),
         "google/gemma-4-26B-A4B-it-FC-checkpoint-1040-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7": ModelConfig(
             model_name="google/gemma-4-26B-A4B-it-FC-checkpoint-1040-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7",
@@ -10209,7 +10209,7 @@ local_inference_model_map = {
             input_price=None,
             output_price=None,
             is_fc_model=True,
-            underscore_to_dot=False,
+            underscore_to_dot=True,
         ),
         "google/gemma-4-26B-A4B-it-FC-checkpoint-1120-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7": ModelConfig(
             model_name="google/gemma-4-26B-A4B-it-FC-checkpoint-1120-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7",
@@ -10221,7 +10221,7 @@ local_inference_model_map = {
             input_price=None,
             output_price=None,
             is_fc_model=True,
-            underscore_to_dot=False,
+            underscore_to_dot=True,
         ),
         "google/gemma-4-26B-A4B-it-FC-checkpoint-1200-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7": ModelConfig(
             model_name="google/gemma-4-26B-A4B-it-FC-checkpoint-1200-merged-5epoch-zhtw-split-turn-6144-trans5-empty-cot-lr5e-7",
@@ -10233,7 +10233,7 @@ local_inference_model_map = {
             input_price=None,
             output_price=None,
             is_fc_model=True,
-            underscore_to_dot=False,
+            underscore_to_dot=True,
         ),
 
 
