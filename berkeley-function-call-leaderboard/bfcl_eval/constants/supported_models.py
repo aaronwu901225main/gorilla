@@ -1058,6 +1058,8 @@ SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-960-merged-5epoch-all-zht
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1040-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1120-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1290-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-lr5e-7")
+# 5epoch-all-zhtw-turn-simple-thinking-test-all-new-v5-lr5e-7
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-720-merged-5epoch-all-zhtw-turn-simple-thinking-test-all-new-v5-lr5e-7")
 
 # 5epoch-all-zhtw-turn-simple-thinking-test-v51-lr5e-7
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-80-merged-5epoch-all-zhtw-turn-simple-thinking-test-v51-lr5e-7")
