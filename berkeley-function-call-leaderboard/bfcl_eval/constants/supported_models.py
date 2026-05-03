@@ -1079,6 +1079,10 @@ SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1440-merged-5epoch-all-zh
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1560-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-dup-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1680-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-dup-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1800-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-dup-lr5e-7")
+# 5epoch-all-zhtw-turn-simple-thinking-test-v5-dup-change-miss-func-have-series-upload-lr5e-7
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-240-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-dup-change-miss-func-have-series-upload-lr5e-7")
+# 5epoch-all-zhtw-turn-simple-thinking-test-v5-dup-change-miss-func-no-series-upload-lr5e-7
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-240-merged-5epoch-all-zhtw-turn-simple-thinking-test-v5-dup-change-miss-func-no-series-upload-lr5e-7")
 
 # gemma-4-31B-it (FC)
 SUPPORTED_MODELS.append("google/gemma-4-31B-it-FC")
