@@ -87,8 +87,9 @@ BASE_MODELS = [
     # Llama-3.1-8B-Instruct (Prompt)
     (r"(meta[/_-]llama[/_-]|Meta\s+Llama\s+)3\.1-8B-Instruct", "meta-llama_Llama-3.1-8B-Instruct"),
     (r"Qwen[/_-]Qwen3-8B-FC", "Qwen_Qwen3-8B-FC"),
-    (r"((google[/_-])?gemma-4-26B-A4B-it(-FC|\(FC\)))", "google_gemma-4-26B-A4B-it-FC"),
-    (r"(openai[/_-])?gpt-oss-20b", "gpt-oss-20b"),
+    (r"(?:(?:google[/_-])?gemma-4-26B-A4B-it(?:-FC|\(FC\)))", "google_gemma-4-26B-A4B-it-FC"),
+    (r"(?:(?:google[/_-])?gemma-4-31B-it(?:-FC|\(FC\)))", "google_gemma-4-31B-it-FC"),
+    (r"(?:openai[/_-])?gpt-oss-20b", "gpt-oss-20b"),
 ]
 
 def pick_acc_col(df: pd.DataFrame) -> str:
@@ -195,28 +196,31 @@ def find_baseline(df: pd.DataFrame, acc_col: str, base_model: str = None):
             base_rows = df[s.str.contains(r"xLAM-2-8b-fc-r\s*\(FC\).*原版", case=False, regex=True)]
             if base_rows.empty:
                 base_rows = df[s.str.contains(r"xLAM-2-8b-fc-r", case=False, regex=True) &
-                               ~s.str.contains(r"LoRA|ckpt", case=False, regex=True)]
+                               ~s.str.contains(r"LoRA|ckpt|checkpoint", case=False, regex=True)]
         elif base_model == "Qwen_Qwen2.5-7B-Instruct":
             base_rows = df[s.str.contains(r"Qwen[/_-]Qwen2\.5-7B-Instruct", case=False, regex=True) &
-                           ~s.str.contains(r"LoRA|ckpt", case=False, regex=True)]
+                           ~s.str.contains(r"LoRA|ckpt|checkpoint", case=False, regex=True)]
         elif base_model == "meta-llama_Llama-3.1-8B-Instruct":
             # 匹配 "Llama-3.1-8B-Instruct (Prompt)"
             base_rows = df[s.str.contains(r"Llama[/_\s-]*3\.1-8B-Instruct\s*\(Prompt\)", case=False, regex=True) &
-                           ~s.str.contains(r"LoRA|ckpt", case=False, regex=True)]
+                           ~s.str.contains(r"LoRA|ckpt|checkpoint", case=False, regex=True)]
         elif base_model == "Qwen_Qwen3-8B-FC":
             base_rows = df[s.str.contains(r"Qwen[/_-]Qwen3-8B-FC", case=False, regex=True) &
-                           ~s.str.contains(r"LoRA|ckpt", case=False, regex=True)]
+                           ~s.str.contains(r"LoRA|ckpt|checkpoint", case=False, regex=True)]
         elif base_model == "google_gemma-4-26B-A4B-it-FC":
-            base_rows = df[s.str.contains(r"((google[/_-])?gemma-4-26B-A4B-it(-FC|\(FC\)))", case=False, regex=True) &
-                           ~s.str.contains(r"LoRA|ckpt", case=False, regex=True)]
+            base_rows = df[s.str.contains(r"(?:(?:google[/_-])?gemma-4-26B-A4B-it(?:-FC|\(FC\)))", case=False, regex=True) &
+                           ~s.str.contains(r"LoRA|ckpt|checkpoint", case=False, regex=True)]
+        elif base_model == "google_gemma-4-31B-it-FC":
+            base_rows = df[s.str.contains(r"(?:(?:google[/_-])?gemma-4-31B-it(?:-FC|\(FC\)))", case=False, regex=True) &
+                           ~s.str.contains(r"LoRA|ckpt|checkpoint", case=False, regex=True)]
         elif base_model == "gpt-oss-20b":
-            base_rows = df[s.str.contains(r"(openai[/_-])?gpt-oss-20b", case=False, regex=True) &
-                           ~s.str.contains(r"LoRA|ckpt", case=False, regex=True)]
+            base_rows = df[s.str.contains(r"(?:openai[/_-])?gpt-oss-20b", case=False, regex=True) &
+                           ~s.str.contains(r"LoRA|ckpt|checkpoint", case=False, regex=True)]
         else:
             # 通用方法：將資料夾名稱轉回 model 名稱格式
             model_pattern = base_model.replace("_", "[/_-]")
             base_rows = df[s.str.contains(model_pattern, case=False, regex=True) &
-                           ~s.str.contains(r"LoRA|ckpt", case=False, regex=True)]
+                           ~s.str.contains(r"LoRA|ckpt|checkpoint", case=False, regex=True)]
     else:
         # 預設行為：找 xLAM-2-8b-fc-r
         # 優先 (FC)(原版)
@@ -224,7 +228,7 @@ def find_baseline(df: pd.DataFrame, acc_col: str, base_model: str = None):
         if base_rows.empty:
             # 次選：不含 LoRA 或 ckpt 的 xLAM-2-8b-fc-r
             base_rows = df[s.str.contains(r"xLAM-2-8b-fc-r", case=False, regex=True) &
-                           ~s.str.contains(r"LoRA|ckpt", case=False, regex=True)]
+                           ~s.str.contains(r"LoRA|ckpt|checkpoint", case=False, regex=True)]
 
     if base_rows.empty:
         return None, None
