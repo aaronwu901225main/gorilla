@@ -74,6 +74,37 @@ class OpenAICompletionsHandler(BaseHandler):
 
         return api_response, end_time - start_time
 
+    def _apply_vllm_sampling_overrides(self, kwargs: dict) -> dict:
+        """Attach optional vLLM-only sampling parameters to OpenAI requests.
+
+        The OpenAI SDK passes `extra_body` through to vLLM's OpenAI-compatible
+        server. Keeping this behind an env var lets Slurm jobs A/B the setting
+        without changing BFCL CLI behavior for hosted OpenAI-compatible APIs.
+        """
+
+        repetition_penalty = os.getenv("BFCL_REPETITION_PENALTY")
+        if not repetition_penalty:
+            return kwargs
+
+        try:
+            repetition_penalty_value = float(repetition_penalty)
+        except ValueError:
+            raise ValueError(
+                "BFCL_REPETITION_PENALTY must be a float, "
+                f"got {repetition_penalty!r}"
+            )
+
+        if repetition_penalty_value <= 0:
+            raise ValueError(
+                "BFCL_REPETITION_PENALTY must be greater than 0, "
+                f"got {repetition_penalty_value}"
+            )
+
+        extra_body = dict(kwargs.get("extra_body") or {})
+        extra_body["repetition_penalty"] = repetition_penalty_value
+        kwargs["extra_body"] = extra_body
+        return kwargs
+
     #### FC methods ####
 
     def _query_FC(self, inference_data: dict):
@@ -94,6 +125,7 @@ class OpenAICompletionsHandler(BaseHandler):
             # This is critical for parallel function calling tests in BFCL
             # kwargs["parallel_tool_calls"] = True
 
+        kwargs = self._apply_vllm_sampling_overrides(kwargs)
         return self.generate_with_backoff(**kwargs)
 
     def _pre_query_processing_FC(self, inference_data: dict, test_entry: dict) -> dict:
@@ -221,12 +253,15 @@ class OpenAICompletionsHandler(BaseHandler):
     def _query_prompting(self, inference_data: dict):
         inference_data["inference_input_log"] = {"message": repr(inference_data["message"])}
 
-        return self.generate_with_backoff(
-            messages=inference_data["message"],
-            model=self.model_name,
-            temperature=self.temperature,
-            store=False,
-        )
+        kwargs = {
+            "messages": inference_data["message"],
+            "model": self.model_name,
+            "temperature": self.temperature,
+            "store": False,
+        }
+        kwargs = self._apply_vllm_sampling_overrides(kwargs)
+
+        return self.generate_with_backoff(**kwargs)
 
     def _pre_query_processing_prompting(self, test_entry: dict) -> dict:
         functions: list = test_entry["function"]
