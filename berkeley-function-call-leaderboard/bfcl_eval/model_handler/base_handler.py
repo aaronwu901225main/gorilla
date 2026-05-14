@@ -91,6 +91,27 @@ class BaseHandler:
             else:
                 return self.inference_single_turn_prompting(test_entry, include_input_log)
 
+    def _build_inference_io_log(
+        self,
+        inference_data: dict,
+        model_response_data: dict,
+        query_latency: float,
+    ) -> dict:
+        log_entry = {
+            "role": "inference_io",
+            "request": inference_data.get("inference_input_log", ""),
+            "raw_response": model_response_data.get("raw_response", ""),
+            "parsed_response": model_response_data.get("model_responses", ""),
+            "input_token": model_response_data.get("input_token"),
+            "output_token": model_response_data.get("output_token"),
+            "latency": query_latency,
+        }
+
+        if reasoning_content := model_response_data.get("reasoning_content", ""):
+            log_entry["reasoning_content"] = reasoning_content
+
+        return log_entry
+
     @final
     def inference_multi_turn_FC(
         self,
@@ -219,19 +240,18 @@ class BaseHandler:
 
                 api_response, query_latency = self._query_FC(inference_data)
 
-                # This part of logging is disabled by default because it is too verbose and will make the result file extremely large
-                # It is only useful to see if the inference pipeline is working as expected (eg, does it convert all the inputs correctly)
-                if include_input_log:
-                    current_step_inference_log.append(
-                        {
-                            "role": "inference_input",
-                            "content": inference_data.get("inference_input_log", ""),
-                        }
-                    )
-
                 # Try parsing the model response
                 model_response_data = self._parse_query_response_FC(api_response)
                 model_responses = model_response_data["model_responses"]
+
+                if include_input_log:
+                    current_step_inference_log.append(
+                        self._build_inference_io_log(
+                            inference_data,
+                            model_response_data,
+                            query_latency,
+                        )
+                    )
 
                 # Add the assistant message to the chat history
                 inference_data = self._add_assistant_message_FC(
@@ -511,19 +531,18 @@ class BaseHandler:
 
                 api_response, query_latency = self._query_prompting(inference_data)
 
-                # This part of logging is disabled by default because it is too verbose and will make the result file extremely large
-                # It is only useful to see if the inference pipeline is working as expected (eg, does it convert all the inputs correctly)
-                if include_input_log:
-                    current_step_inference_log.append(
-                        {
-                            "role": "inference_input",
-                            "content": inference_data.get("inference_input_log", ""),
-                        }
-                    )
-
                 # Try parsing the model response
                 model_response_data = self._parse_query_response_prompting(api_response)
                 model_responses = model_response_data["model_responses"]
+
+                if include_input_log:
+                    current_step_inference_log.append(
+                        self._build_inference_io_log(
+                            inference_data,
+                            model_response_data,
+                            query_latency,
+                        )
+                    )
 
                 # Add the assistant message to the chat history
                 inference_data = self._add_assistant_message_prompting(
@@ -701,10 +720,11 @@ class BaseHandler:
         metadata = {}
         if include_input_log:
             metadata["inference_log"] = [
-                {
-                    "role": "inference_input",
-                    "content": inference_data.get("inference_input_log", ""),
-                }
+                self._build_inference_io_log(
+                    inference_data,
+                    model_response_data,
+                    query_latency,
+                )
             ]
         metadata["input_token_count"] = model_response_data["input_token"]
         metadata["output_token_count"] = model_response_data["output_token"]
@@ -736,10 +756,11 @@ class BaseHandler:
         metadata = {}
         if include_input_log:
             metadata["inference_log"] = [
-                {
-                    "role": "inference_input",
-                    "content": inference_data.get("inference_input_log", ""),
-                }
+                self._build_inference_io_log(
+                    inference_data,
+                    model_response_data,
+                    query_latency,
+                )
             ]
         metadata["input_token_count"] = model_response_data["input_token"]
         metadata["output_token_count"] = model_response_data["output_token"]
@@ -785,6 +806,31 @@ class BaseHandler:
             group_dir_name = get_directory_structure_by_id(entry["id"])
             group_dir_path = model_result_dir / group_dir_name
             group_dir_path.mkdir(parents=True, exist_ok=True)
+
+            if "inference_log" in entry:
+                log_dir_path = group_dir_path / "inference_logs" / test_category
+                log_dir_path.mkdir(parents=True, exist_ok=True)
+                log_file_path = log_dir_path / f"{entry['id']}.json"
+                log_payload = {
+                    "id": entry["id"],
+                    "model_name": self.registry_name,
+                    "test_category": test_category,
+                    "result": entry.get("result"),
+                    "traceback": entry.get("traceback"),
+                    "inference_log": entry["inference_log"],
+                }
+                with open(log_file_path, "w", encoding="utf-8") as f:
+                    json.dump(
+                        make_json_serializable(log_payload),
+                        f,
+                        ensure_ascii=False,
+                        indent=2,
+                    )
+                    f.write("\n")
+                entry["inference_log_path"] = str(
+                    log_file_path.relative_to(model_result_dir)
+                )
+                del entry["inference_log"]
 
             file_path = group_dir_path / f"{VERSION_PREFIX}_{test_category}_result.json"
             file_entries.setdefault(file_path, []).append(entry)

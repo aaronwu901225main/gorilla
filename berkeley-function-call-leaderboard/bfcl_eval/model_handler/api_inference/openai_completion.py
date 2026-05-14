@@ -15,6 +15,7 @@ from bfcl_eval.model_handler.utils import (
     retry_with_backoff,
     system_prompt_pre_processing_chat_model,
 )
+from bfcl_eval.utils import make_json_serializable
 from openai import OpenAI, RateLimitError
 
 
@@ -74,6 +75,18 @@ class OpenAICompletionsHandler(BaseHandler):
 
         return api_response, end_time - start_time
 
+    def _serialize_api_response(self, api_response: Any) -> Any:
+        if hasattr(api_response, "model_dump"):
+            try:
+                return api_response.model_dump(mode="json")
+            except TypeError:
+                return api_response.model_dump()
+
+        if hasattr(api_response, "to_dict"):
+            return api_response.to_dict()
+
+        return make_json_serializable(api_response)
+
     def _apply_vllm_sampling_overrides(self, kwargs: dict) -> dict:
         """Attach optional vLLM-only sampling parameters to OpenAI requests.
 
@@ -110,7 +123,6 @@ class OpenAICompletionsHandler(BaseHandler):
     def _query_FC(self, inference_data: dict):
         message: list[dict] = inference_data["message"]
         tools = inference_data["tools"]
-        inference_data["inference_input_log"] = {"message": repr(message), "tools": tools}
 
         kwargs = {
             "messages": message,
@@ -126,6 +138,7 @@ class OpenAICompletionsHandler(BaseHandler):
             # kwargs["parallel_tool_calls"] = True
 
         kwargs = self._apply_vllm_sampling_overrides(kwargs)
+        inference_data["inference_input_log"] = make_json_serializable(kwargs)
         return self.generate_with_backoff(**kwargs)
 
     def _pre_query_processing_FC(self, inference_data: dict, test_entry: dict) -> dict:
@@ -162,6 +175,7 @@ class OpenAICompletionsHandler(BaseHandler):
             "tool_call_ids": tool_call_ids,
             "input_token": api_response.usage.prompt_tokens,
             "output_token": api_response.usage.completion_tokens,
+            "raw_response": self._serialize_api_response(api_response),
         }
 
     def add_first_turn_message_FC(
@@ -251,8 +265,6 @@ class OpenAICompletionsHandler(BaseHandler):
     #### Prompting methods ####
 
     def _query_prompting(self, inference_data: dict):
-        inference_data["inference_input_log"] = {"message": repr(inference_data["message"])}
-
         kwargs = {
             "messages": inference_data["message"],
             "model": self.model_name,
@@ -260,6 +272,7 @@ class OpenAICompletionsHandler(BaseHandler):
             "store": False,
         }
         kwargs = self._apply_vllm_sampling_overrides(kwargs)
+        inference_data["inference_input_log"] = make_json_serializable(kwargs)
 
         return self.generate_with_backoff(**kwargs)
 
@@ -279,6 +292,7 @@ class OpenAICompletionsHandler(BaseHandler):
             "model_responses_message_for_chat_history": api_response.choices[0].message,
             "input_token": api_response.usage.prompt_tokens,
             "output_token": api_response.usage.completion_tokens,
+            "raw_response": self._serialize_api_response(api_response),
         }
 
     def add_first_turn_message_prompting(

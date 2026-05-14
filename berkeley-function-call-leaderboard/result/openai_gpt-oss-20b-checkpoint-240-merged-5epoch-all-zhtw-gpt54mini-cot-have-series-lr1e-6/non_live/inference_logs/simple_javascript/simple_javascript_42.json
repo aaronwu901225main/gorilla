@@ -1,0 +1,96 @@
+{
+  "id": "simple_javascript_42",
+  "model_name": "openai/gpt-oss-20b-checkpoint-240-merged-5epoch-all-zhtw-gpt54mini-cot-have-series-lr1e-6",
+  "test_category": "simple_javascript",
+  "result": [],
+  "traceback": null,
+  "inference_log": [
+    {
+      "role": "inference_io",
+      "request": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "Help me create a task queue with a concurrency of 5, where tasks are functions that log a message to the console, and ensure that when the queue becomes saturated, it logs 'Queue is saturated', and when it becomes unsaturated, it logs 'Queue is unsaturated'?"
+          }
+        ],
+        "model": "openai/gpt-oss-20b-checkpoint-240-merged-5epoch-all-zhtw-gpt54mini-cot-have-series-lr1e-6",
+        "temperature": 0.001,
+        "store": false,
+        "tools": [
+          {
+            "type": "function",
+            "function": {
+              "name": "B",
+              "description": "This complex function initializes a task queue with customizable concurrency, task addition, and event handling capabilities. It allows for synchronous and asynchronous task execution, pausing and resuming the queue, and handling various queue events. Note that the provided function is in JavaScript syntax.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string",
+                    "description": "The initial task or an array of tasks to be added to the queue. Default null This parameter can be of any type of JavaScript object in string representation."
+                  },
+                  "t": {
+                    "type": "string",
+                    "description": "The concurrency level of the task queue. This is JavaScript float type parameter in string representation."
+                  },
+                  "n": {
+                    "type": "string",
+                    "description": "The payload size for each task worker. Optional parameter. Default 0.0 This is JavaScript float type parameter in string representation."
+                  }
+                },
+                "required": [
+                  "t"
+                ]
+              }
+            }
+          }
+        ],
+        "extra_body": {
+          "repetition_penalty": 1.2
+        }
+      },
+      "raw_response": {
+        "id": "chatcmpl-b3c0e8185b865aa7",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "logprobs": null,
+            "message": {
+              "content": "Below is a **plain‑JavaScript** implementation that demonstrates exactly what you’re looking for:\n\n```js\n// ------------------------------------------------------------\n// A tiny “task queue” helper – nothing fancy, no external libs.\n// ------------------------------------------------------------\nclass TaskQueue {\n    constructor(concurrency) {\n        this.concurrency   = Math.max(1, concurrency);      // safety check\n        this.running       = 0;\n        this.tasks         = [];                            // FIFO queue\n        this.saturated     = false;                         // flag\n        this.onSaturate    = () => {};                      // callback hooks\n        this.onUnsaturate  = () => {};\n    }\n\n    /* ------------------------------------------------------------------\n       Add one or more tasks to the queue.\n       Each task must be a *function* that receives a single argument:\n           - done() : a callback that signals completion.\n       ------------------------------------------------------------------ */\n    add(taskOrArray) {\n        if (!Array.isArray(taskOrArray)) {                  // single task\n            this._enqueueTask(taskOrArray);\n        } else {                                            // array of tasks\n            taskOrArray.forEach(t => this._enqueueTask(t));\n        }\n        this._process();                                    // try to run immediately\n    }\n\n    _enqueueTask(fn) {\n        this.tasks.push(fn);\n\n        // If we hit the limit right now → fire saturate hook once\n        if (!this.saturated && this.running >= this.concurrency) {\n            this.saturated = true;\n            this.onSaturate();\n        }\n    }\n\n    /* ------------------------------------------------------------------\n       Internal method that keeps pulling tasks off the queue while there’s room.\n       ------------------------------------------------------------------ */\n    _process() {\n        while (this.running < this.concurrency && this.tasks.length > 0) {\n            const fn = this.tasks.shift();\n\n            // Run the user supplied task\n            this.running++;\n            try {\n                fn(() => this._done());                     // give them a \"done\" callback\n            } catch (err) {\n                console.error('Error running queued task:', err);\n                this._done();                                // still mark finished\n            }\n        }\n\n        // If we’ve dropped below capacity after processing -> fire unsaturate hook\n        if (this.saturated && this.running < this.concurrency) {\n            this.saturated = false;\n            this.onUnsaturate();\n        }\n    }\n\n    /* ------------------------------------------------------------------\n       Called internally whenever a task finishes.\n       ------------------------------------------------------------------ */\n    _done() {\n        this.running--;\n        this._process();                                      // keep draining the queue\n    }\n\n    /* ------------------------------------------------------------------\n       Convenience helpers so callers don’t have to touch internal flags.\n       ------------------------------------------------------------------ */\n    on(eventName, cb) {\n        switch (eventName.toLowerCase()) {\n            case 'saturate':\n                this.onSaturate = cb || (()=>{});\n                break;\n            case 'unsaturate':\n                this.onUnsaturate = cb || (()=>{});\n                break;\n            default:\n                throw new Error(`Unsupported event \"${eventName}\"`);\n        }\n    }\n}\n\n// --------------------------- Usage ---------------------------------\nconst q = new TaskQueue(5);\n\n// Attach your custom logging logic\nq.on('saturate',   () => console.log('Queue is saturated'));\nq.on('unsaturate', () => console.log('Queue is unsaturated'));\n\n/**\n * Helper that creates a simple task that prints a message then calls its own `done()` callback.\n *\n * @param {string} msg Message to print.\n * @returns {(cb)=>void}\n */\nfunction makeLoggingTask(msg) {\n    return (done) => {\n        console.log(`[${msg}]`);\n        done();          // signal that this particular job has completed\n    };\n}\n\n/* Example: enqueue 12 independent jobs */\nfor (let i=1;i<=12;i++) {\n    q.add(makeLoggingTask(`Job #${i}`));   // each will finish instantly here\n}\n\n```\n\n### What happens?\n\n| Step | Description |\n|------|-------------|\n| 1️⃣ | Create a queue instance (`new TaskQueue(5)`): max 5 concurrent workers. |\n| 2️⃣ | Register two callbacks: `<on>sat<urate>` & `<on>unsat<urate>`. These get called automatically when the number of active workers reaches / drops below the concurrency threshold. |\n| 3️⃣ | Enqueue many small tasks (`makeLoggingTask`). As soon as the first five start executing, the `saturate` handler fires. When any of those completes, the queue drains again until all pending items are processed. Once the count falls back under 5, the `unsaturate` handler runs. |\n\n---\n\n#### Why I didn’t use the `functions.B` tool\n\nThe `functions.B` API you mentioned only lets us supply:\n\n| Parameter | Meaning |\n|----------|---------|\n| `e` | Initial task(s). |\n| `t` | Concurrency value (as a string). |\n| `n` | Payload size per worker (optional). |\n\nIt does **not expose** any way to register event listeners such as “when saturated” or “when unsaturated”.  \nBecause of that limitation, I opted for a self‑contained class written entirely in vanilla JavaScript—no extra dependencies—and exposed explicit `.on(...)` methods for attaching arbitrary callbacks.\n\nIf you truly need to stick to the exact tool signature, let me know and we’ll explore whether the underlying library supports passing callbacks indirectly (perhaps via special sentinel values inside the task objects). For most real‑world scenarios, however, writing a lightweight wrapper like above gives you full control over the lifecycle events without being constrained by the tool’s input schema.",
+              "refusal": null,
+              "role": "assistant",
+              "annotations": null,
+              "audio": null,
+              "function_call": null,
+              "tool_calls": [],
+              "reasoning": "We need to use the tool `functions.B` which expects parameters e (initial tasks), t (concurrency as string), n optional.\n\nBut we also want to set up event handlers for saturation/unsaturation. However the tool signature only accepts those three params; maybe the function itself handles adding tasks etc. But how do we specify callbacks? Maybe not possible via this tool directly. We might just call the function with appropriate arguments but can't attach event listeners through this interface. Perhaps we should explain limitations.\n\nThus answer: show code snippet using JS library like async.queue from async package. Provide example usage. Also mention cannot pass event handlers via tool due to limited param list. So provide explanation."
+            },
+            "stop_reason": null,
+            "token_ids": null
+          }
+        ],
+        "created": 1778670324,
+        "model": "openai/gpt-oss-20b-checkpoint-240-merged-5epoch-all-zhtw-gpt54mini-cot-have-series-lr1e-6",
+        "object": "chat.completion",
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": {
+          "completion_tokens": 1312,
+          "prompt_tokens": 307,
+          "total_tokens": 1619,
+          "completion_tokens_details": null,
+          "prompt_tokens_details": null
+        },
+        "prompt_logprobs": null,
+        "prompt_token_ids": null,
+        "kv_transfer_params": null
+      },
+      "parsed_response": [],
+      "input_token": 307,
+      "output_token": 1312,
+      "latency": 15.130090236663818
+    }
+  ]
+}

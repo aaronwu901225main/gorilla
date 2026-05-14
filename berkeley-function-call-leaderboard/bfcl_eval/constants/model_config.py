@@ -10554,6 +10554,58 @@ local_inference_model_map = {
             is_fc_model=True,
             underscore_to_dot=True,
         ),
+        # 5epoch-all-zhtw-base-cot-have-series-lr1e-6
+        "openai/gpt-oss-20b-checkpoint-240-merged-5epoch-all-zhtw-base-cot-have-series-lr1e-6": ModelConfig(
+            model_name="openai/gpt-oss-20b-checkpoint-240-merged-5epoch-all-zhtw-base-cot-have-series-lr1e-6",
+            display_name="gpt-oss-20b LoRA ckpt240-5epoch-all-zhtw-base-cot-have-series-lr1e-6",
+            url="self",
+            org="OpenAI",
+            license="apache-2.0",
+            model_handler=OpenAICompletionsHandler,
+            input_price=None,
+            output_price=None,
+            is_fc_model=True,
+            underscore_to_dot=True,
+        ),
+        # 5epoch-all-zhtw-gpt54mini-cot-have-series-lr1e-6
+        "openai/gpt-oss-20b-checkpoint-240-merged-5epoch-all-zhtw-gpt54mini-cot-have-series-lr1e-6": ModelConfig(
+            model_name="openai/gpt-oss-20b-checkpoint-240-merged-5epoch-all-zhtw-gpt54mini-cot-have-series-lr1e-6",
+            display_name="gpt-oss-20b LoRA ckpt240-5epoch-all-zhtw-gpt54mini-cot-have-series-lr1e-6",
+            url="self",
+            org="OpenAI",
+            license="apache-2.0",
+            model_handler=OpenAICompletionsHandler,
+            input_price=None,
+            output_price=None,
+            is_fc_model=True,
+            underscore_to_dot=True,
+        ),
+        # 5epoch-all-zhtw-base-cot-have-series-lr5e-7
+        "openai/gpt-oss-20b-checkpoint-240-merged-5epoch-all-zhtw-base-cot-have-series-lr5e-7": ModelConfig(
+            model_name="openai/gpt-oss-20b-checkpoint-240-merged-5epoch-all-zhtw-base-cot-have-series-lr5e-7",
+            display_name="gpt-oss-20b LoRA ckpt240-5epoch-all-zhtw-base-cot-have-series-lr5e-7",
+            url="self",
+            org="OpenAI",
+            license="apache-2.0",
+            model_handler=OpenAICompletionsHandler,
+            input_price=None,
+            output_price=None,
+            is_fc_model=True,
+            underscore_to_dot=True,
+        ),
+        # 5epoch-all-zhtw-gpt54mini-cot-have-series-lr5e-7
+        "openai/gpt-oss-20b-checkpoint-240-merged-5epoch-all-zhtw-gpt54mini-cot-have-series-lr5e-7": ModelConfig(
+            model_name="openai/gpt-oss-20b-checkpoint-240-merged-5epoch-all-zhtw-gpt54mini-cot-have-series-lr5e-7",
+            display_name="gpt-oss-20b LoRA ckpt240-5epoch-all-zhtw-gpt54mini-cot-have-series-lr5e-7",
+            url="self",
+            org="OpenAI",
+            license="apache-2.0",
+            model_handler=OpenAICompletionsHandler,
+            input_price=None,
+            output_price=None,
+            is_fc_model=True,
+            underscore_to_dot=True,
+        ),
 
         # gemma-4-31B-it (FC)
         "google/gemma-4-31B-it-FC": ModelConfig(
