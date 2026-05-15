@@ -1,0 +1,103 @@
+{
+  "id": "simple_java_51",
+  "model_name": "openai/gpt-oss-20b-checkpoint-240-merged-5epoch-all-zhtw-gpt54mini-cot-have-series-lr1e-7",
+  "test_category": "simple_java",
+  "result": [],
+  "traceback": null,
+  "inference_log": [
+    {
+      "role": "inference_io",
+      "request": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "Help me execute the master operation to gather the usage statistics of the Cross-Cluster Replication (CCR) feature in Elasticsearch, including the number of follower indices and auto-follow patterns, using a given `usageRequest` and a `clusterState`, and handle the results using an `actionListener`?"
+          }
+        ],
+        "model": "openai/gpt-oss-20b-checkpoint-240-merged-5epoch-all-zhtw-gpt54mini-cot-have-series-lr1e-7",
+        "temperature": 0.001,
+        "store": false,
+        "tools": [
+          {
+            "type": "function",
+            "function": {
+              "name": "CCRUsageTransportAction_masterOperation",
+              "description": "This function gathers usage statistics of the CCR feature in Elasticsearch and sends the results to the provided ActionListener. Note that the provided function is in Java 8 SDK syntax.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "task": {
+                    "type": "string",
+                    "description": "The task associated with the request. This parameter can be of any type of Java object in string representation."
+                  },
+                  "request": {
+                    "type": "string",
+                    "description": "The XPackUsageRequest object containing the request details. This parameter can be of any type of Java object in string representation."
+                  },
+                  "state": {
+                    "type": "string",
+                    "description": "The current cluster state. This parameter can be of any type of Java object in string representation."
+                  },
+                  "listener": {
+                    "type": "string",
+                    "description": "The ActionListener that handles the response containing the usage statistics. This parameter can be of any type of Java object in string representation."
+                  }
+                },
+                "required": [
+                  "task",
+                  "request",
+                  "state",
+                  "listener"
+                ]
+              }
+            }
+          }
+        ],
+        "extra_body": {
+          "repetition_penalty": 1.2
+        }
+      },
+      "raw_response": {
+        "id": "chatcmpl-9a39278e89cc21a3",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "logprobs": null,
+            "message": {
+              "content": "Below is a **complete “recipe”** – from building the request all the way to invoking the transport‑side master operation and dealing with its callback.  \nEverything is written so it fits the *tool* signature you posted (`CCRUsageTransportAction_masterOperation`).  \n\n---\n\n### 1️⃣ Build the pieces you’ll pass into the helper\n\n| Piece | What it represents | How to obtain / construct |\n|-------|--------------------|---------------------------|\n| `task` | A unique identifier for the background job (you can just reuse the request ID). | `\"ccr_usage_task_\" + System.currentTimeMillis()` |\n| `XPackUsageRequest` | The request telling ES what kind of usage data you want. For CCR you normally ask for the whole “xpack.ccr” domain. | ```java\nnew XPackUsageRequest.Builder().build();\n``` |\n| `ClusterState` | Current snapshot of the cluster metadata & routing tables. In real code you’d pull this from your node’s internal services. | Usually available as `clusterService.state()`. |\n| `ActionListener<XPackUsageResponse>` | Callback that receives either success or failure. | Implement `onResponse(XPackUsageResponse)` and `onFailure(Exception)` |\n\nBecause the wrapper expects **stringified** versions of those objects, you have two options:\n\n1. **JSON serialisation** – turn each object into a JSON string before passing it in.  \n2. **Plain‐text placeholders** – if you’re only calling the helper for demonstration purposes, you can simply put dummy text like `\"dummy_request\"`.\n\nFor production code you would serialize properly (e.g. Jackson).\n\n---\n\n### 2️⃣ Sample implementation (Java‑style)\n\n```java\nimport org.elasticsearch.action.ActionListener;\nimport org.elasticsearch.cluster.ClusterState;\nimport org.elasticsearch.xpack.core.XPackUsageRequest;\nimport org.elasticsearch.xpack.core.XPackUsageResponse;\n\n// ------------------------------------------------------------------\n// Step 0 : Prepare the raw values -------------------------------------------------\nString taskId          = \"ccr_usage_task_\" + System.currentTimeMillis();\n\nXPackUsageRequest xpackReq   = new XPackUsageRequest.Builder()\n                                 .domain(\"xpack.ccr\")      // <-- asks for CCR metrics\n                                 .build();\n\n// If you really had a ClusterState instance:\nClusterState curState = clusterService.state();     // <- replace with actual source\n\n// Convert everything to String (simple placeholder here)\nString reqAsString   = xpackReq.toString();        // or jsonSerialize(xpackReq);\nString stateAsString = curState.toString();       // or jsonSerialize(curState);\n\n// ------------------------------------------------------------------\n// Step 1 : Create the ActionListener ------------------------------------\nActionListener<XPackUsageResponse> listener =\n    new ActionListener<XPackUsageResponse>() {\n        @Override public void onResponse(XPackUsageResponse resp) {\n            // ---- Success path --------------------------------------------------\n            int followerIndices   = resp.getDomainStats().getCcrFollowerCount();\n            int autoFollowPatterns= resp.getDomainStats().getAutoFollowPatternCount();\n\n            System.out.println(\"[SUCCESS] Follower Indices: \"\n                               + followerIndices\n                               + \", Auto-Follow Patterns: \"\n                               + autoFollowPatterns);\n\n            // You could also inspect other fields such as timestamps, version, etc.\n        }\n\n        @Override public void onFailure(Throwable t) {\n            // ---- Failure path ---------------------------------------------------\n            System.err.println(\"[ERROR] Failed to fetch CCR usage:\");\n            t.printStackTrace(System.err);\n        }\n    };\n\n// ------------------------------------------------------------------\n// Step 2 : Call the wrapped master operation --------------------------\nfunctions.CCRUsageTransportAction_masterOperation(\n    Map.of(\n        \"task\",     taskId,\n        \"request\",  reqAsString,\n        \"state\",    stateAsString,\n        \"listener\", listener.toString()   // <--- the tool will internally cast back\n    )\n);\n// ------------------------------------------------------------------\n```\n\n#### Notes\n\n* **Serialising Objects:**  \n  - In a real integration test you would probably do something like  \n    ```java\n    ObjectMapper mapper = new ObjectMapper();\n    String reqAsString   = mapper.writeValueAsString(xpackReq);\n    String stateAsString = mapper.writeValueAsString(curState);\n    ```\n  - The helper will deserialize them again when it runs the master logic.\n\n* **What the Listener Receives:**  \n  - On success you receive an `XPackUsageResponse`.  \n  - From there you can drill down into the specific domain (`resp.getDomainStats()`) and read counters such as `getCcrFollowerCount()` and `getAutoFollowPatternCount()`.\n\n* **Error Handling:**  \n  - Any exception thrown during processing ends up in `onFailure`.\n\n---\n\n### 3️⃣ Quick sanity check\n\nIf you run the above snippet against a live cluster that has CCR enabled, you should see output similar to:\n\n```\n[SUCCESS] Follower Indices: 12, Auto-Follow Patterns: 5\n```\n\nor, if something goes wrong,\n\n```\n[ERROR] Failed to fetch CCR usage:\norg.elasticsearch.ElasticsearchException: ...\n```\n\nThat covers everything you asked for: creating the request, feeding the current cluster state, wiring an `ActionListener`, and finally firing off the master operation through the supplied helper. Happy coding!",
+              "refusal": null,
+              "role": "assistant",
+              "annotations": null,
+              "audio": null,
+              "function_call": null,
+              "tool_calls": [],
+              "reasoning": "We need to call the function defined: CCRUsageTransportAction_masterOperation. Provide arguments: task, request, state, listener.\n\nThe user wants help executing the master operation to gather usage stats of CCR, including number of follower indices and auto-follow patterns, using given usageRequest and clusterState, handling results via actionListener.\n\nSo we should produce code snippet or explanation on how to use this function. We might show example invocation:\n\n```\nString taskId = \"someTask\";\nString usageReqJson = ...; // maybe JSON string representing XPackUsageRequest\nString clusterStateStr = ...;\nString actionListenerImpl = new ActionListener<...>() { ... };\n\nfunctions.CCRUsageTransportAction_masterOperation({\n    task: taskId,\n    request: usageReqJson,\n    state: clusterStateStr,\n    listener: actionListenerImpl.toString()\n});\n```\n\nBut note that parameters expect strings representations of objects. So we may convert them accordingly.\n\nAlso mention that you need to parse result inside listener's onResponse/onFailure methods.\n\nLet's craft answer explaining steps: create task id, build XPackUsageRequest, get ClusterState, implement ActionListener<XPackUsageResponse> etc., then invoke function.\n\nWe'll provide sample Java-like pseudocode but adapt to tool signature expecting string rep. We'll explain converting objects to JSON if needed.\n\nOk let's write."
+            },
+            "stop_reason": null,
+            "token_ids": null
+          }
+        ],
+        "created": 1778859863,
+        "model": "openai/gpt-oss-20b-checkpoint-240-merged-5epoch-all-zhtw-gpt54mini-cot-have-series-lr1e-7",
+        "object": "chat.completion",
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": {
+          "completion_tokens": 1358,
+          "prompt_tokens": 314,
+          "total_tokens": 1672,
+          "completion_tokens_details": null,
+          "prompt_tokens_details": null
+        },
+        "prompt_logprobs": null,
+        "prompt_token_ids": null,
+        "kv_transfer_params": null
+      },
+      "parsed_response": [],
+      "input_token": 314,
+      "output_token": 1358,
+      "latency": 14.893831014633179
+    }
+  ]
+}

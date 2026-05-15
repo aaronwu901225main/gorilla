@@ -1,0 +1,156 @@
+{
+  "id": "zh_parallel_multiple_127",
+  "model_name": "openai/gpt-oss-20b-checkpoint-480-merged-5epoch-all-zhtw-base-cot-have-series-lr5e-7",
+  "test_category": "zh_parallel_multiple",
+  "result": [
+    {
+      "hotel_book": "{\"location\": \"Paris\", \"roomType\": \"Luxury\", \"nights\": 5, \"additional_services\": [\"Breakfast\", \"Spa\"]}"
+    }
+  ],
+  "traceback": null,
+  "inference_log": [
+    {
+      "role": "inference_io",
+      "request": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "\"你能幫我計劃我的旅行嗎？我需要在巴黎預訂一間酒店房間，住5晚。我偏好豪華房間，並希望加上早餐和水療服務。之後，我需要在巴黎租一輛車，租期為7天。我偏好SUV，並且我會在機場取車。然後，我需要在羅馬預訂另一間酒店房間，住3晚。我偏好套房，並希望加上機場接送服務。最後，我需要在羅馬租一輛車，租期為5天。我偏好緊湊型的轎車，並且我會在酒店取車。\""
+          }
+        ],
+        "model": "openai/gpt-oss-20b-checkpoint-480-merged-5epoch-all-zhtw-base-cot-have-series-lr5e-7",
+        "temperature": 0.001,
+        "store": false,
+        "tools": [
+          {
+            "type": "function",
+            "function": {
+              "name": "car_rental",
+              "description": "Rent a car at the specified location for a specific number of days Note that the provided function is in Python 3 syntax.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "location": {
+                    "type": "string",
+                    "description": "Location of the car rental."
+                  },
+                  "days": {
+                    "type": "integer",
+                    "description": "Number of days for which to rent the car."
+                  },
+                  "car_type": {
+                    "type": "string",
+                    "description": "Type of the car to rent."
+                  },
+                  "pick_up": {
+                    "type": "string",
+                    "description": "Location of where to pick up the car. Default is 'airport' if not specified."
+                  }
+                },
+                "required": [
+                  "location",
+                  "days",
+                  "car_type"
+                ]
+              }
+            }
+          },
+          {
+            "type": "function",
+            "function": {
+              "name": "hotel_book",
+              "description": "Book a hotel room given the location, room type, and number of nights and additional services Note that the provided function is in Python 3 syntax.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "location": {
+                    "type": "string",
+                    "description": "Location of the hotel."
+                  },
+                  "roomType": {
+                    "type": "string",
+                    "description": "Type of the room to be booked."
+                  },
+                  "nights": {
+                    "type": "integer",
+                    "description": "Number of nights to book the room for."
+                  },
+                  "additional_services": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "description": "Additonal services that can be booked."
+                    },
+                    "description": "Additional services to be added. Default is not use it if not specified."
+                  }
+                },
+                "required": [
+                  "location",
+                  "roomType",
+                  "nights"
+                ]
+              }
+            }
+          }
+        ],
+        "extra_body": {
+          "repetition_penalty": 1.2
+        }
+      },
+      "raw_response": {
+        "id": "chatcmpl-93c3b0ca09e0b1f2",
+        "choices": [
+          {
+            "finish_reason": "tool_calls",
+            "index": 0,
+            "logprobs": null,
+            "message": {
+              "content": null,
+              "refusal": null,
+              "role": "assistant",
+              "annotations": null,
+              "audio": null,
+              "function_call": null,
+              "tool_calls": [
+                {
+                  "id": "chatcmpl-tool-9c2b744da5b0d829",
+                  "function": {
+                    "arguments": "{\"location\": \"Paris\", \"roomType\": \"Luxury\", \"nights\": 5, \"additional_services\": [\"Breakfast\", \"Spa\"]}",
+                    "name": "hotel_book"
+                  },
+                  "type": "function"
+                }
+              ],
+              "reasoning": "The user wants travel planning with multiple bookings:\n\n1) Hotel in Paris: 5 nights, luxury room, breakfast + spa.\n\n2) Car rental in Paris: SUV, 7 days, pickup airport.\n\n3) Hotel in Rome: 3 nights, suite, add airport transfer service.\n\n4) Car rental in Rome: compact sedan (紧凑型), 5 days, pickup from hotel.\n\nWe have two tool types: car_rental and hotel_book. We need to call them accordingly.\n\nBut we might want to do each booking separately or combine? The instructions say \"If you can only provide one response per request.\" But here there are four separate requests; but they all belong to same overall plan. So we should produce a single assistant reply containing calls to both functions as needed. However, note that calling a function returns JSON output. In this environment, I think we can make multiple function calls sequentially. According to guidelines, after making a function call, we wait for the result before proceeding. But since we can't actually execute the function calls here, maybe we just show how they'd be called?\n\nGiven the instruction: \"When using the function, your response SHOULD ONLY contain the name of the function followed by its arguments formatted exactly like a normal python dictionary inside parentheses.\"\n\nThus we need to respond with function calls. Since we have multiple tasks, we may need to chain calls. Usually you'd call one function then get back results, then proceed. But we cannot interleave responses because it's a single conversation turn. Possibly we could create an array of calls? Not sure.\n\nIn typical usage, we'd ask the system to perform first booking, then second etc. But the user asked for entire trip plan. Maybe we can break into steps: first hotel in Paris, then car rental in Paris, etc. Each step would involve a function call. But we can't send multiple function calls in one answer unless we embed them sequentially. The guidelines mention \"function calls will appear in the middle of the chat history\". That suggests we can include multiple calls separated by text. For example:\n\nhotel_book({...})\ncar_rental({...})\n\nHowever, I'm uncertain about correct format. Let's check earlier examples: They had something like:\n\n```\n{\n\"name\": \"book_flight\",\n\"arguments\": {\n...\n}\n}\n```\n\nWait that's different. Actually the guidelines said: \"Your response SHOULD ONLY contain the name of the function followed by its arguments formatted exactly like a normal python dictionary inside parentheses.\" Example: `my_function({\"arg\":\"value\"})`. That's what we need to do.\n\nSo we need to produce e.g.:\n\n`hotel_book({'location': 'Paris', ...})`.\n\nThen next line: `car_rental(...)`, etc.\n\nLet's craft calls:\n\nFirst: hotel_book for Paris:\nArguments: location='Paris'; roomType='Luxury'; nights=5; additional_services=['Breakfast','Spa'].\n\nSecond: car_rental for Paris:\nArgs: location='Paris'; days=7; car_type='SUV'; pick_up='Airport'.\n\nThird: hotel_book for Rome:\nArgs: location='Rome'; roomType='Suite'; nights=3; additional_services=['Airport Transfer'].\n\nFourth: car_rental for Rome:\nArgs: location='Rome'; days=5; car_type='Compact Sedan'; pick_up='Hotel'.\n\nNow we need to ensure proper formatting: Use double quotes around keys/values? It says \"normal python dictionary\", so likely single quotes acceptable. We'll follow standard Python dict representation: {'key':'value'}.\n\nAlso note that car_type expects string; we pass 'SUV', 'Compact Sedan'.\n\nOk let's prepare final answer with four lines, each being a function call. No extra explanation."
+            },
+            "stop_reason": 200012,
+            "token_ids": null
+          }
+        ],
+        "created": 1778861678,
+        "model": "openai/gpt-oss-20b-checkpoint-480-merged-5epoch-all-zhtw-base-cot-have-series-lr5e-7",
+        "object": "chat.completion",
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": {
+          "completion_tokens": 790,
+          "prompt_tokens": 442,
+          "total_tokens": 1232,
+          "completion_tokens_details": null,
+          "prompt_tokens_details": null
+        },
+        "prompt_logprobs": null,
+        "prompt_token_ids": null,
+        "kv_transfer_params": null
+      },
+      "parsed_response": [
+        {
+          "hotel_book": "{\"location\": \"Paris\", \"roomType\": \"Luxury\", \"nights\": 5, \"additional_services\": [\"Breakfast\", \"Spa\"]}"
+        }
+      ],
+      "input_token": 442,
+      "output_token": 790,
+      "latency": 8.761139631271362
+    }
+  ]
+}

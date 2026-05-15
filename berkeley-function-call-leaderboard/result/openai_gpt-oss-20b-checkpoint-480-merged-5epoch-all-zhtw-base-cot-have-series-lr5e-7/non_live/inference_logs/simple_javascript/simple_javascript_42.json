@@ -1,0 +1,96 @@
+{
+  "id": "simple_javascript_42",
+  "model_name": "openai/gpt-oss-20b-checkpoint-480-merged-5epoch-all-zhtw-base-cot-have-series-lr5e-7",
+  "test_category": "simple_javascript",
+  "result": [],
+  "traceback": null,
+  "inference_log": [
+    {
+      "role": "inference_io",
+      "request": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "Help me create a task queue with a concurrency of 5, where tasks are functions that log a message to the console, and ensure that when the queue becomes saturated, it logs 'Queue is saturated', and when it becomes unsaturated, it logs 'Queue is unsaturated'?"
+          }
+        ],
+        "model": "openai/gpt-oss-20b-checkpoint-480-merged-5epoch-all-zhtw-base-cot-have-series-lr5e-7",
+        "temperature": 0.001,
+        "store": false,
+        "tools": [
+          {
+            "type": "function",
+            "function": {
+              "name": "B",
+              "description": "This complex function initializes a task queue with customizable concurrency, task addition, and event handling capabilities. It allows for synchronous and asynchronous task execution, pausing and resuming the queue, and handling various queue events. Note that the provided function is in JavaScript syntax.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string",
+                    "description": "The initial task or an array of tasks to be added to the queue. Default null This parameter can be of any type of JavaScript object in string representation."
+                  },
+                  "t": {
+                    "type": "string",
+                    "description": "The concurrency level of the task queue. This is JavaScript float type parameter in string representation."
+                  },
+                  "n": {
+                    "type": "string",
+                    "description": "The payload size for each task worker. Optional parameter. Default 0.0 This is JavaScript float type parameter in string representation."
+                  }
+                },
+                "required": [
+                  "t"
+                ]
+              }
+            }
+          }
+        ],
+        "extra_body": {
+          "repetition_penalty": 1.2
+        }
+      },
+      "raw_response": {
+        "id": "chatcmpl-9d1804e52e2c9a74",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "logprobs": null,
+            "message": {
+              "content": "Below you’ll find two complete examples –  \n* **Example A** uses the popular *async* NPM module (`async.queue`) which already implements everything you asked for.  \n* **Example B** shows how to build your very own lightweight queue from scratch so you see exactly why “saturated” / “unsaturated” fire at those moments.\n\nBoth snippets run under Node ≥ 12 (or in modern browsers via bundlers). Pick whichever fits your project style.\n\n\n\n--------------------------------------------------------------------\n\n### Example A – Using `async.queue`\n\n```js\n// Install first:\n//   npm install async          # or yarn add async\n\nconst async = require(\"async\");\n\n// ------------------------------------------------------------------\n// Create a queue that runs no more than 5 concurrent workers.\n// Each worker receives a single argument – our task data.\n// ------------------------------------------------------------------\nconst q = async.queue((taskData, done) => {\n  // Your real work goes here. For demo purposes we just log:\n  console.log(`[Worker] Processing task \"${taskData}\"`);\n  // Simulate async I/O with a timeout\n  setTimeout(done, Math.random() * 200 + 50);\n}, /*concurrency*/ 5);\n\n// ------------------------------------------------------------------\n// Saturation callbacks ------------------------------------------------\n// These fire automatically whenever the queue’s state changes.\n// ------------------------------------------------------------------\nq.on(\"saturated\", () => console.log(\"[Event] Queue is saturated\"));\nq.on(\"unsaturated\", () => console.log(\"[Event] Queue is unsaturated\"));\n\n// ------------------------------------------------------------------\n// Push some dummy tasks ---------------------------------------------\n// ------------------------------------------------------------------\nfor (let i = 1; i <= 20; ++i) {\n  q.push({ id: i }, err => {\n    if (!err) console.log(`[Done] Finished task ${i}`);\n  });\n}\n\n// ------------------------------------------------------------------\n// Optionally wait until all queued jobs finish ---------------------\n// ------------------------------------------------------------------\nq.drain(() => console.log(\"[Drain] All tasks have been processed.\"));\n```\n\n#### What happens?\n\n| State | Trigger |\n|-------|---------|\n| **Saturated** | When the number of currently executing workers reaches the concurrency limit (here 5). |\n| **Unsaturated** | Whenever a worker finishes and the total falls below the limit again. |\n\nBecause we’re pushing 20 items into a pool of only five workers, you will immediately hit “Queue is saturated”, then as soon as a worker completes its job you’ll get “Queue is unsaturated”.  \n\nFeel free to replace the body inside the worker function with whatever logic you actually want to perform per task.\n\n\n--------------------------------------------------------------------\n\n### Example B – A tiny hand‑rolled queue\n\nIf you prefer not to pull in an extra dependency, this minimal implementation gives you the same behaviour while keeping the source visible.\n\n```js\n/**\n * Simple FIFO task queue supporting concurrency limits and saturation events.\n */\nclass TaskQueue {\n  constructor(concurrency) {\n    this.concurrency = concurrency;\n    this.activeCount = 0;\n    this.taskBuffer = [];\n    this.listeners = new Map();      // eventName → Set<callback>\n  }\n\n  /** Register listeners for 'saturated' & 'unsaturated' */\n  on(event, cb) {\n    if (!this.listeners.has(event)) this.listeners.set(event, new Set());\n    this.listeners.get(event).add(cb);\n  }\n  off(event, cb) {\n    const s = this.listeners.get(event);\n    if (s) s.delete(cb);\n  }\n  _emit(event, ...args) {\n    const s = this.listeners.get(event);\n    if (s) for (const fn of s) fn(...args);\n  }\n\n  /**\n   * Add a task to the queue.\n   *\n   * @param {(cb)=>void|string} taskFn Either a function `(done)` or a plain value.\n   *                                   If it's a value, it'll simply be logged.\n   */\n  enqueue(taskFn) {\n    this.taskBuffer.push(taskFn);\n    this._maybeRun();\n  }\n\n  /** Try to start pending tasks respecting the concurrency cap. */\n  _maybeRun() {\n    while (\n      this.activeCount < this.concurrency &&\n      this.taskBuffer.length > 0\n    ) {\n      const nextTask = this.taskBuffer.shift();\n\n      // Fire saturated once we reach capacity\n      if (++this.activeCount === this.concurrency)\n        this._emit(\"saturated\");\n\n      try {\n        // Normalise to a function form\n        let fn =\n          typeof nextTask === \"function\"\n            ? nextTask\n            : (done) => {\n                console.log(nextTask);\n                done();\n              };\n\n        // Execute asynchronously to avoid blocking the loop\n        Promise.resolve()\n          .then(() => fn(this._createCallback()))\n          .catch(err =>\n            console.error(\n              \"[Error] Unhandled exception in task:\",\n              err.message || err\n            )\n          );\n      } catch (ex) {\n        console.warn(\"[Warning] Failed to schedule task:\", ex);\n        this._decrementActive();\n      }\n    }\n  }\n\n  /** Helper that returns a completion callback for a task. */\n  _createCallback() {\n    return (...results) => {\n      this._decrementActive(results);\n    };\n  }\n\n  /** Decrease active count and possibly trigger unsaturated. */\n  _decrementActive(resultArgs) {\n    --this.activeCount;\n    if (this.activeCount < this.concurrency)\n      this._emit(\"unsaturated\");\n    // You could forward resultArgs somewhere else if needed\n    this._maybeRun(); // Start another waiting task if possible\n  }\n}\n\n/**\n * Demo usage\n */\n\nconst myQ = new TaskQueue(5);\n\nmyQ.on(\"saturated\", () => console.log(\"[Event] Queue is saturated\"));\nmyQ.on(\"unsaturated\", () => console.log(\"[Event] Queue is unsaturated\"));\n\nfor (let i = 1; i <= 15; ++i) {\n  myQ.enqueue({\n    id: i,\n    msg: `Hello world!`,\n  }); // Plain objects become simple logs\n}\n\nconsole.log(\"[Info] Enqueued 15 tasks.\");\n```\n\n#### How does it know when it’s saturated?\n\nWhen `_activeCount` increments to equal the configured concurrency, the queue emits `\"saturated\"` right away. As soon as any worker calls back (via the returned callback), `_activeCount` drops below the limit and `\"unsaturated\"` fires.\n\nThis pattern mirrors the behavior of many production queues such as BullMQ, Kue, or even Redis Streams—only without the persistence layer.\n\n---\n\n## Quick checklist before deploying\n\n| ✅ Item | Why it matters |\n|--------|----------------|\n| Use `process.nextTick()` or `setImmediate()` if you plan to do heavy CPU work inside a task, otherwise block the event loop. | Keeps other queued tasks responsive. |\n| Wrap task bodies in `try/catch` or promise `.catch()` to prevent unhandled rejections crashing the process. | Robustness. |\n| Consider adding a graceful shutdown hook (`SIGINT`, `SIGTERM`). | Ensure all queued tasks finish cleanly. |\n| Monitor metrics (queue length, average latency) if scaling beyond trivial workloads. | Operational visibility. |\n\nHappy queuing! 🚀",
+              "refusal": null,
+              "role": "assistant",
+              "annotations": null,
+              "audio": null,
+              "function_call": null,
+              "tool_calls": [],
+              "reasoning": "The user wants help creating a task queue with concurrency 5, tasks as functions logging messages, and ensuring saturation/unsaturation logs.\n\nWe need to provide code example likely using some library like async.queue from async.js or custom implementation. Provide explanation how to set up queue, add tasks, handle events on saturate/un-saturate.\n\nAlso mention usage of `async` npm package's queue. Show sample code:\n\n```\nconst async = require('async');\n\nlet q = async.queue(function(task, callback) {\n    console.log(`Processing ${task}`);\n    setTimeout(callback, 100); // simulate work\n}, 5);\n\nq.saturated(() => { console.log('Queue is saturated'); });\nq.unsaturated(() => { console.log('Queue is unsaturated'); });\n\nfor (let i=1; i<=10;i++){\n   q.push(i);\n}\n```\n\nExplain what saturated means: number of running workers equals concurrency limit? Actually saturated triggers when all workers busy. Unsaturated triggers when below threshold.\n\nAlternatively use Node's built-in EventEmitter if building own queue.\n\nBut question says \"help me create a task queue\" not necessarily requiring external libs but we can show both ways.\n\nLet's propose simple class TaskQueue extends EventEmitter with methods pushTask etc., maintain internal counter of active tasks, check saturation thresholds.\n\nWe'll also explain saturating condition: activeTasks >= concurrency -> emit 'saturated'; unsaturated when active < concurrency - maybe after finishing one job.\n\nProvide full JS snippet.\n\nOk produce answer accordingly."
+            },
+            "stop_reason": null,
+            "token_ids": null
+          }
+        ],
+        "created": 1778861562,
+        "model": "openai/gpt-oss-20b-checkpoint-480-merged-5epoch-all-zhtw-base-cot-have-series-lr5e-7",
+        "object": "chat.completion",
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": {
+          "completion_tokens": 1783,
+          "prompt_tokens": 307,
+          "total_tokens": 2090,
+          "completion_tokens_details": null,
+          "prompt_tokens_details": null
+        },
+        "prompt_logprobs": null,
+        "prompt_token_ids": null,
+        "kv_transfer_params": null
+      },
+      "parsed_response": [],
+      "input_token": 307,
+      "output_token": 1783,
+      "latency": 19.984130382537842
+    }
+  ]
+}
