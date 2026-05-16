@@ -1,0 +1,156 @@
+{
+  "id": "zh_parallel_multiple_127",
+  "model_name": "openai/gpt-oss-20b-checkpoint-80-merged-5epoch-all-zhtw-base-cot-have-series-lr5e-7",
+  "test_category": "zh_parallel_multiple",
+  "result": [
+    {
+      "hotel_book": "{\"location\": \"Paris\", \"roomType\": \"Luxury\", \"nights\": 5, \"additional_services\": [\"Breakfast\", \"Spa\"]}"
+    }
+  ],
+  "traceback": null,
+  "inference_log": [
+    {
+      "role": "inference_io",
+      "request": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "\"你能幫我計劃我的旅行嗎？我需要在巴黎預訂一間酒店房間，住5晚。我偏好豪華房間，並希望加上早餐和水療服務。之後，我需要在巴黎租一輛車，租期為7天。我偏好SUV，並且我會在機場取車。然後，我需要在羅馬預訂另一間酒店房間，住3晚。我偏好套房，並希望加上機場接送服務。最後，我需要在羅馬租一輛車，租期為5天。我偏好緊湊型的轎車，並且我會在酒店取車。\""
+          }
+        ],
+        "model": "openai/gpt-oss-20b-checkpoint-80-merged-5epoch-all-zhtw-base-cot-have-series-lr5e-7",
+        "temperature": 0.001,
+        "store": false,
+        "tools": [
+          {
+            "type": "function",
+            "function": {
+              "name": "car_rental",
+              "description": "Rent a car at the specified location for a specific number of days Note that the provided function is in Python 3 syntax.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "location": {
+                    "type": "string",
+                    "description": "Location of the car rental."
+                  },
+                  "days": {
+                    "type": "integer",
+                    "description": "Number of days for which to rent the car."
+                  },
+                  "car_type": {
+                    "type": "string",
+                    "description": "Type of the car to rent."
+                  },
+                  "pick_up": {
+                    "type": "string",
+                    "description": "Location of where to pick up the car. Default is 'airport' if not specified."
+                  }
+                },
+                "required": [
+                  "location",
+                  "days",
+                  "car_type"
+                ]
+              }
+            }
+          },
+          {
+            "type": "function",
+            "function": {
+              "name": "hotel_book",
+              "description": "Book a hotel room given the location, room type, and number of nights and additional services Note that the provided function is in Python 3 syntax.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "location": {
+                    "type": "string",
+                    "description": "Location of the hotel."
+                  },
+                  "roomType": {
+                    "type": "string",
+                    "description": "Type of the room to be booked."
+                  },
+                  "nights": {
+                    "type": "integer",
+                    "description": "Number of nights to book the room for."
+                  },
+                  "additional_services": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "description": "Additonal services that can be booked."
+                    },
+                    "description": "Additional services to be added. Default is not use it if not specified."
+                  }
+                },
+                "required": [
+                  "location",
+                  "roomType",
+                  "nights"
+                ]
+              }
+            }
+          }
+        ],
+        "extra_body": {
+          "repetition_penalty": 1.2
+        }
+      },
+      "raw_response": {
+        "id": "chatcmpl-ad156baf742bb56a",
+        "choices": [
+          {
+            "finish_reason": "tool_calls",
+            "index": 0,
+            "logprobs": null,
+            "message": {
+              "content": null,
+              "refusal": null,
+              "role": "assistant",
+              "annotations": null,
+              "audio": null,
+              "function_call": null,
+              "tool_calls": [
+                {
+                  "id": "chatcmpl-tool-93f132232a060be1",
+                  "function": {
+                    "arguments": "{\"location\": \"Paris\", \"roomType\": \"Luxury\", \"nights\": 5, \"additional_services\": [\"Breakfast\", \"Spa\"]}",
+                    "name": "hotel_book"
+                  },
+                  "type": "function"
+                }
+              ],
+              "reasoning": "The user wants travel planning with bookings:\n\n1) Hotel in Paris: 5 nights, luxury room, breakfast + spa.\n\n2) Car rental in Paris: SUV, 7 days, pickup airport.\n\n3) Hotel in Rome: 3 nights, suite, add airport transfer service (likely \"Airport Transfer\").\n\n4) Car rental in Rome: compact sedan? They say \"compact car\", but they want to pick up from hotel.\n\nWe need to call two functions: hotel_book twice, car_rental twice.\n\nBut we have no constraints about order; maybe do them sequentially or all together. We can just make calls accordingly.\n\nCheck function signatures:\n\nhotel_book takes:\n{\n    location: string,\n    roomType: string,\n    nights: number,\n    additional_services?: string[]\n}\n\nSo first call: location=\"Paris\", roomType=\"Luxury Room\"? The prompt says \"luxury room\". So pass \"Luxury\".\n\nAdd breakfast and spa: [\"Breakfast\",\"Spa\"].\n\nSecond call: location=\"Rome\", roomType=\"Suite\", nights=3, additional_services=[\"Airport Transfer\"]\n\nCar rentals:\n\ncar_rental signature:\n{\n   location: string,\n   days: number,\n   car_type: string,\n   pick_up?: string\n}\n\nFirst car: location=\"Paris\", days=7, car_type=\"SUV\", pick_up=\"airport\"\n\nSecond car: location=\"Rome\", days=5, car_type=\"Compact\", pick_up=\"Hotel\"\n\nReturn results as JSON array of responses? Usually after calling each function, we return result. But here we might combine into one response containing both calls? According to guidelines, we should output only the function calls. Since multiple calls needed, we may chain them? In previous tasks, you can send separate messages per function call. But I think best approach: produce two function calls separated by newlines? Actually typical pattern: assistant outputs a single function call. For multiple actions, we could either nest calls or create an object summarizing requests. However instructions: \"When your next reply contains a function name, respond with a JSON object ... Do NOT provide anything else.\" That means each function call must be its own top-level message. If we need multiple calls, we need to send multiple replies. But this conversation expects us to plan entire trip. Maybe we can aggregate into a single request? There's no combined function defined. So likely we need to perform four separate calls. But the system might expect us to handle them sequentially. Let's see prior examples: When asked to book flights/hotels etc., they'd often ask to confirm details then proceed. Here it's straightforward.\n\nThus I'll produce first function call for hotel booking in Paris. Then second for car rental in Paris. Third for hotel booking in Rome. Fourth for car rental in Rome.\n\nHowever the instruction: \"Respond with a JSON object following the schema exactly.\" Means each function call's arguments must match schema. We'll produce four messages.\n\nLet's craft each call.\n\nCall 1: hotel_book({\"location\":\"Paris\",\"roomType\":\"Luxury\",\"nights\":5,\"additional_services\":[\"Breakfast\",\"Spa\"]})\n\nCall 2: car_rental({\"location\":\"Paris\",\"days\":7,\"car_type\":\"SUV\",\"pick_up\":\"airport\"})\n\nCall 3: hotel_book({\"location\":\"Rome\",\"roomType\":\"Suite\",\"nights\":3,\"additional_services\":[\"Airport Transfer\"]})\n\nCall 4: car_rental({\"location\":\"Rome\",\"days\":5,\"car_type\":\"Compact\",\"pick_up\":\"Hotel\"}) \n\nMake sure keys names correct: For hotel_book, key is \"roomType\" camelCase. For car_rental, key is \"car_type\" snake_case. Also optional fields default omitted.\n\nWe'll output each function call separately. Probably better to include them in sequence."
+            },
+            "stop_reason": 200012,
+            "token_ids": null
+          }
+        ],
+        "created": 1778955998,
+        "model": "openai/gpt-oss-20b-checkpoint-80-merged-5epoch-all-zhtw-base-cot-have-series-lr5e-7",
+        "object": "chat.completion",
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": {
+          "completion_tokens": 804,
+          "prompt_tokens": 442,
+          "total_tokens": 1246,
+          "completion_tokens_details": null,
+          "prompt_tokens_details": null
+        },
+        "prompt_logprobs": null,
+        "prompt_token_ids": null,
+        "kv_transfer_params": null
+      },
+      "parsed_response": [
+        {
+          "hotel_book": "{\"location\": \"Paris\", \"roomType\": \"Luxury\", \"nights\": 5, \"additional_services\": [\"Breakfast\", \"Spa\"]}"
+        }
+      ],
+      "input_token": 442,
+      "output_token": 804,
+      "latency": 9.527607679367065
+    }
+  ]
+}
