@@ -1,0 +1,138 @@
+{
+  "id": "zh_multiple_53",
+  "model_name": "openai/gpt-oss-20b-checkpoint-400-merged-5epoch-all-zhtw-gpt54mini-cot-have-series-lr5e-7",
+  "test_category": "zh_multiple",
+  "result": [],
+  "traceback": null,
+  "inference_log": [
+    {
+      "role": "inference_io",
+      "request": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "根據利率和失業率，預測未來5年的房價。"
+          }
+        ],
+        "model": "openai/gpt-oss-20b-checkpoint-400-merged-5epoch-all-zhtw-gpt54mini-cot-have-series-lr5e-7",
+        "temperature": 0.001,
+        "store": false,
+        "tools": [
+          {
+            "type": "function",
+            "function": {
+              "name": "linear_regression",
+              "description": "Applies linear regression to a given set of independent variables to make a prediction. Note that the provided function is in Python 3 syntax.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "independent_var": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "The independent variables."
+                  },
+                  "dependent_var": {
+                    "type": "string",
+                    "description": "The dependent variable."
+                  },
+                  "forecast_period": {
+                    "type": "integer",
+                    "description": "The number of years to forecast the prices. Default 1",
+                    "optional": true
+                  }
+                },
+                "required": [
+                  "independent_var",
+                  "dependent_var"
+                ]
+              }
+            }
+          },
+          {
+            "type": "function",
+            "function": {
+              "name": "random_forest_regression",
+              "description": "Applies Random Forest Regression to a given set of independent variables to make a prediction. Note that the provided function is in Python 3 syntax.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "independent_var": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "The independent variables."
+                  },
+                  "dependent_var": {
+                    "type": "string",
+                    "description": "The dependent variable."
+                  },
+                  "n_estimators": {
+                    "type": "integer",
+                    "description": "The number of trees in the forest. Default 1",
+                    "optional": true
+                  },
+                  "forecast_period": {
+                    "type": "integer",
+                    "description": "The number of years to forecast the prices. Default 1",
+                    "optional": true
+                  }
+                },
+                "required": [
+                  "independent_var",
+                  "dependent_var"
+                ]
+              }
+            }
+          }
+        ],
+        "extra_body": {
+          "repetition_penalty": 1.2
+        }
+      },
+      "raw_response": {
+        "id": "chatcmpl-91518dc074a19922",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "logprobs": null,
+            "message": {
+              "content": "以下是一個完整的「從零開始」流程示範：  \n* 如何收集、清理並整合 **利率**（Interest Rate）與 **失業率**（Unemployment Rate）的歷史資料；  \n* 用這兩項指標作為自變量訓練線性回歸或隨機森林迴歸模型；  \n* 在已知未來五年利率/失業率趨勢時做出房價預估。\n\n> ⚠️ 本回答僅提供演算法框架及程式碼範例，實際應用請自行取得真實數值並進行驗證。  \n\n---\n\n## 一、先決條件 & 資料來源\n\n| 步驟 | 說明 |\n|------|------|\n| ① 收集歷史資料 | 利率可由美聯儲（Fed）、台灣央行等公開 API 或 FRED 提供；失業率亦同樣可以透過各國統計局下載。<br>房價則以每月平均成交價格或 CPI‑調整後的住宅價格指數為主。 |\n| ② 整合時間序列 | 把所有資料對齊到相同頻度（建議使用月份），缺漏值填補或刪除。 |\n| ③ 建立特徵矩陣 | `X` 為 `[interest_rate, unemployment_rate]` 的二維向量；`y` 為當期房價。 |\n\n> 若你手頭已有 CSV 檔案，只需把檔名改成 `data.csv` 並放在執行目錄即可直接跑下方程式碼。\n\n---\n\n## 二、Python 範例 – 線性回歸 + 隨機森林\n\n```python\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.linear_model import LinearRegression\nfrom sklearn.ensemble import RandomForestRegressor\nfrom sklearn.metrics import mean_squared_error, r2_score\nimport numpy as np\nimport matplotlib.pyplot as plt\n\n# ------------------------------\n# 0️⃣ 載入資料\n# ------------------------------\ndf = pd.read_csv('data.csv')          # 欲保留欄位：'date','house_price','interest_rate','unemployment'\ndf['date'] = pd.to_datetime(df['date'])\ndf.set_index('date', inplace=True)\n\n# ------------------------------\n# 1️⃣ 特徵工程\n# ------------------------------\nX = df[['interest_rate', 'unemployment']]\ny = df['house_price']\n\n# ------------------------------\n# 2️⃣ 分割訓練 / 測試集\ntrain_X, test_X, train_y, test_y = train_test_split(\n    X, y, test_size=0.20, shuffle=False   # 時間順序不可打亂\n)\n\n# ------------------------------\n# 3️⃣ 模型訓練 - 線性回歸\nlinreg = LinearRegression()\nlinreg.fit(train_X, train_y)\npred_lin = linreg.predict(test_X)\n\nprint(\"Linear Regression:\")\nprint(f\"  Coefficients : {dict(zip(X.columns, linreg.coef_))}\")\nprint(f\"  Intercept    : {linreg.intercept_: .4f}\")\nprint(f\"  RMSE         : {(mean_squared_error(test_y, pred_lin)**0.5): .4f}\")\nprint(f\"  R²           : {r2_score(test_y, pred_lin): .4f}\")\n\n# ------------------------------\n# 4️⃣ 模型訓練 - 隨機森林\nrf = RandomForestRegressor(n_estimators=200, random_state=42)\nrf.fit(train_X, train_y)\npred_rf = rf.predict(test_X)\n\nprint(\"\\nRandom Forest Regressor:\")\nprint(f\"  Feature Importances : {dict(zip(X.columns, rf.feature_importances_))}\")\nprint(f\"  RMSE                 : {(mean_squared_error(test_y, pred_rf)**0.5): .4f}\")\nprint(f\"  R²                   : {r2_score(test_y, pred_rf): .4f}\")\n\n# ------------------------------\n# 5️⃣ 未來 5 年的假設輸入\nfuture_years = [2019, 2020, 2021, 2022, 2023]\nfuture_interest_rates = [1.75, 1.50, 1.25, 1.00, 0.85]      # 假設逐漸下降\nfuture_unemp_rates     = [7.8 , 7.5 , 7.2 , 7.0 , 6.8 ]       # 同上\n\nfuture_df = pd.DataFrame({\n    \"interest_rate\": future_interest_rates,\n    \"unemployment\": future_unemp_rates\n})\n\n# ------------------------------\n# 6️⃣ 做出預測\nprice_pred_lin = linreg.predict(future_df)\nprice_pred_rf  = rf.predict(future_df)\n\nfor i, year in enumerate(future_years):\n    print(f\"\\nYear {year}:\")\n    print(f\"  Interest Rate : {future_interest_rates[i]: .2%}\")\n    print(f\"  Unemploy Rate : {future_unemp_rates[i]: .2%}\")\n    print(f\"  Predicted House Price (Lin.) : ${price_pred_lin[i]:,.2f}\")\n    print(f\"  Predicted House Price (RF ) : ${price_pred_rf[i]:,.2f}\")\n\n# ------------------------------\n# 7️⃣ 視覺化結果\nplt.figure(figsize=(10,5))\nplt.plot(y.index[-len(test_y):], test_y.values, label='Actual')\nplt.plot(y.index[-len(pred_lin):], pred_lin, '--', label='Pred Lin.')\nplt.title('House Prices vs Predictions')\nplt.legend(); plt.show()\n\n```\n\n### 程式說明\n\n| 行號區塊 | 功能摘要 |\n|----------|-----------|\n| 0️⃣ | 匯入必要套件並讀取 CSV。若沒有此檔，可自行產生模擬資料如下： |\n| ```python<br>#--- 生成簡易模擬資料 ---<br>N = 120  # 月份數 <br>np.random.seed(0)<br>dates = pd.date_range(start=\"2000-01\", periods=N, freq=\"M\")\\n\\ninterest = np.linspace(5, 1, N)+np.random.normal(scale=.15,N)\\nunemp    = np.linspace(8, 5, N)+np.random.normal(scale=.12,N)\\nhousep   = 300+(-0.5)*interest+(0.3)*unemp+np.random.normal(scale=5,N)\\ndf_sim = pd.DataFrame({'date': dates,'interest_rate':interest,'unemployment':unemp,'house_price':housep}).set_index('date').reset_index()\\ndf_sim.to_csv('data.csv',index=False)\\n``` |\n| 1️⃣ | 對於每一筆觀察，我們只需要三個欄位：利率、失業率以及房價。 |\n| 2️⃣ | 使用 `train_test_split()` 保持時間順序不被洗牌，以避免資訊洩露。 |\n| 3️⃣ | 計算線性回歸係數、截距，以及評分指標 RMSE 與 \\(R^2\\)。 |\n| 4️⃣ | 隨機森林設定樹木數量 200 棵，並印出重要程度。 |\n| 5️⃣ | 定義未來五年的利率與失業率走勢（此處採用假設）。如果有更精確的經濟前景，可以替換此表格。 |\n| 6️⃣ | 用兩種模型都給出的預測值比較。 |\n| 7️⃣ | 簡單繪圖顯示最後 20 個月的實際值與預測差異。 |\n\n---\n\n## 三、如何提升準確度？\n\n| 方法 | 解釋 |\n|------|------|\n| 加入更多宏觀因子 | 如 GDP 成長率、通膨率、人口增速、政府住房政策等。 |\n| 滑動窗口交叉驗證 | 避免一次性的訓練／測試切分帶來偏誤。 |\n| 超參數優化 | 例如利用 GridSearchCV 找最佳 n_estimators、max_depth 等。 |\n| 時間序列專屬模型 | ARIMA、SARIMAX、Prophet、LSTM 等可捕捉季節性與非線性關係。 |\n| 預測期間的情境分析 | 不只是單一路徑，而是多種可能場景（如利率急升、失業率飆高）再加權平均。 |\n\n---\n\n## 四、結論\n\n* 利率與失業率雖然是影響房市的重要因素，但它們往往不是唯一解答。  \n* 上述程式碼展示了最基本且直觀的方法——將兩者視為自變量，用線性或隨機森林模型去學習其對房價的映射。  \n* 真正可靠的預測還須配合大量歷史資料、多元特徵、嚴謹的超參數搜尋以及適當的風險管理策略。  \n\n祝你開發愉快，也歡迎提出任何想要深入探討的細部！",
+              "refusal": null,
+              "role": "assistant",
+              "annotations": null,
+              "audio": null,
+              "function_call": null,
+              "tool_calls": [],
+              "reasoning": "The user wants predictions based on interest rates and unemployment rate over next five years. We have no data; we can simulate or use placeholder values. Provide explanation about limitations.\n\nWe need to call one of the tool functions? They require independent_var array (strings) and dependent var name. But we don't have actual dataset. So maybe not necessary. Instead provide conceptual approach with example code using scikit-learn's LinearRegression or RandomForestRegressor. Use synthetic data as demonstration. Also mention how to get real data from sources like FRED etc.\n\nThus produce answer explaining steps, sample python snippet generating synthetic data, training models, forecasting future values. Mention evaluation metrics MSE, R2. Show predicted house price trend.\n\nLet's craft response accordingly."
+            },
+            "stop_reason": null,
+            "token_ids": null
+          }
+        ],
+        "created": 1779056135,
+        "model": "openai/gpt-oss-20b-checkpoint-400-merged-5epoch-all-zhtw-gpt54mini-cot-have-series-lr5e-7",
+        "object": "chat.completion",
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": {
+          "completion_tokens": 2186,
+          "prompt_tokens": 291,
+          "total_tokens": 2477,
+          "completion_tokens_details": null,
+          "prompt_tokens_details": null
+        },
+        "prompt_logprobs": null,
+        "prompt_token_ids": null,
+        "kv_transfer_params": null
+      },
+      "parsed_response": [],
+      "input_token": 291,
+      "output_token": 2186,
+      "latency": 25.360825061798096
+    }
+  ]
+}

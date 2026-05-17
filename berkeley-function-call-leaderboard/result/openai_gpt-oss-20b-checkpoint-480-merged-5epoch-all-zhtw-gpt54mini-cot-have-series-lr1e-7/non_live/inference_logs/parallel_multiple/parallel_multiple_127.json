@@ -1,0 +1,156 @@
+{
+  "id": "parallel_multiple_127",
+  "model_name": "openai/gpt-oss-20b-checkpoint-480-merged-5epoch-all-zhtw-gpt54mini-cot-have-series-lr1e-7",
+  "test_category": "parallel_multiple",
+  "result": [
+    {
+      "hotel_book": "{\"location\": \"Paris\", \"roomType\": \"Deluxe\", \"nights\": 5, \"additional_services\": [\"Breakfast\", \"Spa\"]}"
+    }
+  ],
+  "traceback": null,
+  "inference_log": [
+    {
+      "role": "inference_io",
+      "request": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "\"Can you help me plan my trip? I need to book a hotel room in Paris for 5 nights. I prefer a deluxe room and would like to add breakfast and spa services. After that, I need to rent a car in Paris for 7 days. I prefer a SUV and I will pick it up from the airport. Then, I need to book another hotel room in Rome for 3 nights. I prefer a suite and would like to add airport transfer service. Lastly, I need to rent a car in Rome for 5 days. I prefer a compact car and I will pick it up from the hotel.\""
+          }
+        ],
+        "model": "openai/gpt-oss-20b-checkpoint-480-merged-5epoch-all-zhtw-gpt54mini-cot-have-series-lr1e-7",
+        "temperature": 0.001,
+        "store": false,
+        "tools": [
+          {
+            "type": "function",
+            "function": {
+              "name": "car_rental",
+              "description": "Rent a car at the specified location for a specific number of days Note that the provided function is in Python 3 syntax.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "location": {
+                    "type": "string",
+                    "description": "Location of the car rental."
+                  },
+                  "days": {
+                    "type": "integer",
+                    "description": "Number of days for which to rent the car."
+                  },
+                  "car_type": {
+                    "type": "string",
+                    "description": "Type of the car to rent."
+                  },
+                  "pick_up": {
+                    "type": "string",
+                    "description": "Location of where to pick up the car. Default is 'airport' if not specified."
+                  }
+                },
+                "required": [
+                  "location",
+                  "days",
+                  "car_type"
+                ]
+              }
+            }
+          },
+          {
+            "type": "function",
+            "function": {
+              "name": "hotel_book",
+              "description": "Book a hotel room given the location, room type, and number of nights and additional services Note that the provided function is in Python 3 syntax.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "location": {
+                    "type": "string",
+                    "description": "Location of the hotel."
+                  },
+                  "roomType": {
+                    "type": "string",
+                    "description": "Type of the room to be booked."
+                  },
+                  "nights": {
+                    "type": "integer",
+                    "description": "Number of nights to book the room for."
+                  },
+                  "additional_services": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "description": "Additonal services that can be booked."
+                    },
+                    "description": "Additional services to be added. Default is not use it if not specified."
+                  }
+                },
+                "required": [
+                  "location",
+                  "roomType",
+                  "nights"
+                ]
+              }
+            }
+          }
+        ],
+        "extra_body": {
+          "repetition_penalty": 1.2
+        }
+      },
+      "raw_response": {
+        "id": "chatcmpl-bfb903f1ac1ff02d",
+        "choices": [
+          {
+            "finish_reason": "tool_calls",
+            "index": 0,
+            "logprobs": null,
+            "message": {
+              "content": null,
+              "refusal": null,
+              "role": "assistant",
+              "annotations": null,
+              "audio": null,
+              "function_call": null,
+              "tool_calls": [
+                {
+                  "id": "chatcmpl-tool-ba441e350a49e3ab",
+                  "function": {
+                    "arguments": "{\"location\": \"Paris\", \"roomType\": \"Deluxe\", \"nights\": 5, \"additional_services\": [\"Breakfast\", \"Spa\"]}",
+                    "name": "hotel_book"
+                  },
+                  "type": "function"
+                }
+              ],
+              "reasoning": "The user wants us to do multiple bookings:\n\n1) Hotel in Paris: 5 nights, deluxe room, with breakfast + spa.\n\n2) Car rental in Paris: 7 days, SUV, pickup at airport.\n\n3) Hotel in Rome: 3 nights, suite, plus airport transfer service.\n\n4) Car rental in Rome: 5 days, compact car, pickup at hotel.\n\nWe have two tool types: car_rental and hotel_book. We should call them accordingly.\n\nFirst we need to confirm details: For each booking, specify parameters correctly.\n\nFor hotel_book: arguments: location (string), roomType (string), nights (number), additional_services optional array of strings.\n\nSo first call: location=\"Paris\", roomType=\"deluxe\", nights=5, additional_services=[\"breakfast\",\"spa\"].\n\nSecond: car_rental: location=\"Paris\", days=7, car_type=\"SUV\", pick_up=\"airport\".\n\nThird: hotel_book: location=\"Rome\", roomType=\"suite\", nights=3, additional_services=[\"airport transfer\"].\n\nFourth: car_rental: location=\"Rome\", days=5, car_type=\"compact\", pick_up=\"hotel\". Wait \"pickup from the hotel\": maybe pick_up param can accept \"hotel\"? The default is 'airport', but they want from hotel; so set pick_up=\"hotel\".\n\nThus produce calls sequentially. According to guidelines, after calling one function, wait for response before next. But as an assistant, we might chain calls or ask clarifying question? Usually we just proceed. We'll output JSON calls via function invocation format. Since there are four separate tasks, we may need to make four calls. However typical approach: we could combine into single conversation step? Possibly we can send all four calls separately. Let's see instructions: \"When you invoke a function, respond with only the function call ... Do NOT provide any other text unless explicitly asked.\" So we cannot give explanation. But we also can't call more than one function per turn? Actually we can call multiple times, but each time we must get result then continue. In this environment, likely we can call consecutively. But best practice: call first function, await response, then second etc. But since no interactive loop here, we can simulate making calls sequentially. Maybe we should ask clarification about preferences? Not needed.\n\nWe'll start with first function call: hotel_book for Paris. Provide JSON object. Then subsequent calls. Probably we need to include all calls in order. I'll produce them one after another separated by newlines? Each call must be its own block. Use correct formatting: {\"name\":\"function_name\",\"arguments\":{\"...\"}}\n\nLet's craft:\n\n{\n\"name\":\"hotel_book\",\n\"arguments\":{\n    \"location\":\"Paris\",\n    \"roomType\":\"Deluxe\",\n    \"nights\":5,\n    \"additional_services\":[\"Breakfast\",\"Spa\"]\n}\n}\n\nThen next:\n\n{\n\"name\":\"car_rental\",\n\"arguments\":{\n   \"location\":\"Paris\",\n   \"days\":7,\n   \"car_type\":\"SUV\",\n   \"pick_up\":\"Airport\"\n}\n}\n\nNext:\n\n{\n\"name\":\"hotel_book\",\n\"arguments\":{\n   \"location\":\"Rome\",\n   \"roomType\":\"Suite\",\n   \"nights\":3,\n   \"additional_services\":[\"Airport Transfer\"]\n}\n}\n\nFinally:\n\n{\n\"name\":\"car_rental\",\n\"arguments\":{\n   \"location\":\"Rome\",\n   \"days\":5,\n   \"car_type\":\"Compact\",\n   \"pick_up\":\"Hotel\"\n}\n}\n\nMake sure capitalization consistent? Might not matter. Provide exactly those calls."
+            },
+            "stop_reason": 200012,
+            "token_ids": null
+          }
+        ],
+        "created": 1779049184,
+        "model": "openai/gpt-oss-20b-checkpoint-480-merged-5epoch-all-zhtw-gpt54mini-cot-have-series-lr1e-7",
+        "object": "chat.completion",
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": {
+          "completion_tokens": 762,
+          "prompt_tokens": 418,
+          "total_tokens": 1180,
+          "completion_tokens_details": null,
+          "prompt_tokens_details": null
+        },
+        "prompt_logprobs": null,
+        "prompt_token_ids": null,
+        "kv_transfer_params": null
+      },
+      "parsed_response": [
+        {
+          "hotel_book": "{\"location\": \"Paris\", \"roomType\": \"Deluxe\", \"nights\": 5, \"additional_services\": [\"Breakfast\", \"Spa\"]}"
+        }
+      ],
+      "input_token": 418,
+      "output_token": 762,
+      "latency": 8.388015508651733
+    }
+  ]
+}

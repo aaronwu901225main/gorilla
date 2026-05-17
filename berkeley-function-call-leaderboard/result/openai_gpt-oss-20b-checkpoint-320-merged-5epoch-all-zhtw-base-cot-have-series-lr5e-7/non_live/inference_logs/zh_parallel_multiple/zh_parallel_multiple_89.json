@@ -1,0 +1,149 @@
+{
+  "id": "zh_parallel_multiple_89",
+  "model_name": "openai/gpt-oss-20b-checkpoint-320-merged-5epoch-all-zhtw-base-cot-have-series-lr5e-7",
+  "test_category": "zh_parallel_multiple",
+  "result": [
+    {
+      "ride_hailing_get_rides": "{\"source\": \"123 Main Street\", \"destination\": \"456 Park Avenue\", \"max_cost\": 30}"
+    }
+  ],
+  "traceback": null,
+  "inference_log": [
+    {
+      "role": "inference_io",
+      "request": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "\"你能幫我規劃一下我的一天嗎？我需要從位於123 Main Street的我家到我位於456 Park Avenue的辦公室，我不想花超過30美元的交通費。下班後，我需要從789 Broadway的全食超市訂購雜貨。我需要的東西有牛奶、麵包、雞蛋和蘋果。我不想花超過10美元的運費。然後，我需要從辦公室搭乘交通工具到我朋友位於321 Elm Street的家，我不想花超過20美元的交通費。最後，我需要從朋友家搭乘交通工具回到我家，我不想花超過25美元的交通費。你能幫我處理這一切嗎？\""
+          }
+        ],
+        "model": "openai/gpt-oss-20b-checkpoint-320-merged-5epoch-all-zhtw-base-cot-have-series-lr5e-7",
+        "temperature": 0.001,
+        "store": false,
+        "tools": [
+          {
+            "type": "function",
+            "function": {
+              "name": "grocery_delivery_order",
+              "description": "Order grocery items from a specific location with optional delivery price limit Note that the provided function is in Python 3 syntax.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "location": {
+                    "type": "string",
+                    "description": "The location of the grocery store"
+                  },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "List of items to order"
+                  },
+                  "max_delivery_cost": {
+                    "type": "number",
+                    "description": "The maximum delivery cost. It is optional This is a float type value.",
+                    "default": 10.0,
+                    "format": "float"
+                  }
+                },
+                "required": [
+                  "location",
+                  "items"
+                ]
+              }
+            }
+          },
+          {
+            "type": "function",
+            "function": {
+              "name": "ride_hailing_get_rides",
+              "description": "Find ride from source to destination with an optional cost limit Note that the provided function is in Python 3 syntax.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "description": "The starting point of the journey"
+                  },
+                  "destination": {
+                    "type": "string",
+                    "description": "The endpoint of the journey"
+                  },
+                  "max_cost": {
+                    "type": "number",
+                    "description": "The maximum cost of the ride. It is optional This is a float type value.",
+                    "default": 30.0,
+                    "format": "float"
+                  }
+                },
+                "required": [
+                  "source",
+                  "destination"
+                ]
+              }
+            }
+          }
+        ],
+        "extra_body": {
+          "repetition_penalty": 1.2
+        }
+      },
+      "raw_response": {
+        "id": "chatcmpl-b49b58ba8e02140a",
+        "choices": [
+          {
+            "finish_reason": "tool_calls",
+            "index": 0,
+            "logprobs": null,
+            "message": {
+              "content": null,
+              "refusal": null,
+              "role": "assistant",
+              "annotations": null,
+              "audio": null,
+              "function_call": null,
+              "tool_calls": [
+                {
+                  "id": "chatcmpl-tool-983d1a22536f41a7",
+                  "function": {
+                    "arguments": "{\"source\": \"123 Main Street\", \"destination\": \"456 Park Avenue\", \"max_cost\": 30}",
+                    "name": "ride_hailing_get_rides"
+                  },
+                  "type": "function"
+                }
+              ],
+              "reasoning": "The user wants us to plan their day and handle transportation orders within budget constraints.\n\nWe have two tool types:\n\n1) `ride_hailing_get_rides` - find rides between points with max cost constraint.\n\n2) `grocery_delivery_order` - place grocery order at a location (store), list items, with max delivery cost.\n\nUser's requests:\n\n- From home at \"123 Main Street\" to office at \"456 Park Avenue\", not more than $30 transport fare.\n\n- After work, from \"789 Broadway Whole Foods\" to get groceries: milk, bread, eggs, apples; no more than $10 shipping fee.\n\n- Then from office to friend's house at \"321 Elm Street\": not over $20.\n\n- Finally from friend’s house back to home: not over $25.\n\nThey want us to process all this. We need to call the appropriate functions sequentially? Possibly we should do each step separately or combine them into one request?\n\nBut note: For the first trip, it's a ride hailing service. So use `ride_hailing_get_rides`. Similarly third and fourth trips also require rides. Grocery ordering uses `grocery_delivery_order`.\n\nThus we will produce calls to those functions accordingly.\n\nHowever, there might be multiple steps: maybe they want us to schedule everything in sequence. But the instructions say: \"If you can answer the question directly without calling a function, just respond.\" If we cannot answer directly because it requires external data like available rides etc., we must call the relevant function(s). In our case, we don't know if there's a ride available under given budgets. We'll ask the system via function calls.\n\nSo we likely need to make four separate function calls: three times for rides, once for grocery order.\n\nBut the problem says: \"Your response SHOULD NOT contain anything other than the JSON object required by the function signature.\" That means when invoking a function, we only output the JSON arguments as per the function signature. And after receiving result, we may provide explanation. However, the instruction states: \"When responding to the user, your response SHOULD NOT contain anything other than the JSON object required by the function signature.\"\n\nWait that's contradictory: earlier guidelines said: \"If you decide to invoke a function, your entire reply should consist solely of the JSON payload ...\". Yes, so we can't give additional text besides the JSON. So we need to choose which function to call next. Since we have multiple tasks, perhaps we need to chain them? Usually you'd pick one function at a time. Maybe we start with the first ride. Or we could create a composite approach but the API doesn't support multi-step calls. Typically we'd call each function individually. But here we have many actions. Perhaps we can call the first ride, then wait for its result before proceeding to next. But the conversation expects us to handle all tasks. Might need to orchestrate multiple calls. According to policy, we can send multiple function calls sequentially. Each call returns results. But we can't embed explanations. So we would call the first function, receive result, then proceed.\n\nGiven the user's request includes several distinct operations, we probably need to perform them in order. Let's break down:\n\nStep 1: Ride from home to office ($<=30).\n\nCall `ride_hailing_get_rides`: {source:\"123 Main Street\", destination:\"456 Park Avenue\", max_cost:30}\n\nThen Step 2: Grocery order from Whole Foods at 789 Broadway: Items [\"milk\",\"bread\",\"eggs\",\"apples\"], max_delivery_cost=10.\n\nCall `grocery_delivery_order`: {location:\"789 Broadway\", items:[\"milk\",\"bread\",\"eggs\",\"apples\"], max_delivery_cost:10}\n\nStep 3: Ride from office to friend's house: source=\"456 Park Avenue\"? Wait office address is \"456 Park Avenue\". Destination \"321 Elm Street\". Max cost 20.\n\nCall `ride_hailing_get_rides`: {source:\"456 Park Avenue\", destination:\"321 Elm Street\", max_cost:20}\n\nStep 4: Ride from friend's house back home: source=\"321 Elm Street\", destination=\"123 Main Street\", max_cost:25.\n\nCall `ride_hailing_get_rides`: {source:\"321 Elm Street\", destination:\"123 Main Street\", max_cost:25}\n\nNow we need to consider whether we can batch them? There's no single function that handles multiple rides. So we need to call each separately. But the assistant has to respond with a function call. Which one first? Probably the earliest action: morning commute. So let's call that first.\n\nAfter getting the result, we can continue. But since the user asked to help with whole day's planning, we might need to gather all info. But due to limitations, we can only call one function at a time. So we will start with the first ride.\n\nHence initial response: JSON for `ride_hailing_get_rides` with parameters above.\n\nLet's craft the JSON exactly matching schema: name: \"ride_hailing_get_rides\", arguments: {...}. Ensure correct formatting.\n\nWe'll include the function name field too? Actually according to spec: When invoking a function, the assistant outputs a JSON object containing the function name and arguments. Example format: {\"name\":\"function_name\",\"arguments\":{\"...\"}}\n\nYes.\n\nTherefore first call:\n\n{\n\"name\":\"ride_hailing_get_rides\",\n\"arguments\":{\n    \"source\":\"123 Main Street\",\n    \"destination\":\"456 Park Avenue\",\n    \"max_cost\":30\n}\n}\n\nThat is what we'll output."
+            },
+            "stop_reason": 200012,
+            "token_ids": null
+          }
+        ],
+        "created": 1779051067,
+        "model": "openai/gpt-oss-20b-checkpoint-320-merged-5epoch-all-zhtw-base-cot-have-series-lr5e-7",
+        "object": "chat.completion",
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": {
+          "completion_tokens": 1157,
+          "prompt_tokens": 444,
+          "total_tokens": 1601,
+          "completion_tokens_details": null,
+          "prompt_tokens_details": null
+        },
+        "prompt_logprobs": null,
+        "prompt_token_ids": null,
+        "kv_transfer_params": null
+      },
+      "parsed_response": [
+        {
+          "ride_hailing_get_rides": "{\"source\": \"123 Main Street\", \"destination\": \"456 Park Avenue\", \"max_cost\": 30}"
+        }
+      ],
+      "input_token": 444,
+      "output_token": 1157,
+      "latency": 13.50711178779602
+    }
+  ]
+}

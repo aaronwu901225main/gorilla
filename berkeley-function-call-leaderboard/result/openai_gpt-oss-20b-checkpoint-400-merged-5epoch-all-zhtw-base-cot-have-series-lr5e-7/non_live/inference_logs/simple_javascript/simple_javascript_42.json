@@ -1,0 +1,96 @@
+{
+  "id": "simple_javascript_42",
+  "model_name": "openai/gpt-oss-20b-checkpoint-400-merged-5epoch-all-zhtw-base-cot-have-series-lr5e-7",
+  "test_category": "simple_javascript",
+  "result": [],
+  "traceback": null,
+  "inference_log": [
+    {
+      "role": "inference_io",
+      "request": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "Help me create a task queue with a concurrency of 5, where tasks are functions that log a message to the console, and ensure that when the queue becomes saturated, it logs 'Queue is saturated', and when it becomes unsaturated, it logs 'Queue is unsaturated'?"
+          }
+        ],
+        "model": "openai/gpt-oss-20b-checkpoint-400-merged-5epoch-all-zhtw-base-cot-have-series-lr5e-7",
+        "temperature": 0.001,
+        "store": false,
+        "tools": [
+          {
+            "type": "function",
+            "function": {
+              "name": "B",
+              "description": "This complex function initializes a task queue with customizable concurrency, task addition, and event handling capabilities. It allows for synchronous and asynchronous task execution, pausing and resuming the queue, and handling various queue events. Note that the provided function is in JavaScript syntax.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "e": {
+                    "type": "string",
+                    "description": "The initial task or an array of tasks to be added to the queue. Default null This parameter can be of any type of JavaScript object in string representation."
+                  },
+                  "t": {
+                    "type": "string",
+                    "description": "The concurrency level of the task queue. This is JavaScript float type parameter in string representation."
+                  },
+                  "n": {
+                    "type": "string",
+                    "description": "The payload size for each task worker. Optional parameter. Default 0.0 This is JavaScript float type parameter in string representation."
+                  }
+                },
+                "required": [
+                  "t"
+                ]
+              }
+            }
+          }
+        ],
+        "extra_body": {
+          "repetition_penalty": 1.2
+        }
+      },
+      "raw_response": {
+        "id": "chatcmpl-830ec0e763ada8d3",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "logprobs": null,
+            "message": {
+              "content": "Below is a minimal “recipe” you can drop into your project to get exactly what you asked for – a **task‑queue** that runs at most five workers concurrently, pushes simple logging callbacks as jobs, and prints messages whenever the queue hits its capacity (`saturated`) or drops below it again (`unsaturated`).  \n\n> ⚠️ *Assumption:*  \n> You’re already pulling in the module that exposes the `B()` factory (the one described under **Tools → Functions → B**) and that it returns an EventEmitter‑style queue object similar to [async.queue](https://caolan.github.io/node-asynclib/#queue) or [piscina](https://github.com/piscinajs/piscina).\n\n---\n\n### Step 1 – Create the Queue\n\n```js\n// Import the helper that builds our queue.\n// If you're inside Node.js / CommonJS:\nconst { B } = require('./path/to/functions');     // <-- adjust path accordingly\n\n// Or ES modules:\n// import { B } from './path/to/functions';\n\n// Build a queue with concurrency 5.\nconst myQueue = B({\n    t: '5',          // concurrency level (string because that's what the wrapper expects)\n});\n```\n\n*Why pass `\"5\"` instead of `5`?*  \nBecause the wrapper’s signature says the numeric values come wrapped in strings (“JavaScript float type parameter in string representation”). Once created, however, the resulting queue behaves like a normal async queue – you’ll interact with it through methods like `.add()`, `.on(...)`, etc.\n\n---\n\n### Step 2 – Hook Up Saturation Events\n\n```js\nmyQueue.on('saturated', () => {\n    console.log('Queue is saturated');\n});\n\nmyQueue.on('unsaturated', () => {\n    console.log('Queue is unsaturated');\n});\n```\n\nThese two lines register listeners so that whenever the number of running workers reaches the maximum allowed (`5` here) the first callback fires, and once the load falls back below that threshold the second fires.\n\n---\n\n### Step 3 – Add Some Logging Tasks\n\nHere’s a quick loop that enqueues ten tiny jobs—each simply writes a line to the console. Because the queue has a limit of five concurrent workers, you will see the “saturated” message appear right before the sixth job starts executing, and the “unsaturated” message pop out once enough workers finish freeing space.\n\n```js\nfor (let i = 1; i <= 10; ++i) {\n    const msg = `Hello from task #${i}`;\n    \n    // Each job is just a zero‑argument function that does something synchronously.\n    myQueue.add(async () => {\n        console.log(msg);\n        \n        /* Simulate some work */\n        await new Promise(r => setTimeout(r, Math.random() * 200));\n    });\n}\n```\n\n> 💡 *Tip*: Even though the queued functions run asynchronously, they still respect the concurrency cap—you won’t ever have more than five active promises at once.\n\n---\n\n### Full Working Example\n\nPutting everything together gives you a ready‑to‑run script:\n\n```js\n/* -------------------------------------------------------------\n   File: demo-task-queue.js\n------------------------------------------------------------- */\n\nconst { B } = require('./path/to/functions');\n\n// ------------------------------------------------------------------\n// 1️⃣  Instantiate a queue with maxConcurrency = 5\n// ------------------------------------------------------------------\nconst queue = B({ t: '5' });\n\n// ------------------------------------------------------------------\n// 2️⃣  Listen for saturation changes\n// ------------------------------------------------------------------\nqueue.on('saturated', () => console.log('[EVENT] Queue is saturated'));\nqueue.on('unsaturated', () => console.log('[EVENT] Queue is unsaturated'));\n\n// ------------------------------------------------------------------\n// 3️⃣  Enqueue several trivial tasks\n// ------------------------------------------------------------------\nfor (let id = 1; id <= 12; ++id) {\n    queue.add(async () => {\n        console.log(`[TASK ${id}] Started`);\n        // Pretend we're doing real work...\n        await new Promise(res => setTimeout(res, Math.floor(Math.random()*400)));\n        console.log(`[TASK ${id}] Finished`);\n    });\n}\n\n// ------------------------------------------------------------------\n// 4️⃣  Optionally wait until all tasks complete\n// ------------------------------------------------------------------\nqueue.drain().then(() => console.log('All tasks processed.'));\n```\n\nRun it with `node demo-task-queue.js`. You should observe output resembling:\n\n```\n[TASK 1] Started\n[TASK 2] Started\n[TASK 3] Started\n[TASK 4] Started\n[TASK 5] Started\n[EVENT] Queue is saturated\n... (tasks finish & start)\n[EVENT] Queue is unsaturated\nAll tasks processed.\n```\n\nThat’s it! 🎉 Your queue now respects a fixed concurrency window, reports saturation status, and executes arbitrary functions that log whatever you wish. Feel free to replace the dummy `console.log` calls with actual business logic.",
+              "refusal": null,
+              "role": "assistant",
+              "annotations": null,
+              "audio": null,
+              "function_call": null,
+              "tool_calls": [],
+              "reasoning": "We need to use the tool `functions.B` which expects parameters e (initial task(s)), t (concurrency), n optional.\n\nBut we also want to set up event handlers for saturation/unsaturation. However the tool only creates the queue; maybe after creation we attach listeners? But the user wants help creating such a queue. We might provide code snippet using this library's API. Since it's JS, we could show how to instantiate queue via functions.B then add tasks etc., plus event listeners.\n\nThe question: \"Help me create a task queue with a concurrency of 5, where tasks are functions that log a message to the console, and ensure that when the queue becomes saturated, it logs 'Queue is saturated', and when it becomes unsaturated, it logs 'Queue is unsaturated'?\" So answer should include example code:\n\n```\nconst q = new TaskQueue({ concurrency: 5 });\n\nq.on('saturated', () => console.log('Queue is saturated'));\nq.on('unsaturated', () => console.log('Queue is unsaturated'));\n\nfor(let i=1;i<=10;i++){\n   q.add(() => {\n      console.log(`Task ${i}`);\n   });\n}\n```\n\nAlso mention usage of functions.B if needed: call functions.B({t:'5'}). Then assign event listeners on returned queue instance.\n\nLet's produce explanation and sample code."
+            },
+            "stop_reason": null,
+            "token_ids": null
+          }
+        ],
+        "created": 1779052675,
+        "model": "openai/gpt-oss-20b-checkpoint-400-merged-5epoch-all-zhtw-base-cot-have-series-lr5e-7",
+        "object": "chat.completion",
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": {
+          "completion_tokens": 1286,
+          "prompt_tokens": 307,
+          "total_tokens": 1593,
+          "completion_tokens_details": null,
+          "prompt_tokens_details": null
+        },
+        "prompt_logprobs": null,
+        "prompt_token_ids": null,
+        "kv_transfer_params": null
+      },
+      "parsed_response": [],
+      "input_token": 307,
+      "output_token": 1286,
+      "latency": 14.021887302398682
+    }
+  ]
+}
