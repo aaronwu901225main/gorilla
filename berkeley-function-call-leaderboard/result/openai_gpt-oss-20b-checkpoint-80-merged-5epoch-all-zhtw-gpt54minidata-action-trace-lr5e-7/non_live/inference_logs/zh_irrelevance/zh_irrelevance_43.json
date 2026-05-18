@@ -1,0 +1,103 @@
+{
+  "id": "zh_irrelevance_43",
+  "model_name": "openai/gpt-oss-20b-checkpoint-80-merged-5epoch-all-zhtw-gpt54minidata-action-trace-lr5e-7",
+  "test_category": "zh_irrelevance",
+  "result": [],
+  "traceback": null,
+  "inference_log": [
+    {
+      "role": "inference_io",
+      "request": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "我如何在遊戲人工智能中應用進化算法？"
+          }
+        ],
+        "model": "openai/gpt-oss-20b-checkpoint-80-merged-5epoch-all-zhtw-gpt54minidata-action-trace-lr5e-7",
+        "temperature": 0.001,
+        "store": false,
+        "tools": [
+          {
+            "type": "function",
+            "function": {
+              "name": "evolve_creatures",
+              "description": "Apply the Evolutionary Algorithm to improve the creatures in a simulation over generations. Note that the provided function is in Python 3 syntax.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "population_size": {
+                    "type": "integer",
+                    "description": "The initial size of the creature population."
+                  },
+                  "mutation_rate": {
+                    "type": "number",
+                    "description": "The probability of mutation in each generation. This is a float type value.",
+                    "format": "float"
+                  },
+                  "generations": {
+                    "type": "integer",
+                    "description": "The number of generations to run the simulation."
+                  },
+                  "fitness_goal": {
+                    "type": "integer",
+                    "description": "The fitness goal that the creatures should strive for. This is an optional parameter. Default: 1"
+                  }
+                },
+                "required": [
+                  "population_size",
+                  "mutation_rate",
+                  "generations"
+                ]
+              }
+            }
+          }
+        ],
+        "extra_body": {
+          "repetition_penalty": 1.2
+        }
+      },
+      "raw_response": {
+        "id": "chatcmpl-a9f3b52fd52c6de5",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "logprobs": null,
+            "message": {
+              "content": "### 在游戏 AI 中使用进化演算（Evolutionary Algorithms，EA）的完整流程  \n\n> **目标**：让“生物”（NPC、策略、路径规划等）通过自然选择的方式逐代改良，从而获得更好的表现。  \n> **核心思想**：把每一条 “生命” 看作一个染色体，用遗传操作（交叉、变异）产生新个体，再根据适应度评估谁能留下来。\n\n---\n\n## 一、先确定你想要优化什么？\n\n| 场景 | 可量化指标（Fitness） |\n|------|------------------------|\n| *敌人行为* | 击败玩家次数 / 生存时间 / 战术多样性 |\n| *资源收集* | 收集速度 + 路径效率 |\n| *战斗决策树权重* | 胜率/平均伤害输出 |\n| *地图生成* | 玩家满意度评分 / 平衡性指数 |\n\n> **Tip**：越具体、可测得的数据越好；如果是主观感受，可以事后给分数或做 A/B 测试再回填到 Fitness。\n\n---\n\n## 二、设计基因编码（Genome）\n\n1. **离散型参数**  \n   - `int` 或 `bool` 的数组，例如 `[0, 1, 2]` 表示不同攻击模式。\n2. **连续型参数**  \n   - 用浮点数表示，如 `[0.73, 1.5, 0.02]` 对应加速系数、射程倍率、冷却时间。\n3. **混合类型**  \n   - 使用结构体或字典，把两种都放进去。例如：\n     ```python\n     genome = {\n         \"attack_mode\": random.choice([0,1,2]),\n         \"speed_factor\": random.uniform(0.8, 1.2),\n         \"cooldown_time\": random.randint(10,30)\n     }\n     ```\n\n> **注意**：保持基因长度固定，否则交叉会出错；若需要动态大小，可采用自定义交叉逻辑，但实现复杂度上升。\n\n---\n\n## 三、初始化种群\n\n```python\ndef init_population(population_size):\n    return [random_genome() for _ in range(population_size)]\n```\n- 每一次实验最好从同一随机种子开始，以便复现结果。\n\n---\n\n## 四、评价函数（Fitness Function）\n\n这是最关键的一步，你必须把「优秀」与「糟糕」映射成数字：\n\n```python\ndef evaluate(genome):\n    # 运行模拟并记录数据\n    result = simulate_game_with_ai(genome)  # 自己写的接口\n    \n    # 根据业务需求组合多个维度\n    win_ratio      = result.wins / result.games_played\n    avg_damage     = sum(result.damage_dealt)/result.games_played\n    survival_score = result.total_survival_seconds\n    \n    # 简单线性组合，也可以用非线性公式\n    fitness = (\n        0.5 * win_ratio +\n        0.3 * (avg_damage / max_possible_damage) +\n        0.2 * (survival_score / max_survival_time)\n    )\n    \n    return fitness\n```\n\n> **小技巧**  \n> • 如果某些指标对胜负影响极大，可以乘以较大的权重。  \n> • 若有约束条件（如不允许超过一定耗时），可以加入惩罚项：`fitness -= penalty`.\n\n---\n\n## 五、选择（Selection）\n\n常见方法：\n\n| 方法 | 特点 | 示例代码 |\n|------|------|----------|\n| 锦标赛（Tournament） | 快速且易调节 | `selected = tournament_selection(pop)` |\n| 精英保留（Elitism） | 保证最佳永远存在 | `elite = sorted(pop, key=fit)[-k:]` |\n| 拍卖式（Roulette Wheel） | 按比例选取 | `probabilities = fit/sum(fit); selected = np.random.choice(...)` |\n\n> 推荐：锦标赛+精英结合，既保证了探索，又不会丢失已知优解。\n\n---\n\n## 六、交叉（Crossover）\n\n- **单点交叉**：交换两个父母部分基因。  \n- **均匀交叉**：按位决定来自哪方。  \n- **BLX‑α**（针对实值）：在父母区间外扩展 α 值。\n\n```python\ndef single_point_crossover(parent_a, parent_b):\n    point = random.randint(1, len(parent_a)-1)\n    child = parent_a[:point] + parent_b[point:]\n    return child\n```\n\n> 对于混合型基因，需要分别处理整数和浮点字段。\n\n---\n\n## 七、突变（Mutation）\n\n- **概率**：通常设为 0.01~0.1。  \n- **方式**：  \n  - 整数 → 随机替换  \n  - 实数 → 加入正态噪声  \n  - 布尔 → 翻转\n\n```python\ndef mutate(genome, rate):\n    for i in range(len(genome)):\n        if random.random() < rate:\n            genome[i] += random.gauss(0, sigma)  # 连续型\n    return genome\n```\n\n> **重要**：不要过高，否则破坏已有优势；太低则搜索停滞。\n\n---\n\n## 八、终止准则\n\n| 条件 | 描述 |\n|------|------|\n| 达到最大世代数 | 固定迭代次数 |\n| 适配度阈值 | 当最高适配度 ≥ target 时停止 |\n| 没有效果提升 | 如连续 N 世代无显著改善，则提前结束 |\n\n---\n\n## 九、完整伪代码\n\n```python\nimport random\n\nPOP_SIZE       = 200\nGENERATIONS    = 100\nMUTATION_RATE  = 0.03\nELITE_COUNT    = 5\n\npop = init_population(POP_SIZE)\n\nfor gen in range(GENERATIONS):\n\n    # 计算所有个体适配度\n    fits = [evaluate(g) for g in pop]\n    \n    # 保存精英\n    elite_indices = sorted(range(len(fits)), key=lambda i:fits[i], reverse=True)[:ELITE_COUNT]\n    elites = [pop[i][:] for i in elite_indices]\n\n    new_pop = []\n\n    while len(new_pop) < POP_SIZE - ELITE_COUNT:\n        # 选择父母\n        p1, p2 = tournament_select(pop, fits), tournament_select(pop, fits)\n        \n        # 交叉\n        child = single_point_crossover(p1, p2)\n        \n        # 突变\n        child = mutate(child, MUTATION_RATE)\n        \n        new_pop.append(child)\n\n    # 合并精英\n    pop = new_pop + elites\n\n    best_fit = max(fits)\n    print(f\"Gen {gen}: Best Fit={best_fit:.4f}\")\n\n    # 判断是否满足终止条件\n    if best_fit >= FITNESS_GOAL:\n        break\n```\n\n---\n\n## 十、实践案例\n\n| 游戏功能 | 如何应用 EA | 参考库 |\n|---------|-------------|-------|\n| **自动平衡武器属性** | 把弹道、威力、装填时间作为基因，通过玩家击杀统计得到适配度 | DEAP, PyGAD |\n| **敌人巡航路线** | 基因代表节点序列，适配度由通关难度 & 多样性计分 | NEAT-Python |\n| **实时战略单位生产顺序** | 染色体是一串指令，适配度依据比赛输赢 | TensorFlow Genetic Algorithms |\n| **剧情脚本生成** | 基因是事件触发规则集合，适配度靠情绪曲线匹配 | EvoScript |\n\n---\n\n## 十一、常见陷阱及解决方案\n\n| 陷阱 | 症状 | 解决办法 |\n|------|------|-----------|\n| **退化（All same genotype）** | 种群缺乏多样性 | 增加 Mutation Rate 或引入新的随机个体 |\n| **局部最优** | 适配度卡住 | 引入梯度下降辅助或多峰搜索 |\n| **计算成本爆炸** | 模拟慢导致跑不到足够世代 | 缩减仿真规模、利用 GPU 并行、或者使用代理模型预测 Fitness |\n| **不可解释的结果** | 得到奇怪但性能不错的配置 | 添加可视化工具查看基因变化趋势，或手工分析前几代 |\n\n---\n\n## 十二、进一步阅读\n\n1. **《Artificial Intelligence for Games》 – Ian Millington**  \n   第 9 节专门讨论进化学习。  \n2. **DEAP 官方文档** – https://deap.readthedocs.io/en/master/  \n3. **PyGAD GitHub** – https://github.com/ahmedfgad/PyGAD  \n4. **NEAT-Python** – 神经网络进化，适用于控制问题。  \n\n---\n\n### 小结\n\n将进化算法嵌入游戏 AI，只需完成以下步骤：\n\n1. 明确优化目标 → 定义 Fitness  \n2. 编码基因 → 初始化种群  \n3. 循环执行 Selection ➜ Crossover ➜ Mutation ➜ Evaluation  \n4. 检查 Termination Criteria → 输出最终基因  \n\n只要不断调整权重、变异率以及选择机制，就能让你的 NPC 行为越来越像真正的“智慧”。祝你玩得开心，同时也玩得聪明！ 🚀",
+              "refusal": null,
+              "role": "assistant",
+              "annotations": null,
+              "audio": null,
+              "function_call": null,
+              "tool_calls": [],
+              "reasoning": "The user asks \"I how do I apply evolutionary algorithm in game AI?\" They want explanation on applying EA in game AI context. We can explain steps: representation, selection, crossover, mutation, evaluation (fitness), termination criteria; examples like evolving NPC behavior, pathfinding heuristics, strategy optimization etc.\n\nWe might also provide code example or pseudo-code. Also mention using libraries such as DEAP, PyGAD, genetic algorithms frameworks. Provide practical tips: encoding strategies, objective metrics, dealing with multi-objective, constraints, computational cost. Could give sample scenario: evolving parameters for enemy AI decision tree. Or use GA to tune weights of heuristic functions.\n\nAlso ask if they need help implementing? Might propose using python and library. But question likely expects conceptual answer. So respond accordingly. Use Chinese. Let's produce thorough guide."
+            },
+            "stop_reason": null,
+            "token_ids": null
+          }
+        ],
+        "created": 1779088405,
+        "model": "openai/gpt-oss-20b-checkpoint-80-merged-5epoch-all-zhtw-gpt54minidata-action-trace-lr5e-7",
+        "object": "chat.completion",
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": {
+          "completion_tokens": 2267,
+          "prompt_tokens": 224,
+          "total_tokens": 2491,
+          "completion_tokens_details": null,
+          "prompt_tokens_details": null
+        },
+        "prompt_logprobs": null,
+        "prompt_token_ids": null,
+        "kv_transfer_params": null
+      },
+      "parsed_response": [],
+      "input_token": 224,
+      "output_token": 2267,
+      "latency": 23.432806491851807
+    }
+  ]
+}
