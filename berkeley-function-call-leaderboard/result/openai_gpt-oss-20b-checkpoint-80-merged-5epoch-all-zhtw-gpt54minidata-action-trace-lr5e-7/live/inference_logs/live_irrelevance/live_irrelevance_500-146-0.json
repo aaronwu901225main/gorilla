@@ -71,39 +71,39 @@
           }
         ],
         "extra_body": {
-          "repetition_penalty": 1.2
+          "repetition_penalty": 1.02
         }
       },
       "raw_response": {
-        "id": "chatcmpl-9e183dfe20bd84a6",
+        "id": "chatcmpl-865ea2ade09c87b2",
         "choices": [
           {
             "finish_reason": "stop",
             "index": 0,
             "logprobs": null,
             "message": {
-              "content": "Below is a quick‑start guide for retrieving data about a specific interface using the **`telemetry_flowrules_interfaceInfo_get`** helper you’ve got available.  \nI’ll walk through:\n\n1. What each argument means  \n2. How to build a minimal request in plain Python  \n3. Typical responses & error handling  \n\nFeel free to drop me more context (e.g., “I’m looking at Ethernet port 5 on node 42”) so I can tailor the exact payload for your environment.\n\n\n\n---\n\n### 1️⃣ Argument Cheat Sheet\n\n| Parameter | Type | Description |\n|-----------|------|-------------|\n| `fabricName` | `str` | Name/ID of the fabric you’re querying (e.g., `\"prod-fabric\"`). |\n| `nodeId`     | `int` | Numeric ID of the switch/node inside that fabric. |\n| `podId`      | `int` | Pod number where the node lives (often same as node’s rack/pod). |\n| `interfaceType` | `\"svi\" | \"ethernet\" | \"loopback\" | \"port-channel\"` | Which kind of interface you care about. |\n| `infoType`   | `\"interfaces\" | \"status\" | \"statistics\" | \"errors\"` | *What* slice of data you want back. |\n\n> ⚠️ If you pass an unsupported combination (e.g., requesting `\"errors\"` on a loopback) the service will return a clear error message – no silent failures.\n\n\n---\n\n### 2️⃣ Minimal Example (Python)\n\n```python\nfrom __future__ import annotations\nimport json\n\ndef fetch_interface_info(fabric_name: str,\n                         node_id: int,\n                         pod_id: int,\n                         iface_type: str,\n                         info_kind: str):\n    \"\"\"\n    Wrapper around the telemetry FlowRules API.\n    Returns parsed JSON or raises ValueError on bad input.\n    \"\"\"\n\n    # Validate inputs early\n    valid_types = {\"svi\", \"ethernet\", \"loopback\", \"port-channel\"}\n    valid_infos = {\"interfaces\", \"status\", \"statistics\", \"errors\"}\n\n    if iface_type not in valid_types:\n        raise ValueError(f\"Unsupported interfaceType '{iface_type}'.\")\n    if info_kind not in valid_infos:\n        raise ValueError(f\"Unsupported infoType '{info_kind}'.\")\n\n    # Build the request body exactly like the SDK expects\n    req_body = {\n        \"fabricName\": fabric_name,\n        \"nodeId\": node_id,\n        \"podId\": pod_id,\n        \"interfaceType\": iface_type,\n        \"infoType\": info_kind,\n    }\n\n    # Call the underlying function (provided by the platform)\n    result = functions.telemetry_flowrules_interfaceInfo_get(req_body)\n\n    # Pretty‑print the returned dict / list\n    print(json.dumps(result, indent=2))\n    return result\n\n\nif __name__ == \"__main__\":\n    # Example: Get status of all ethernet interfaces on node 101 in pod 7 of fabric \"core\"\n    fetch_interface_info(\n        fabric_name=\"core\",\n        node_id=101,\n        pod_id=7,\n        iface_type=\"ethernet\",\n        info_kind=\"status\",\n    )\n```\n\n#### Expected Output Skeleton\n\nWhen you query e.g. `infoKind=\"status\"` you'll typically see something like:\n\n```json\n{\n  \"nodeId\": 101,\n  \"podId\": 7,\n  \"fabricName\": \"core\",\n  \"interfaceType\": \"ethernet\",\n  \"data\": [\n    {\n      \"id\": \"Ethernet0/48\",\n      \"adminState\": \"up\",\n      \"operStatus\": \"down\",\n      \"lastChange\": \"2026-05-17T14:23:01Z\",\n      \"description\": \"Uplink to spine\"\n    },\n    ...\n  ]\n}\n```\n\nIf you asked for `\"statistics\"` you’d receive counters (`rxBytes`, `txPackets`, …); `\"errors\"` would give packet‑error counts; `\"interfaces\"` returns full config objects (IP addresses, MTUs, ACL references).\n\n---\n\n### 3️⃣ Common Pitfalls & Tips\n\n| Symptom | Likely Cause | Fix |\n|---------|--------------|-----|\n| Empty array/list | No matching interfaces exist for those filters | Double‑check `nodeId`, `podId`, and `interfaceType`. |\n| Error: Unsupported interfaceType | Typo or wrong enum value | Use one of the four allowed strings verbatim. |\n| Permission denied | Your account lacks read rights on that fabric | Request appropriate role from Ops team. |\n| Unexpected keys in response | Service version changed | Inspect raw HTTP headers or consult docs for new schema. |\n\n---\n\n### 4️⃣ Next Steps\n\n1. **Identify the target** – decide whether you need configuration (`interfaces`) or runtime metrics (`status/statistics/errors`).  \n2. **Pick the right filter** – most often you’ll only need a single `nodeId`; but if you’re scanning across many pods, iterate over them programmatically.  \n3. **Automate reporting** – wrap this call into a cron job or integrate it into your monitoring stack (Grafana, Prometheus exporters, etc.).  \n\nLet me know if you hit any snags while plugging this into your workflow!",
+              "content": "### How to Pull Interface Information with the Telemetry API\n\nBelow is a quick‑start guide that shows you how to request the four kinds of data you can pull for a specific interface on a specific node/pod in a fabric.\n\n| Parameter | What it means | Example |\n|-----------|---------------|---------|\n| `fabricName` | Name of the fabric (e.g., “core‑fabric”) | `\"core-fabric\"` |\n| `nodeId` | Numeric ID of the node you’re interested in | `101` |\n| `podId` | Numeric ID of the pod that contains the node | `1` |\n| `interfaceType` | Type of interface you want to query | `\"svi\"` |\n| `infoType` | What you want to retrieve (`interfaces`, `status`, `statistics`, `errors`) | `\"status\"` |\n\n---\n\n#### 1. Pick the data you need\n\n- **`interfaces`** – Basic interface definition (name, description, etc.)  \n- **`status`** – Operational state, admin state, speed, duplex, etc.  \n- **`statistics`** – Counters (bytes, packets, errors, etc.)  \n- **`errors`** – Error counters (CRC, alignment, etc.)\n\n---\n\n#### 2. Build the request\n\n```python\n# Example: Get the status of the SVI on node 101 in pod 1 of the \"core-fabric\"\npayload = {\n    \"fabricName\": \"core-fabric\",\n    \"nodeId\": 101,\n    \"podId\": 1,\n    \"interfaceType\": \"svi\",\n    \"infoType\": \"status\"\n}\n```\n\n---\n\n#### 3. Call the function\n\n```python\nfrom functions import telemetry_flowrules_interfaceInfo_get\n\nresponse = telemetry_flowrules_interfaceInfo_get(payload)\nprint(response)\n```\n\n> **Tip:** If you’re using a REST client or a different language, just translate the JSON payload into the appropriate request body.\n\n---\n\n#### 4. Inspect the response\n\nThe API will return a JSON object that looks something like this (simplified):\n\n```json\n{\n  \"fabricName\": \"core-fabric\",\n  \"nodeId\": 101,\n  \"podId\": 1,\n  \"interfaceType\": \"svi\",\n  \"infoType\": \"status\",\n  \"data\": {\n    \"interfaceName\": \"Vlan100\",\n    \"adminState\": \"up\",\n    \"operState\": \"up\",\n    \"speed\": \"10G\",\n    \"duplex\": \"full\",\n    \"lastChange\": \"2026-05-18T14:32:07Z\"\n  }\n}\n```\n\nIf you requested `statistics` or `errors`, the `data` field will contain the relevant counters.\n\n---\n\n### Quick‑Reference Cheat Sheet\n\n| `infoType` | Typical fields returned |\n|------------|------------------------|\n| `interfaces` | `interfaceName`, `description`, `mtu`, `type` |\n| `status` | `adminState`, `operState`, `speed`, `duplex`, `lastChange` |\n| `statistics` | `inOctets`, `outOctets`, `inPackets`, `outPackets`, `inErrors`, `outErrors` |\n| `errors` | `crcErrors`, `alignmentErrors`, `frameErrors`, `overrunErrors` |\n\n---\n\n### Common Pitfalls\n\n| Issue | Fix |\n|-------|-----|\n| **Wrong `nodeId` or `podId`** | Double‑check your inventory or use the fabric discovery API to list valid IDs. |\n| **Unsupported `interfaceType`** | Only `\"svi\"`, `\"ethernet\"`, `\"loopback\"`, and `\"port-channel\"` are accepted. |\n| **Missing permissions** | Ensure your API token has telemetry read rights. |\n| **Large payloads** | For `statistics` or `errors`, you might hit rate limits; consider paginating or filtering by time window if supported. |\n\n---\n\n### Next Steps\n\n1. **Automate** – Wrap the call in a script that runs every X minutes and stores the output in a database or monitoring dashboard.  \n2. **Alerting** – Use the `errors` counters to trigger alerts when thresholds are exceeded.  \n3. **Trend Analysis** – Store `statistics` over time to spot bandwidth trends or anomalies.\n\nHappy querying! If you run into any specific error messages or need help interpreting the data, just let me know.",
               "refusal": null,
               "role": "assistant",
               "annotations": null,
               "audio": null,
               "function_call": null,
               "tool_calls": [],
-              "reasoning": "The user asks: \"how to get the information of an interface?\" They likely want instructions on how to use the tool or API call. We have a function defined: telemetry_flowrules_interfaceInfo_get with parameters: fabricName (string), nodeId (number), podId (number), interfaceType (\"svi\"|\"ethernet\"|...), infoType (\"interfaces\",\"status\",\"statistics\",\"errors\"). So we need to explain usage.\n\nWe should ask clarifying details: which interface type, what info they want, etc., then show example code calling the function. Provide explanation of each parameter. Also mention possible errors if not found. Possibly provide sample output format.\n\nThus answer: describe steps: choose fabric, node id, pod id; specify interface type; pick info type; call function via python snippet. Show expected JSON response structure. Ask follow-up questions. Let's produce helpful guidance."
+              "reasoning": "The user asks: \"how to get the information of an interface?\" They likely want to use the telemetry function. We need to call the function with appropriate parameters. But we don't have specific values. We can explain how to use the function, maybe give an example. The function signature: telemetry_flowrules_interfaceInfo_get with fabricName, nodeId, podId, interfaceType, infoType. So we can explain that you need to specify those. Provide example call. Also mention that you can retrieve interfaces, status, statistics, errors. Provide sample code. Also mention that you need to have access to the API. So answer accordingly."
             },
             "stop_reason": null,
             "token_ids": null
           }
         ],
-        "created": 1779088197,
+        "created": 1779175637,
         "model": "openai/gpt-oss-20b-checkpoint-80-merged-5epoch-all-zhtw-gpt54minidata-action-trace-lr5e-7",
         "object": "chat.completion",
         "service_tier": null,
         "system_fingerprint": null,
         "usage": {
-          "completion_tokens": 1276,
+          "completion_tokens": 1068,
           "prompt_tokens": 289,
-          "total_tokens": 1565,
+          "total_tokens": 1357,
           "completion_tokens_details": null,
           "prompt_tokens_details": null
         },
@@ -113,8 +113,8 @@
       },
       "parsed_response": [],
       "input_token": 289,
-      "output_token": 1276,
-      "latency": 13.983699083328247
+      "output_token": 1068,
+      "latency": 12.508867979049683
     }
   ]
 }

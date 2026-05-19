@@ -198,39 +198,39 @@
           }
         ],
         "extra_body": {
-          "repetition_penalty": 1.2
+          "repetition_penalty": 1.02
         }
       },
       "raw_response": {
-        "id": "chatcmpl-a4bda824217b1c1b",
+        "id": "chatcmpl-bde6d15c0ed835ed",
         "choices": [
           {
             "finish_reason": "stop",
             "index": 0,
             "logprobs": null,
             "message": {
-              "content": "### Why “`'Message' object is not subscriptable’” happens  \n\nIn Python, *subscriptable* means you can use square‑bracket notation (`obj[key]`) just like you would with lists, tuples, dictionaries, etc.  \nA **Discord `discord.Message`** (or similar custom class) isn’t one of those built‑in containers – it’s a normal Python object whose data lives in its **attributes**, not in a mapping interface.\n\nSo doing something like:\n\n```python\nmsg = await ctx.send(\"Hello!\")\nprint(msg[\"content\"])   # ❌ TypeError: 'Message' object is not subscriptable\n```\n\nwill raise exactly the error you saw because `msg` doesn’t implement `__getitem__`.\n\n---\n\n## How to access the content correctly\n\n| What you want | Correct approach |\n|---------------|------------------|\n| Text sent in the message | `msg.content` |\n| Author who posted it | `msg.author` |\n| Attachments list | `msg.attachments` |\n| Reaction count | `len(msg.reactions)` |\n\nExample:\n\n```python\n@bot.command()\nasync def echo(ctx):\n    original_msg = await ctx.send(\"Echoing your next message…\")\n    \n    def check(m): \n        return m.channel == ctx.channel and m.author == ctx.author\n    \n    reply = await bot.wait_for('message', check=check)\n    \n    # Access fields normally:\n    print(f\"Their message was: {reply.content}\")\n    print(f\"It had {len(reply.attachments)} attachment(s)\")\n```\n\nIf you really need a *dictionary-like* view of all public attributes, you can turn the object into a dict first:\n\n```python\ndata_dict = vars(original_msg)          # or original_msg.__dict__\nprint(data_dict.get(\"content\"))         # works now\n```\n\nBut remember that many internal/private attributes start with `_`, so filtering may be needed.\n\n---\n\n## Common pitfalls & quick fixes\n\n| Symptom | Likely cause | Fix |\n|---------|--------------|-----|\n| `\"TypeError: 'Message' object is not subscriptable\"` | Trying to read `.content` with brackets | Use dot notation: `msg.content`. |\n| Unexpected `AttributeError` after switching to dot notation | Misspelled attribute name | Double-check spelling against docs / IDE autocomplete. |\n| Need to pass message data to another API expecting JSON | Convert to plain dict | `json.dumps(vars(message))` or build manually. |\n| Want to iterate over multiple messages but get same error | Same issue—use attributes inside loop | `for m in msgs: print(m.content)` |\n\n---\n\n## Quick reference cheat sheet\n\n```python\n# Basic properties\nm.id            # int\nm.created_at    # datetime\nm.guild          # Guild object (None if DM)\n\n# Content helpers\nm.clean_content  # Strips mentions/roles/etc.\nm.jump_url       # URL link to jump directly to the message\n\n# Interaction helpers\nawait m.add_reaction(emoji)\nawait m.delete()\n\n# Checking reactions\nif any(r.count > 10 for r in m.reactions):\n    ...\n\n# Converting to dict (only public attrs)\npayload = {k:v for k,v in vars(m).items() if not k.startswith('_')}\n```\n\nFeel free to paste the exact line of code that's throwing the error if you'd like more targeted guidance!",
+              "content": "It looks like you’re trying to treat a `Message` instance like a dictionary or list (e.g., `msg['content']` or `msg[0]`).  \nIn most libraries `Message` is a **class** that exposes its data through **attributes**, not through key‑based indexing.  \n\nBelow are some common scenarios and how to fix them:\n\n| Library / Context | Typical mistake | Correct usage |\n|-------------------|-----------------|---------------|\n| **discord.py / nextcord / pycord** | `msg['content']` | `msg.content` |\n| **slack_sdk** | `msg['text']` | `msg.text` |\n| **Telegram Bot API (python-telegram-bot)** | `msg['text']` | `msg.text` |\n| **Custom `Message` class** | `msg['field']` | `msg.field` or `getattr(msg, 'field')` |\n| **When you really need a dict** | `msg['field']` | `vars(msg)['field']` or `msg.__dict__['field']` |\n\n### Quick checklist\n\n1. **Identify the library**  \n   - Look at the import statements or the documentation you’re following.  \n   - Example: `from discord import Message` → you’re in Discord.\n\n2. **Check the object type**  \n   ```python\n   print(type(msg))          # <class 'discord.Message'>\n   print(dir(msg))           # shows available attributes\n   ```\n\n3. **Use attributes**  \n   ```python\n   content = msg.content          # not msg['content']\n   author  = msg.author           # not msg['author']\n   ```\n\n4. **If you need a plain dict**  \n   ```python\n   data = msg.__dict__            # or vars(msg)\n   # Now you can do data['content'] if you really want dict semantics\n   ```\n\n5. **Avoid accidental indexing**  \n   - If you’re iterating over a list of messages, make sure you’re not accidentally indexing the list again:\n     ```python\n     for msg in messages:          # messages is a list\n         print(msg.content)        # correct\n     ```\n\n### Example: Discord bot\n\n```python\n@bot.event\nasync def on_message(message):\n    # Wrong: message['content']  -> TypeError\n    # Correct:\n    print(f\"Received message: {message.content}\")\n    await message.channel.send(f\"Hello, {message.author.name}!\")\n```\n\n### Example: Custom Message class\n\n```python\nclass Message:\n    def __init__(self, content, author):\n        self.content = content\n        self.author = author\n\nmsg = Message(\"Hi!\", \"Alice\")\n\n# Wrong: msg['content']  -> TypeError\n# Correct:\nprint(msg.content)   # Hi!\n```\n\n---\n\n#### What to do next?\n\n1. **Show the snippet** where the error occurs.  \n2. **Mention the library** you’re using (Discord, Slack, Telegram, etc.).  \n3. If you really need dictionary‑style access, let me know and I can suggest a wrapper or conversion.\n\nFeel free to paste the relevant code block, and I’ll point out the exact line that’s causing the “not subscriptable” error!",
               "refusal": null,
               "role": "assistant",
               "annotations": null,
               "audio": null,
               "function_call": null,
               "tool_calls": [],
-              "reasoning": "The user says \"'Message' object is not subscriptable\". They likely encountered this error when trying to index into a Message object (maybe from discord.py). We need to respond helpfully.\n\nWe might ask clarifying question? Provide explanation: In python, you cannot do msg['content'] if it's a Discord Message instance; instead use .content attribute. Or maybe they attempted to treat it like dict. So explain difference between dictionary vs object attributes. Also mention how to convert to dict via vars() or __dict__ etc. Suggest correct usage.\n\nAlso we could provide code snippet showing proper way.\n\nLet's produce answer accordingly."
+              "reasoning": "The user says \"'Message' object is not subscriptable\". They likely encountered an error in code. We need to respond helpfully. They might be using a library where Message is a class and they attempted to index it like a dict or list. We should ask for context or explain typical reasons. Provide guidance: ensure you access attributes via .attribute, not indexing. If using a library like discord.py, Message is a class; you can't do message['content'] but message.content. Or if using a custom Message class. Provide example. Also mention that if you need to convert to dict, use vars(message) or message.__dict__.\n\nWe should ask for more details: what code? Which library? Provide general debugging steps.\n\nLet's respond."
             },
             "stop_reason": null,
             "token_ids": null
           }
         ],
-        "created": 1779089916,
+        "created": 1779179806,
         "model": "openai/gpt-oss-20b-checkpoint-160-merged-5epoch-all-zhtw-gpt54minidata-action-trace-lr5e-7",
         "object": "chat.completion",
         "service_tier": null,
         "system_fingerprint": null,
         "usage": {
-          "completion_tokens": 836,
+          "completion_tokens": 846,
           "prompt_tokens": 828,
-          "total_tokens": 1664,
+          "total_tokens": 1674,
           "completion_tokens_details": null,
           "prompt_tokens_details": null
         },
@@ -240,8 +240,8 @@
       },
       "parsed_response": [],
       "input_token": 828,
-      "output_token": 836,
-      "latency": 8.956631183624268
+      "output_token": 846,
+      "latency": 10.398109197616577
     }
   ]
 }

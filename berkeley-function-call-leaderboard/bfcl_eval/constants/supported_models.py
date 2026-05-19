@@ -1152,6 +1152,13 @@ SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-480-merged-5epoch-all-zht
 # 5epoch-all-zhtw-gpt54minidata-action-trace-lr5e-7
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-80-merged-5epoch-all-zhtw-gpt54minidata-action-trace-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-160-merged-5epoch-all-zhtw-gpt54minidata-action-trace-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-240-merged-5epoch-all-zhtw-gpt54minidata-action-trace-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-320-merged-5epoch-all-zhtw-gpt54minidata-action-trace-lr5e-7")
+# 5epoch-all-zhtw-gpt54minidata-action-trace-lr1e-6
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-80-merged-5epoch-all-zhtw-gpt54minidata-action-trace-lr1e-6")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-160-merged-5epoch-all-zhtw-gpt54minidata-action-trace-lr1e-6")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-240-merged-5epoch-all-zhtw-gpt54minidata-action-trace-lr1e-6")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-320-merged-5epoch-all-zhtw-gpt54minidata-action-trace-lr1e-6")
 
 # gemma-4-31B-it (FC)
 SUPPORTED_MODELS.append("google/gemma-4-31B-it-FC")
