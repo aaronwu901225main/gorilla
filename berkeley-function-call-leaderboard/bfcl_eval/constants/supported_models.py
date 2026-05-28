@@ -1163,8 +1163,10 @@ SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-320-merged-5epoch-all-zht
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-160-merged-5epoch-gpt54minidata-action-trace-64-128-256-lr1e-6")
 # 5epoch-gpt54minidata-action-trace-64-192-256-lr1e-6
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-160-merged-5epoch-gpt54minidata-action-trace-64-192-256-lr1e-6")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-480-merged-5epoch-gpt54minidata-action-trace-64-192-256-lr1e-6")
 # 5epoch-gpt54minidata-action-trace-128-256-256-lr1e-6
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-160-merged-5epoch-gpt54minidata-action-trace-128-256-256-lr1e-6")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-480-merged-5epoch-gpt54minidata-action-trace-128-256-256-lr1e-6")
 # 5epoch-gpt54minidata-action-trace-64-128-256-lr5e-7
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-160-merged-5epoch-gpt54minidata-action-trace-64-128-256-lr5e-7")
 # 5epoch-gpt54minidata-action-trace-128-256-256-lr5e-7
