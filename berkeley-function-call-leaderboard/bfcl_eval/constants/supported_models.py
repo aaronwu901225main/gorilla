@@ -1171,6 +1171,22 @@ SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-480-merged-5epoch-gpt54mi
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-160-merged-5epoch-gpt54minidata-action-trace-64-128-256-lr5e-7")
 # 5epoch-gpt54minidata-action-trace-128-256-256-lr5e-7
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-160-merged-5epoch-gpt54minidata-action-trace-128-256-256-lr5e-7")
+# 5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-80-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-160-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-240-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-320-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-400-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-480-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-560-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-640-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-720-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-800-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-880-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-960-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1040-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1120-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1200-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7")
 
 # gemma-4-31B-it (FC)
 SUPPORTED_MODELS.append("google/gemma-4-31B-it-FC")
