@@ -198,39 +198,39 @@
           }
         ],
         "extra_body": {
-          "repetition_penalty": 1.03
+          "repetition_penalty": 1.02
         }
       },
       "raw_response": {
-        "id": "chatcmpl-8c12c5377181beed",
+        "id": "chatcmpl-b2486d92254a3cc9",
         "choices": [
           {
             "finish_reason": "stop",
             "index": 0,
             "logprobs": null,
             "message": {
-              "content": "It looks like you’re trying to treat a `Message` instance like a dictionary or list (e.g., `msg['content']` or `msg[0]`). In Python, only objects that implement the `__getitem__` protocol (lists, tuples, dicts, etc.) are *subscriptable*. A plain `Message` object usually exposes its data through attributes, not subscripts.\n\n### Common scenarios where this error pops up\n\n| Scenario | Typical code that triggers the error | What to do instead |\n|----------|-------------------------------------|--------------------|\n| **Using a custom `Message` class** | ```python<br>msg = Message(text=\"Hello\")<br>print(msg['text'])<br>``` | Access via attribute: `msg.text` |\n| **Using a library that returns a `Message` object** (e.g., some chat‑bot SDKs) | ```python<br>msg = get_message()<br>print(msg['role'])<br>``` | Use the documented API: `msg.role` or `msg.get('role')` if it’s a dict-like wrapper |\n| **Confusing a list of messages with a single message** | ```python<br>messages = [Message(...), Message(...)]<br>for m in messages:<br>    print(m[0])<br>``` | Iterate over the list and then access attributes: `m.content` |\n| **Using the OpenAI API** | ```python<br>response = openai.ChatCompletion.create(...)\\nmsg = response['choices'][0]['message']\\nprint(msg['content'])<br>``` | `msg` is already a dict; no error here. But if you wrapped it in a `Message` class, use attributes. |\n\n### Quick checklist to fix the issue\n\n1. **Identify the type**  \n   ```python\n   print(type(msg))\n   ```\n   If it prints `<class 'Message'>`, you’re dealing with a custom class.\n\n2. **Check the class definition**  \n   Look for attributes or methods that expose the data. For example:\n   ```python\n   class Message:\n       def __init__(self, content):\n           self.content = content\n   ```\n\n3. **Use attributes, not subscripts**  \n   ```python\n   # Wrong\n   msg['content']\n\n   # Right\n   msg.content\n   ```\n\n4. **If you really need dict‑like access**  \n   - Add a `__getitem__` method to the class, or\n   - Convert the object to a dict: `vars(msg)` or `msg.__dict__`.\n\n5. **If you’re working with a list of messages**  \n   ```python\n   for m in messages:\n       print(m.content)\n   ```\n\n### Example fix\n\nSuppose you have:\n\n```python\nclass Message:\n    def __init__(self, role, content):\n        self.role = role\n        self.content = content\n\nmsg = Message(role=\"assistant\", content=\"Hello!\")\nprint(msg['role'])   # ❌ Raises TypeError\n```\n\nChange it to:\n\n```python\nprint(msg.role)      # ✅ Works\n```\n\nOr, if you want to keep the subscript syntax:\n\n```python\nclass Message:\n    def __init__(self, role, content):\n        self.data = {\"role\": role, \"content\": content}\n\n    def __getitem__(self, key):\n        return self.data[key]\n\nmsg = Message(\"assistant\", \"Hello!\")\nprint(msg['role'])   # ✅ Works\n```\n\n### Need more help?\n\nIf you can share a snippet of the code where the error occurs, I can give you a more targeted fix. Just paste the relevant part (or a minimal reproducible example), and we’ll troubleshoot together!",
+              "content": "It looks like you’re trying to treat a `Message` instance like a dictionary or list (e.g., `msg['text']` or `msg[0]`). In Python, only objects that implement the `__getitem__` method are “subscriptable.” A plain `Message` class (or whatever library you’re using) usually exposes its data through attributes instead.\n\n### Common scenarios\n\n| Scenario | Typical code that causes the error | What to do instead |\n|----------|-----------------------------------|--------------------|\n| **OpenAI Chat API** | `msg = {\"role\": \"user\", \"content\": \"Hello\"}; msg['content']` works because it’s a dict. <br>But if you wrap it in a custom `Message` class: `msg = Message(role=\"user\", content=\"Hello\")` and then `msg['content']`, you’ll get the error. | Use attributes: `msg.content` or `msg.role`. |\n| **Custom `Message` class** | `class Message: def __init__(self, text): self.text = text` <br>Then `msg = Message(\"hi\")` and `msg['text']` → error. | Access via `msg.text`. |\n| **Using a library that expects dicts** | You passed a `Message` object where a dict was expected. | Convert to dict: `msg_dict = {\"role\": msg.role, \"content\": msg.content}` or use the library’s helper method. |\n\n### Quick checklist\n\n1. **Inspect the object**  \n   ```python\n   print(type(msg))\n   print(dir(msg))\n   ```\n   This tells you whether it’s a dict, a custom class, or something else.\n\n2. **Use attributes**  \n   ```python\n   # If msg is a custom object\n   content = msg.content\n   role = msg.role\n   ```\n\n3. **If you need a dict**  \n   ```python\n   msg_dict = {\"role\": msg.role, \"content\": msg.content}\n   ```\n\n4. **If you’re using a library that expects a dict**  \n   Make sure you pass the correct type. For example, with the OpenAI SDK:\n   ```python\n   messages = [\n       {\"role\": \"system\", \"content\": \"You are helpful.\"},\n       {\"role\": \"user\", \"content\": \"Tell me a joke.\"}\n   ]\n   ```\n\n### Example fix\n\nSuppose you have:\n\n```python\nclass Message:\n    def __init__(self, role, content):\n        self.role = role\n        self.content = content\n\nmsg = Message(\"user\", \"Hello\")\nprint(msg['content'])  # ❌ raises TypeError\n```\n\nChange it to:\n\n```python\nprint(msg.content)  # ✅ works\n```\n\nOr, if you need a dict for an API call:\n\n```python\napi_msg = {\"role\": msg.role, \"content\": msg.content}\n```\n\n### When you’re still stuck\n\n- **Show the relevant code snippet**: The exact line that triggers the error.\n- **Explain what you’re trying to achieve**: Are you sending a message to an API? Parsing a response?\n- **Mention the library**: e.g., `openai`, `langchain`, `anthropic`, etc.\n\nWith that information, I can give you a more precise fix.",
               "refusal": null,
               "role": "assistant",
               "annotations": null,
               "audio": null,
               "function_call": null,
               "tool_calls": [],
-              "reasoning": "The user says \"'Message' object is not subscriptable\". They likely encountered an error in code. We need to respond helpfully. Probably they are using a library where Message is a class and they attempted to index it like a dict or list. We should ask for context or explain typical reasons. Provide guidance: ensure you access attributes via .attribute, not indexing. If using a list of messages, ensure you refer to the list, not the Message object. Provide example. Also mention that if using a library like openai, messages are dicts, not Message objects. Provide debugging steps."
+              "reasoning": "The user says \"'Message' object is not subscriptable\". They likely encountered an error in code. We need to respond helpfully. Probably they are using a library where Message is a class and they tried to index it like a dict. We should ask for context or explain typical cause. Provide guidance: ensure you access attributes, not subscript. Provide example. Also mention that if using openai library, messages are dicts. If using custom Message class, use .content or .text. Provide debugging steps."
             },
             "stop_reason": null,
             "token_ids": null
           }
         ],
-        "created": 1780066860,
+        "created": 1780078339,
         "model": "openai/gpt-oss-20b-checkpoint-240-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7",
         "object": "chat.completion",
         "service_tier": null,
         "system_fingerprint": null,
         "usage": {
-          "completion_tokens": 914,
+          "completion_tokens": 813,
           "prompt_tokens": 828,
-          "total_tokens": 1742,
+          "total_tokens": 1641,
           "completion_tokens_details": null,
           "prompt_tokens_details": null
         },
@@ -240,8 +240,8 @@
       },
       "parsed_response": [],
       "input_token": 828,
-      "output_token": 914,
-      "latency": 10.603153467178345
+      "output_token": 813,
+      "latency": 9.907533645629883
     }
   ]
 }

@@ -198,39 +198,39 @@
           }
         ],
         "extra_body": {
-          "repetition_penalty": 1.04
+          "repetition_penalty": 1.02
         }
       },
       "raw_response": {
-        "id": "chatcmpl-b65f10d17ceb4c0f",
+        "id": "chatcmpl-8ad1e3303ea9060f",
         "choices": [
           {
             "finish_reason": "stop",
             "index": 0,
             "logprobs": null,
             "message": {
-              "content": "That error usually pops up when you try to treat a `Message` instance (or any custom object) like a dictionary or list—i.e., using square‑bracket indexing (`msg['text']`, `msg[0]`, etc.)—but the class doesn’t implement the `__getitem__` method.\n\n### Why it happens\n- **Python objects are only subscriptable if they define `__getitem__`.**  \n  Built‑in types like `dict`, `list`, `tuple`, `str`, etc. support indexing. Custom classes don’t unless you explicitly add that method.\n- **Common mistake:** Assuming a library’s `Message` object behaves like a dict because many APIs return JSON‑like structures.\n\n### Typical scenarios\n| Context | What you might have written | What you should do |\n|---------|-----------------------------|--------------------|\n| Using a messaging library (e.g., `discord.py`, `slack_sdk`) | `content = msg['content']` | Use the attribute: `content = msg.content` |\n| Working with a custom `Message` class | `payload = msg['payload']` | Either add `__getitem__` to the class or access via attributes/methods. |\n| Parsing JSON into a custom object | `data = json.loads(json_str)` then `msg = Message(data)` | Keep the raw dict (`data['key']`) or expose properties on `Message`. |\n\n### Quick fixes\n\n1. **Check the documentation**  \n   Look up the library or class definition. Most messaging libraries expose attributes, e.g.:\n\n   ```python\n   # discord.py example\n   async def on_message(message):\n       print(message.content)   # not message['content']\n   ```\n\n2. **Add `__getitem__` to your class**  \n   If you control the `Message` class and want to keep the subscript syntax:\n\n   ```python\n   class Message:\n       def __init__(self, data):\n           self.data = data\n\n       def __getitem__(self, key):\n           return self.data[key]\n   ```\n\n3. **Use `.get()` or `.getattr()`**  \n   If you’re dealing with a dict‑like object but unsure of keys:\n\n   ```python\n   content = msg.get('content', None)  # safe dict access\n   ```\n\n4. **Convert to a dict first**  \n   If the object has a method to serialize itself:\n\n   ```python\n   payload = msg.to_dict()          # or msg.__dict__\n   value = payload['key']\n   ```\n\n### Example: Discord bot\n\n```python\nimport discord\n\nclass MyClient(discord.Client):\n    async def on_message(self, message):\n        # Wrong: message['content'] -> TypeError\n        # Correct:\n        print(f\"Received message: {message.content}\")\n\nclient = MyClient()\nclient.run(\"YOUR_TOKEN\")\n```\n\n### Example: Slack SDK\n\n```python\nfrom slack_sdk import WebClient\n\nclient = WebClient(token=\"xoxb-...\")\nresponse = client.chat_postMessage(channel=\"#general\", text=\"Hello!\")\n# response is a dict; you can index it\nprint(response[\"ts\"])\n```\n\n### When you *do* want subscriptable behavior\n\nIf you’re wrapping a dict inside a class and want to preserve the dict interface:\n\n```python\nclass Message(dict):\n    pass\n\nmsg = Message({\"text\": \"hi\"})\nprint(msg[\"text\"])  # works because Message inherits from dict\n```\n\nOr implement `__getitem__` manually as shown earlier.\n\n---\n\n#### TL;DR\n\n- **`'Message' object is not subscriptable`** → You tried `msg[key]` on an object that doesn’t support indexing.\n- **Fix**: Use the object's attributes (`msg.attribute`) or add `__getitem__` if you need dictionary‑style access.\n\nIf you share the snippet that caused the error, I can give more targeted advice!",
+              "content": "It looks like you’re trying to treat a `Message` instance like a dictionary or list (e.g., `msg['text']` or `msg[0]`). In most libraries that define a `Message` class, the object is **not** subscriptable; you need to access its data through attributes or methods.\n\n### Common scenarios and how to fix them\n\n| Scenario | Typical mistake | Correct approach |\n|----------|-----------------|------------------|\n| **Using a `Message` from a chat‑completion library** | `msg['content']` | `msg.content` (or whatever attribute the library exposes) |\n| **Trying to get the first element of a `Message`** | `msg[0]` | `msg[0]` only works if `msg` is a list/tuple. If you want the first message in a list of messages, use `messages[0]`. |\n| **Accessing nested data** | `msg['payload']['text']` | `msg.payload.text` (or `msg.payload.get('text')` if `payload` is a dict) |\n| **Using a custom `Message` class** | `msg['field']` | `msg.field` or `msg.get_field()` depending on the API |\n\n### Quick checklist\n\n1. **Inspect the object**  \n   ```python\n   print(type(msg))\n   print(dir(msg))\n   ```\n   This will show you what attributes/methods are available.\n\n2. **Read the documentation**  \n   Look up the library’s docs for the `Message` class. It usually lists the public attributes (e.g., `id`, `role`, `content`, `metadata`).\n\n3. **Use attribute access**  \n   ```python\n   content = msg.content          # if `content` is a public attribute\n   # or\n   content = getattr(msg, 'content', None)\n   ```\n\n4. **If you really need a dict**  \n   Some libraries provide a `.to_dict()` or `.dict()` method:\n   ```python\n   msg_dict = msg.to_dict()\n   content = msg_dict['content']\n   ```\n\n### Example with OpenAI’s `ChatCompletion` (Python)\n\n```python\nimport openai\n\nresponse = openai.ChatCompletion.create(\n    model=\"gpt-3.5-turbo\",\n    messages=[{\"role\": \"user\", \"content\": \"Hello!\"}]\n)\n\n# response is a dict, but each message inside is a dict too\nfirst_msg = response[\"choices\"][0][\"message\"]\nprint(first_msg[\"content\"])  # works because it's a dict\n```\n\nIf you’re using a wrapper that returns a `Message` object instead of a plain dict, you’ll need to consult that wrapper’s API.\n\n---\n\n#### What to do next\n\n- **Show me the snippet** where you’re getting the error.  \n- Tell me which library or framework you’re using (`openai`, `anthropic`, a custom SDK, etc.).  \n- If you’re writing your own `Message` class, consider adding a `__getitem__` method if you really want subscriptable behavior.\n\nOnce I see the code, I can give you a more precise fix!",
               "refusal": null,
               "role": "assistant",
               "annotations": null,
               "audio": null,
               "function_call": null,
               "tool_calls": [],
-              "reasoning": "The user says \"'Message' object is not subscriptable\". They likely encountered an error in code. We need to respond helpfully. Probably explain what it means, how to fix. Ask for context? Provide explanation."
+              "reasoning": "The user says \"'Message' object is not subscriptable\". They likely encountered an error in code. We need to respond helpfully. Probably they are using a library where Message is a class and they tried to index it like a dict. We should ask for context or explain that you cannot subscript a Message object; you need to access attributes. Provide guidance."
             },
             "stop_reason": null,
             "token_ids": null
           }
         ],
-        "created": 1780067078,
+        "created": 1780083462,
         "model": "openai/gpt-oss-20b-checkpoint-400-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7",
         "object": "chat.completion",
         "service_tier": null,
         "system_fingerprint": null,
         "usage": {
-          "completion_tokens": 872,
+          "completion_tokens": 747,
           "prompt_tokens": 828,
-          "total_tokens": 1700,
+          "total_tokens": 1575,
           "completion_tokens_details": null,
           "prompt_tokens_details": null
         },
@@ -240,8 +240,8 @@
       },
       "parsed_response": [],
       "input_token": 828,
-      "output_token": 872,
-      "latency": 10.150030851364136
+      "output_token": 747,
+      "latency": 9.369431972503662
     }
   ]
 }
