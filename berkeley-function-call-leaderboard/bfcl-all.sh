@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 conda activate BFCL
 set -euo pipefail
-
+DEPENDENCY=55740
 # JOB1_SCRIPT="bfcl-gen.slurm"
 JOB1_SCRIPT="bfcl-gen-gptoss-merged-1.slurm"
-# JOB2_SCRIPT="bfcl-gen-gptoss-merged-2.slurm"
-# JOB3_SCRIPT="bfcl-gen-gptoss-merged-3.slurm"
-# JOB4_SCRIPT="bfcl-gen-gptoss-merged-4.slurm"
+JOB2_SCRIPT="bfcl-gen-gptoss-merged-2.slurm"
+JOB3_SCRIPT="bfcl-gen-gptoss-merged-3.slurm"
+JOB4_SCRIPT="bfcl-gen-gptoss-merged-4.slurm"
 # JOB5_SCRIPT="bfcl-gen-gptoss-merged-5.slurm"
 
 # JOB1_SCRIPT="bfcl-gen-gemma4-fc-1.slurm"
@@ -18,9 +18,9 @@ JOB1_SCRIPT="bfcl-gen-gptoss-merged-1.slurm"
 
 JOB_SCRIPTS=(
   "$JOB1_SCRIPT"
-  # "$JOB2_SCRIPT"
-  # "$JOB3_SCRIPT"
-  # "$JOB4_SCRIPT"
+  "$JOB2_SCRIPT"
+  "$JOB3_SCRIPT"
+  "$JOB4_SCRIPT"
   # "$JOB5_SCRIPT"
 )
 
@@ -29,7 +29,11 @@ job_ids=()
 # 同時送出所有 jobs
 for i in "${!JOB_SCRIPTS[@]}"; do
   script="${JOB_SCRIPTS[$i]}"
-  job_id=$(sbatch --parsable "$script")
+  if [[ -n "${DEPENDENCY:-}" ]]; then
+    job_id=$(sbatch --dependency=afterok:"$DEPENDENCY" --parsable "$script")
+  else
+    job_id=$(sbatch --parsable "$script")
+  fi
   job_ids+=("$job_id")
   echo "Submitted job$((i + 1)): $job_id ($script)"
 done
