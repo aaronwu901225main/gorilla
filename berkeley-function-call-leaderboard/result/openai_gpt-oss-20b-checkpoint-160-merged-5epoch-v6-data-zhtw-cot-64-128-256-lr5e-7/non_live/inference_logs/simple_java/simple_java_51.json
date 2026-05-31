@@ -1,0 +1,103 @@
+{
+  "id": "simple_java_51",
+  "model_name": "openai/gpt-oss-20b-checkpoint-160-merged-5epoch-v6-data-zhtw-cot-64-128-256-lr5e-7",
+  "test_category": "simple_java",
+  "result": [],
+  "traceback": null,
+  "inference_log": [
+    {
+      "role": "inference_io",
+      "request": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "Help me execute the master operation to gather the usage statistics of the Cross-Cluster Replication (CCR) feature in Elasticsearch, including the number of follower indices and auto-follow patterns, using a given `usageRequest` and a `clusterState`, and handle the results using an `actionListener`?"
+          }
+        ],
+        "model": "openai/gpt-oss-20b-checkpoint-160-merged-5epoch-v6-data-zhtw-cot-64-128-256-lr5e-7",
+        "temperature": 0.001,
+        "store": false,
+        "tools": [
+          {
+            "type": "function",
+            "function": {
+              "name": "CCRUsageTransportAction_masterOperation",
+              "description": "This function gathers usage statistics of the CCR feature in Elasticsearch and sends the results to the provided ActionListener. Note that the provided function is in Java 8 SDK syntax.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "task": {
+                    "type": "string",
+                    "description": "The task associated with the request. This parameter can be of any type of Java object in string representation."
+                  },
+                  "request": {
+                    "type": "string",
+                    "description": "The XPackUsageRequest object containing the request details. This parameter can be of any type of Java object in string representation."
+                  },
+                  "state": {
+                    "type": "string",
+                    "description": "The current cluster state. This parameter can be of any type of Java object in string representation."
+                  },
+                  "listener": {
+                    "type": "string",
+                    "description": "The ActionListener that handles the response containing the usage statistics. This parameter can be of any type of Java object in string representation."
+                  }
+                },
+                "required": [
+                  "task",
+                  "request",
+                  "state",
+                  "listener"
+                ]
+              }
+            }
+          }
+        ],
+        "extra_body": {
+          "repetition_penalty": 1.02
+        }
+      },
+      "raw_response": {
+        "id": "chatcmpl-849d5e6c6c223e5a",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "logprobs": null,
+            "message": {
+              "content": "Below is a minimal, self‑contained example that shows how you would invoke the **master‑side** CCR usage transport action from Java 8 code.  \nThe example assumes you already have:\n\n| Variable | What it represents | Typical type |\n|----------|--------------------|--------------|\n| `task` | The background task that is executing the request (e.g. a `Task` instance). | `Task` |\n| `usageRequest` | The `XPackUsageRequest` that you want to send to the master node. | `XPackUsageRequest` |\n| `clusterState` | The current `ClusterState` snapshot that the master node will inspect. | `ClusterState` |\n| `actionListener` | The listener that will receive the `XPackUsageResponse` (or an exception). | `ActionListener<XPackUsageResponse>` |\n\nBecause the function signature in the SDK expects **string representations** of these objects, you’ll need to serialize them (or simply pass the objects themselves if the SDK wrapper handles that). Below is a typical Java 8 snippet that demonstrates the call:\n\n```java\nimport org.elasticsearch.action.ActionListener;\nimport org.elasticsearch.cluster.ClusterState;\nimport org.elasticsearch.cluster.service.ClusterService;\nimport org.elasticsearch.common.util.concurrent.EsExecutors;\nimport org.elasticsearch.xpack.core.usage.XPackUsageRequest;\nimport org.elasticsearch.xpack.core.usage.XPackUsageResponse;\nimport org.elasticsearch.tasks.Task;\n\n// ---------------------------------------------------------------------\n// 1. Prepare the objects you need\n// ---------------------------------------------------------------------\n\n// 1a. The task that is running this request (optional – can be null)\nTask task = null; // or new Task(...)\n\n// 1b. The usage request – usually just a default instance\nXPackUsageRequest usageRequest = new XPackUsageRequest();\n\n// 1c. Grab the current cluster state (you normally get this from ClusterService)\nClusterService clusterService = ...; // injected or looked up\nClusterState clusterState = clusterService.state(); // snapshot of the state\n\n// 1d. The listener that will receive the response\nActionListener<XPackUsageResponse> actionListener = new ActionListener<XPackUsageResponse>() {\n    @Override\n    public void onResponse(XPackUsageResponse response) {\n        // Handle the successful response here\n        System.out.println(\"CCR usage stats: \" + response);\n    }\n\n    @Override\n    public void onFailure(Exception e) {\n        // Handle errors here\n        e.printStackTrace();\n    }\n};\n\n// ---------------------------------------------------------------------\n// 2. Call the master operation\n// ---------------------------------------------------------------------\n\n// The SDK function expects string representations – the wrapper will\n// convert the Java objects into the required format internally.\nfunctions.CCRUsageTransportAction_masterOperation({\n    task: task.toString(),          // or simply pass the Task object if the SDK accepts it\n    request: usageRequest.toString(),\n    state: clusterState.toString(),\n    listener: actionListener.toString()\n});\n```\n\n### What the master operation does\n\nWhen the master node receives this call it will:\n\n1. Inspect the supplied `ClusterState` to count:\n   * **Follower indices** – indices that are replicating data from remote clusters.\n   * **Auto‑follow patterns** – patterns that automatically create follower indices when new indices appear on the leader cluster.\n2. Build an `XPackUsageResponse` that contains those counts (and any other CCR‑related metrics).\n3. Invoke the supplied `ActionListener` with the response (or an exception if something goes wrong).\n\n### Handling the response\n\nIn the `onResponse` callback you can inspect the `XPackUsageResponse`:\n\n```java\npublic void onResponse(XPackUsageResponse response) {\n    // Example: print the number of follower indices\n    int followerCount = response.getUsage().get(\"follower_indices\").asInt();\n    int autoFollowCount = response.getUsage().get(\"auto_follow_patterns\").asInt();\n\n    System.out.println(\"Follower indices: \" + followerCount);\n    System.out.println(\"Auto‑follow patterns: \" + autoFollowCount);\n}\n```\n\nIf you need to perform additional logic (e.g., store the metrics, trigger alerts, etc.), just add it inside the `onResponse` method.\n\n---\n\n#### Quick checklist\n\n| Step | Done? |\n|------|-------|\n| Create `Task` (optional) | ✅ |\n| Build `XPackUsageRequest` | ✅ |\n| Grab current `ClusterState` | ✅ |\n| Implement `ActionListener<XPackUsageResponse>` | ✅ |\n| Call `CCRUsageTransportAction_masterOperation` with the four arguments | ✅ |\n\nThat’s all you need to execute the master operation and process the CCR usage statistics. Happy coding!",
+              "refusal": null,
+              "role": "assistant",
+              "annotations": null,
+              "audio": null,
+              "function_call": null,
+              "tool_calls": [],
+              "reasoning": "The user wants to execute the master operation to gather usage statistics of CCR feature in Elasticsearch, including number of follower indices and auto-follow patterns, using a given usageRequest and clusterState, and handle results using an actionListener. They want to use the function CCRUsageTransportAction_masterOperation. We need to call the function with appropriate arguments. The function signature expects strings for task, request, state, listener. We need to provide those. The user didn't provide actual values, so we need to show how to call it. We can provide example code snippet in Java or pseudo-code. The function is in Java 8 SDK syntax. So we can show a Java method call. The user might want to know how to use it. We can explain that we need to create a task object, usageRequest, clusterState, and actionListener. Then call the function. Provide example. Also mention that the function returns any. So we can show usage. Let's produce a code snippet."
+            },
+            "stop_reason": null,
+            "token_ids": null
+          }
+        ],
+        "created": 1780237850,
+        "model": "openai/gpt-oss-20b-checkpoint-160-merged-5epoch-v6-data-zhtw-cot-64-128-256-lr5e-7",
+        "object": "chat.completion",
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": {
+          "completion_tokens": 1169,
+          "prompt_tokens": 314,
+          "total_tokens": 1483,
+          "completion_tokens_details": null,
+          "prompt_tokens_details": null
+        },
+        "prompt_logprobs": null,
+        "prompt_token_ids": null,
+        "kv_transfer_params": null
+      },
+      "parsed_response": [],
+      "input_token": 314,
+      "output_token": 1169,
+      "latency": 17.323201656341553
+    }
+  ]
+}
