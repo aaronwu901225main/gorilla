@@ -2,9 +2,15 @@ import os
 import gc
 import shutil
 import torch
-from transformers import AutoTokenizer, AutoProcessor
 from peft import AutoPeftModelForCausalLM
 import argparse
+import sys
+
+from disk_space_guard import (
+    format_bytes,
+    get_directory_size_bytes,
+    require_merge_output_space,
+)
 
 
 # 基礎模型路徑可由參數指定
@@ -30,17 +36,12 @@ OUTPUT_DIR = args.OUTPUT_DIR
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 BASE_MODEL_IS_DIR = os.path.isdir(BASE_MODEL)
-
-BASE_TOKENIZER = None
-BASE_PROCESSOR = None
-
 if not BASE_MODEL_IS_DIR:
-    # 若 BASE_MODEL 是 HF repo id，改用 from_pretrained 載入再落地。
-    BASE_TOKENIZER = AutoTokenizer.from_pretrained(BASE_MODEL)
-    try:
-        BASE_PROCESSOR = AutoProcessor.from_pretrained(BASE_MODEL, trust_remote_code=True)
-    except Exception:
-        BASE_PROCESSOR = None
+    print(f"錯誤: BASE_MODEL 必須是本機資料夾，才能精準檢查空間: {BASE_MODEL}")
+    sys.exit(1)
+
+BASE_MODEL_SIZE_BYTES = get_directory_size_bytes(BASE_MODEL)
+print(f"Base model size: {format_bytes(BASE_MODEL_SIZE_BYTES)}")
 
 DTYPE_MAP = {
     'bf16': torch.bfloat16,
@@ -69,6 +70,21 @@ for ckpt_name in sorted(os.listdir(LORA_DIR)):
         continue
 
     print(f"正在處理 {ckpt_name}...")
+    save_path = os.path.join(OUTPUT_DIR, ckpt_name + "_merged")
+    try:
+        available_bytes, required_bytes = require_merge_output_space(
+            save_path,
+            BASE_MODEL_SIZE_BYTES,
+            checkpoint_name=ckpt_name,
+        )
+    except RuntimeError as exc:
+        print(f"錯誤: {exc}")
+        sys.exit(1)
+    print(
+        "空間檢查通過: "
+        f"available={format_bytes(available_bytes)}, "
+        f"required={format_bytes(required_bytes)}"
+    )
 
     # 直接從 LoRA adapter 路徑載入，AutoPeftModelForCausalLM 會自動處理 base model
     load_kwargs = {
@@ -92,7 +108,6 @@ for ckpt_name in sorted(os.listdir(LORA_DIR)):
     merged_model = merged_model.to(target_dtype)
 
     # 存成完整模型
-    save_path = os.path.join(OUTPUT_DIR, ckpt_name + "_merged")
     merged_model.save_pretrained(
         save_path,
         max_shard_size=args.MAX_SHARD_SIZE,
@@ -100,27 +115,18 @@ for ckpt_name in sorted(os.listdir(LORA_DIR)):
     )
 
     # 非權重檔一律以 BASE_MODEL 為準，避免 checkpoint 內 tokenizer 設定漂移。
-    if BASE_MODEL_IS_DIR:
-        for cfg_name in (
-            "tokenizer.json",
-            "tokenizer_config.json",
-            "special_tokens_map.json",
-            "added_tokens.json",
-            "chat_template.jinja",
-            "generation_config.json",
-            "processor_config.json",
-            "preprocessor_config.json",
-        ):
-            if _copy_config_if_exists(BASE_MODEL, cfg_name, save_path):
-                print(f"已從 BASE_MODEL 複製 {cfg_name}")
-    else:
-        # BASE_MODEL 非本機資料夾時，退回 transformers 落地。
-        if BASE_TOKENIZER is not None:
-            BASE_TOKENIZER.save_pretrained(save_path)
-            print("已從 BASE_MODEL 載入並儲存 tokenizer 設定")
-        if BASE_PROCESSOR is not None:
-            BASE_PROCESSOR.save_pretrained(save_path)
-            print("已從 BASE_MODEL 載入並儲存 processor 設定")
+    for cfg_name in (
+        "tokenizer.json",
+        "tokenizer_config.json",
+        "special_tokens_map.json",
+        "added_tokens.json",
+        "chat_template.jinja",
+        "generation_config.json",
+        "processor_config.json",
+        "preprocessor_config.json",
+    ):
+        if _copy_config_if_exists(BASE_MODEL, cfg_name, save_path):
+            print(f"已從 BASE_MODEL 複製 {cfg_name}")
 
     processor_cfg = os.path.join(save_path, "processor_config.json")
     preprocessor_cfg = os.path.join(save_path, "preprocessor_config.json")
