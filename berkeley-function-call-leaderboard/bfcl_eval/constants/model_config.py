@@ -11263,9 +11263,9 @@ local_inference_model_map = {
             is_fc_model=True,
             underscore_to_dot=True,
         ),
-        "openai/gpt-oss-20b-checkpoint-800-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7": ModelConfig(
-            model_name="openai/gpt-oss-20b-checkpoint-800-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7",
-            display_name="gpt-oss-20b LoRA ckpt800-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7",
+        "openai/gpt-oss-20b-checkpoint-755-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7": ModelConfig(
+            model_name="openai/gpt-oss-20b-checkpoint-755-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7",
+            display_name="gpt-oss-20b LoRA ckpt755-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7",
             url="self",
             org="OpenAI",
             license="apache-2.0",

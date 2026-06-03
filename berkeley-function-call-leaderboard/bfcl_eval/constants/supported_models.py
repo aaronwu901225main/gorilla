@@ -1181,7 +1181,7 @@ SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-480-merged-5epoch-base-co
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-560-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-640-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-720-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7")
-SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-800-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-755-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-880-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-960-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1040-merged-5epoch-base-cot-have-series-only-answer-loss-16-64-256-lr5e-7")
