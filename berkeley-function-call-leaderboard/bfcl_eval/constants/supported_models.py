@@ -1381,6 +1381,9 @@ SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1120-merged-5epoch-v6data
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1200-merged-5epoch-v6data-simple-cot-only-answer-loss-aug-only-miss-turn3-64-128-256-lr5e-7")
 
 SUPPORTED_MODELS.append("google/gemma-4-31B-it-FC")
+# 5epoch-zhtw-v6-no-cot-only-miss-turn-lr5e-7
+SUPPORTED_MODELS.append("google/gemma-4-31B-it-FC-checkpoint-80-merged-5epoch-zhtw-v6-no-cot-only-miss-turn-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-31B-it-FC-checkpoint-160-merged-5epoch-zhtw-v6-no-cot-only-miss-turn-lr5e-7")
 # 5epoch-zhtw-split-turn-5120-trans5-empty-cot-lr5e-6
 SUPPORTED_MODELS.append("google/gemma-4-31B-it-FC-checkpoint-90-merged-5epoch-zhtw-split-turn-5120-trans5-empty-cot-lr5e-6")
 SUPPORTED_MODELS.append("google/gemma-4-31B-it-FC-checkpoint-180-merged-5epoch-zhtw-split-turn-5120-trans5-empty-cot-lr5e-6")
