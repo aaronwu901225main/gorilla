@@ -1384,6 +1384,12 @@ SUPPORTED_MODELS.append("google/gemma-4-31B-it-FC")
 # 5epoch-zhtw-v6-no-cot-only-miss-turn-lr5e-7
 SUPPORTED_MODELS.append("google/gemma-4-31B-it-FC-checkpoint-80-merged-5epoch-zhtw-v6-no-cot-only-miss-turn-lr5e-7")
 SUPPORTED_MODELS.append("google/gemma-4-31B-it-FC-checkpoint-160-merged-5epoch-zhtw-v6-no-cot-only-miss-turn-lr5e-7")
+# 5epoch-zhtw-v6-no-cot-lr5e-7
+SUPPORTED_MODELS.append("google/gemma-4-31B-it-FC-checkpoint-80-merged-5epoch-zhtw-v6-no-cot-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-31B-it-FC-checkpoint-160-merged-5epoch-zhtw-v6-no-cot-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-31B-it-FC-checkpoint-240-merged-5epoch-zhtw-v6-no-cot-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-31B-it-FC-checkpoint-320-merged-5epoch-zhtw-v6-no-cot-lr5e-7")
+
 # 5epoch-zhtw-split-turn-5120-trans5-empty-cot-lr5e-6
 SUPPORTED_MODELS.append("google/gemma-4-31B-it-FC-checkpoint-90-merged-5epoch-zhtw-split-turn-5120-trans5-empty-cot-lr5e-6")
 SUPPORTED_MODELS.append("google/gemma-4-31B-it-FC-checkpoint-180-merged-5epoch-zhtw-split-turn-5120-trans5-empty-cot-lr5e-6")
