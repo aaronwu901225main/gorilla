@@ -13547,6 +13547,18 @@ local_inference_model_map = {
             is_fc_model=True,
             underscore_to_dot=True,
         ),
+        "google/gemma-4-31B-it-FC-checkpoint-240-merged-5epoch-zhtw-v6-no-cot-only-miss-turn-lr5e-7": ModelConfig(
+            model_name="google/gemma-4-31B-it-FC-checkpoint-240-merged-5epoch-zhtw-v6-no-cot-only-miss-turn-lr5e-7",
+            display_name="Gemma-4-31B-it(FC) LoRA ckpt240-5epoch-zhtw-v6-no-cot-only-miss-turn-lr5e-7",
+            url="self",
+            org="Google",
+            license="gemma-terms-of-use",
+            model_handler=Gemma4FCHandler,
+            input_price=None,
+            output_price=None,
+            is_fc_model=True,
+            underscore_to_dot=True,
+        ),
         # 5epoch-zhtw-split-turn-5120-trans5-empty-cot-lr5e-6
         "google/gemma-4-31B-it-FC-checkpoint-90-merged-5epoch-zhtw-split-turn-5120-trans5-empty-cot-lr5e-6": ModelConfig(
             model_name="google/gemma-4-31B-it-FC-checkpoint-90-merged-5epoch-zhtw-split-turn-5120-trans5-empty-cot-lr5e-6",
