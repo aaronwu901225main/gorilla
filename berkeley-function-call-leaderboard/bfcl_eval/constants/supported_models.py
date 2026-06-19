@@ -1379,6 +1379,23 @@ SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-960-merged-5epoch-v6data-
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1040-merged-5epoch-v6data-simple-cot-only-answer-loss-aug-only-miss-turn3-64-128-256-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1120-merged-5epoch-v6data-simple-cot-only-answer-loss-aug-only-miss-turn3-64-128-256-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-1200-merged-5epoch-v6data-simple-cot-only-answer-loss-aug-only-miss-turn3-64-128-256-lr5e-7")
+# 5epoch-v6data-simple-cot-only-answer-los-A-method-64-128-256-lr5e-7
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-50-merged-5epoch-v6data-simple-cot-only-answer-los-A-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-100-merged-5epoch-v6data-simple-cot-only-answer-los-A-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-150-merged-5epoch-v6data-simple-cot-only-answer-los-A-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-200-merged-5epoch-v6data-simple-cot-only-answer-los-A-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-250-merged-5epoch-v6data-simple-cot-only-answer-los-A-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-300-merged-5epoch-v6data-simple-cot-only-answer-los-A-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-350-merged-5epoch-v6data-simple-cot-only-answer-los-A-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-400-merged-5epoch-v6data-simple-cot-only-answer-los-A-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-450-merged-5epoch-v6data-simple-cot-only-answer-los-A-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-500-merged-5epoch-v6data-simple-cot-only-answer-los-A-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-550-merged-5epoch-v6data-simple-cot-only-answer-los-A-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-600-merged-5epoch-v6data-simple-cot-only-answer-los-A-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-650-merged-5epoch-v6data-simple-cot-only-answer-los-A-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-700-merged-5epoch-v6data-simple-cot-only-answer-los-A-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-750-merged-5epoch-v6data-simple-cot-only-answer-los-A-method-64-128-256-lr5e-7")
+
 
 SUPPORTED_MODELS.append("google/gemma-4-31B-it-FC")
 # 5epoch-zhtw-v6-no-cot-only-miss-turn-lr5e-7
