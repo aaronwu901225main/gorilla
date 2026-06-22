@@ -1429,6 +1429,22 @@ SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-420-merged-5epoch-v6data-
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-450-merged-5epoch-v6data-simple-cot-only-answer-loss-B-method-64-128-256-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-480-merged-5epoch-v6data-simple-cot-only-answer-loss-B-method-64-128-256-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-500-merged-5epoch-v6data-simple-cot-only-answer-loss-B-method-64-128-256-lr5e-7")
+# 5epoch-v6data-base-cot-only-answer-loss-B-method-64-128-256-lr5e-7
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-30-merged-5epoch-v6data-base-cot-only-answer-loss-B-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-60-merged-5epoch-v6data-base-cot-only-answer-loss-B-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-90-merged-5epoch-v6data-base-cot-only-answer-loss-B-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-120-merged-5epoch-v6data-base-cot-only-answer-loss-B-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-150-merged-5epoch-v6data-base-cot-only-answer-loss-B-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-180-merged-5epoch-v6data-base-cot-only-answer-loss-B-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-210-merged-5epoch-v6data-base-cot-only-answer-loss-B-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-240-merged-5epoch-v6data-base-cot-only-answer-loss-B-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-270-merged-5epoch-v6data-base-cot-only-answer-loss-B-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-300-merged-5epoch-v6data-base-cot-only-answer-loss-B-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-330-merged-5epoch-v6data-base-cot-only-answer-loss-B-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-360-merged-5epoch-v6data-base-cot-only-answer-loss-B-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-390-merged-5epoch-v6data-base-cot-only-answer-loss-B-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-420-merged-5epoch-v6data-base-cot-only-answer-loss-B-method-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-450-merged-5epoch-v6data-base-cot-only-answer-loss-B-method-64-128-256-lr5e-7")
 
 SUPPORTED_MODELS.append("google/gemma-4-31B-it-FC")
 # 5epoch-zhtw-v6-no-cot-only-miss-turn-lr5e-7
