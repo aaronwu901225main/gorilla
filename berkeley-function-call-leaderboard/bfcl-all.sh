@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 conda activate BFCL
 set -euo pipefail
-# DEPENDENCY=58996
+DEPENDENCY=59426
 # JOB1_SCRIPT="bfcl-gen.slurm"
 JOB1_SCRIPT="bfcl-gen-gptoss-merged-1.slurm"
 # JOB2_SCRIPT="bfcl-gen-gptoss-merged-2.slurm"
