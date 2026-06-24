@@ -13881,6 +13881,18 @@ local_inference_model_map = {
             is_fc_model=True,
             underscore_to_dot=True,
         ),
+        "openai/gpt-oss-20b-checkpoint-625-merged-5epoch-v6data-simple-cot-only-answer-loss-C-method-64-128-256-lr5e-7": ModelConfig(
+            model_name="openai/gpt-oss-20b-checkpoint-625-merged-5epoch-v6data-simple-cot-only-answer-loss-C-method-64-128-256-lr5e-7",
+            display_name="gpt-oss-20b LoRA ckpt625-5epoch-v6data-simple-cot-only-answer-loss-C-method-64-128-256-lr5e-7",
+            url="self",
+            org="OpenAI",
+            license="apache-2.0",
+            model_handler=OpenAICompletionsHandler,
+            input_price=None,
+            output_price=None,
+            is_fc_model=True,
+            underscore_to_dot=True,
+        ),
         # 5epoch-v6data-simple-cot-only-answer-loss-B-method-64-128-256-lr5e-7
         "openai/gpt-oss-20b-checkpoint-30-merged-5epoch-v6data-simple-cot-only-answer-loss-B-method-64-128-256-lr5e-7": ModelConfig(
             model_name="openai/gpt-oss-20b-checkpoint-30-merged-5epoch-v6data-simple-cot-only-answer-loss-B-method-64-128-256-lr5e-7",
