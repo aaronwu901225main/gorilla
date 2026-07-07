@@ -3,9 +3,9 @@ conda activate BFCL
 set -euo pipefail
 # DEPENDENCY=59426
 # JOB1_SCRIPT="bfcl-gen.slurm"
-JOB1_SCRIPT="bfcl-gen-gptoss-merged-1.slurm"
+# JOB1_SCRIPT="bfcl-gen-gptoss-merged-1.slurm"
 JOB2_SCRIPT="bfcl-gen-gptoss-merged-2.slurm"
-# JOB3_SCRIPT="bfcl-gen-gptoss-merged-3.slurm"
+JOB3_SCRIPT="bfcl-gen-gptoss-merged-3.slurm"
 # JOB4_SCRIPT="bfcl-gen-gptoss-merged-4.slurm"
 # JOB5_SCRIPT="bfcl-gen-gptoss-merged-5.slurm"
 
@@ -17,9 +17,9 @@ JOB2_SCRIPT="bfcl-gen-gptoss-merged-2.slurm"
 #JOB1_SCRIPT="bfcl-gen-mistral-merged.slurm"
 
 JOB_SCRIPTS=(
-  "$JOB1_SCRIPT"
+  # "$JOB1_SCRIPT"
   "$JOB2_SCRIPT"
-  # "$JOB3_SCRIPT"
+  "$JOB3_SCRIPT"
   # "$JOB4_SCRIPT"
   # "$JOB5_SCRIPT"
 )
