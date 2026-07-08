@@ -1,0 +1,153 @@
+LOCAL_SERVER_ENDPOINT=127.0.0.1
+LOCAL_SERVER_PORT=8001
+export OPENAI_API_KEY="fake"
+export OPENAI_BASE_URL="http://${LOCAL_SERVER_ENDPOINT}:${LOCAL_SERVER_PORT}/v1"
+
+export VLLM_USE_FLASHINFER_SAMPLER=0
+unset VLLM_ATTENTION_BACKEND || true
+
+
+export CUDA_HOME="${CONDA_PREFIX}"
+export PATH="${CUDA_HOME}/bin:${PATH}"
+export LD_LIBRARY_PATH="${CUDA_HOME}/lib64:${CUDA_HOME}/lib:${LD_LIBRARY_PATH:-}"
+export CUDACXX="${CUDA_HOME}/bin/nvcc"
+
+mkdir -p "${CUDA_HOME}/include" "${CUDA_HOME}/lib64"
+ln -sf "${CUDA_HOME}/targets/x86_64-linux/include" "${CUDA_HOME}/include" 2>/dev/null || true
+ln -sf "${CUDA_HOME}/targets/x86_64-linux/lib" "${CUDA_HOME}/lib64" 2>/dev/null || true
+
+echo "=== Sanity ==="
+echo "CONDA_PREFIX=${CONDA_PREFIX}"
+echo "CUDA_HOME=${CUDA_HOME}"
+which nvcc
+nvcc --version
+python - <<'PY'
+from torch.utils.cpp_extension import CUDA_HOME
+import torch
+print("torch.version.cuda =", torch.version.cuda)
+print("torch.utils.cpp_extension.CUDA_HOME =", CUDA_HOME)
+print("torch.cuda.is_available =", torch.cuda.is_available())
+PY
+echo "=============="
+
+# 工作目錄
+MERGE_DIR="/home/at0842/aaronwu901225master.ai13/gorilla/berkeley-function-call-leaderboard/merge_lora_model"
+
+export BFCL_REPETITION_PENALTY="${BFCL_REPETITION_PENALTY:-1.02}"
+echo "BFCL_REPETITION_PENALTY=${BFCL_REPETITION_PENALTY}"
+# 模型列表
+# 格式：model_path|served_model_name
+declare -a MODELS=(
+  "${MERGE_DIR}/gpt-oss-20b-lora-5epoch-v6data-simple-cot-only-answer-loss-AC-method-2-1-2-64-128-256-lr5e-7-40/checkpoint-40_merged|openai/gpt-oss-20b-checkpoint-40-merged-5epoch-v6data-simple-cot-only-answer-loss-AC-method-2-1-2-64-128-256-lr5e-7-40"
+  "${MERGE_DIR}/gpt-oss-20b-lora-5epoch-v6data-simple-cot-only-answer-loss-AC-method-2-1-2-64-128-256-lr5e-7-40/checkpoint-80_merged|openai/gpt-oss-20b-checkpoint-80-merged-5epoch-v6data-simple-cot-only-answer-loss-AC-method-2-1-2-64-128-256-lr5e-7-40"
+  "${MERGE_DIR}/gpt-oss-20b-lora-5epoch-v6data-simple-cot-only-answer-loss-AC-method-2-1-2-64-128-256-lr5e-7-40/checkpoint-120_merged|openai/gpt-oss-20b-checkpoint-120-merged-5epoch-v6data-simple-cot-only-answer-loss-AC-method-2-1-2-64-128-256-lr5e-7-40"
+  "${MERGE_DIR}/gpt-oss-20b-lora-5epoch-v6data-simple-cot-only-answer-loss-AC-method-2-1-2-64-128-256-lr5e-7-40/checkpoint-160_merged|openai/gpt-oss-20b-checkpoint-160-merged-5epoch-v6data-simple-cot-only-answer-loss-AC-method-2-1-2-64-128-256-lr5e-7-40"
+)
+
+TOTAL_MODELS=${#MODELS[@]}
+echo "=========================================="
+echo "📋 Total models to evaluate: ${TOTAL_MODELS}"
+echo "=========================================="
+
+for i in "${!MODELS[@]}"; do
+  MODEL_ENTRY="${MODELS[$i]}"
+  MODEL_PATH="${MODEL_ENTRY%%|*}"
+  SERVED_NAME="${MODEL_ENTRY##*|}"
+  
+  MODEL_IDX=$((i + 1))
+  echo ""
+  echo "=========================================="
+  echo "🔄 Model ${MODEL_IDX}/${TOTAL_MODELS}"
+  echo "📁 Path: ${MODEL_PATH}"
+  echo "🏷️  Name: ${SERVED_NAME}"
+  echo "=========================================="
+  
+  # 檢查模型路徑是否存在
+  if [ ! -d "${MODEL_PATH}" ]; then
+    echo "❌ ERROR: Model path does not exist: ${MODEL_PATH}"
+    echo "⏭️  Skipping this model..."
+    continue
+  fi
+  
+  # 檢查是否有必要的模型文件
+  if [ ! -f "${MODEL_PATH}/config.json" ]; then
+    echo "❌ ERROR: config.json not found in ${MODEL_PATH}"
+    echo "⏭️  Skipping this model..."
+    continue
+  fi
+  
+  VLLM_LOG="vllm_server_${SLURM_JOB_ID}_model${MODEL_IDX}.log"
+
+  echo "🚀 Starting vLLM server..."
+  vllm serve "${MODEL_PATH}" \
+    --served-model-name "${SERVED_NAME}" \
+    --host 0.0.0.0 \
+    --port "${LOCAL_SERVER_PORT}" \
+    --tensor-parallel-size 1 \
+    --dtype bfloat16 \
+    --enable-auto-tool-choice \
+    --tool-call-parser openai \
+    --max-model-len 32768 \
+    --gpu-memory-utilization 0.90 \
+    --trust-remote-code \
+    --reasoning-parser openai_gptoss \
+    > "${VLLM_LOG}" 2>&1 &
+  
+  VLLM_PID=$!
+
+  echo "⏳ Waiting for vLLM server to be ready..."
+  MAX_WAIT=1800
+  WAIT_TIME=0
+  
+  while true; do
+    if ! kill -0 "$VLLM_PID" 2>/dev/null; then
+      echo "❌ ERROR: vLLM crashed during startup."
+      echo "📋 Last 200 lines of log:"
+      tail -n 200 "${VLLM_LOG}" || true
+      echo "⏭️  Skipping this model and continuing with next..."
+      break
+    fi
+    
+    if curl -sf "http://${LOCAL_SERVER_ENDPOINT}:${LOCAL_SERVER_PORT}/health" >/dev/null; then
+      echo "✅ vLLM server is ready!"
+      
+      echo "🧪 Running BFCL generate for ${SERVED_NAME}..."
+      if bfcl generate --model "${SERVED_NAME}" --test-category all_scoring --num-threads 30 --include-input-log; then
+        echo "✅ BFCL generation completed for ${SERVED_NAME}!"
+      else
+        echo "❌ ERROR: BFCL generation failed for ${SERVED_NAME}"
+        echo "⚠️  Check the output above for details"
+      fi
+      
+      break
+    fi
+    
+    sleep 5
+    WAIT_TIME=$((WAIT_TIME + 5))
+    if [ $((WAIT_TIME % 60)) -eq 0 ]; then
+      echo "⏳ Still waiting... (${WAIT_TIME}s elapsed)"
+    fi
+    
+    if [ $WAIT_TIME -ge $MAX_WAIT ]; then
+      echo "❌ ERROR: vLLM server failed to start within ${MAX_WAIT} seconds."
+      echo "📋 Last 200 lines of log:"
+      tail -n 200 "${VLLM_LOG}" || true
+      echo "⏭️  Skipping this model..."
+      break
+    fi
+  done
+
+  echo "🛑 Stopping vLLM server..."
+  kill "$VLLM_PID" 2>/dev/null || true
+  wait "$VLLM_PID" 2>/dev/null || true
+  echo "✅ vLLM server stopped"
+  
+  # 清理 GPU 記憶體
+  sleep 10
+  echo ""
+done
+
+echo ""
+echo "=========================================="
+echo "🎉 All models processed!"
+echo "=========================================="

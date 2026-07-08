@@ -1,0 +1,211 @@
+# Ensure conda env binaries win over user-level ~/.local/bin executables.
+export PATH="${CONDA_PREFIX}/bin:${PATH}"
+VLLM_BIN="${CONDA_PREFIX}/bin/vllm"
+
+if [ ! -x "${VLLM_BIN}" ]; then
+  echo "ERROR: vllm binary not found in BFCL env: ${VLLM_BIN}"
+  exit 1
+fi
+
+# ----------------------------
+# 2) OpenAI-compatible endpoint for BFCL
+# ----------------------------
+LOCAL_SERVER_ENDPOINT=127.0.0.1
+LOCAL_SERVER_PORT=8012
+
+export REMOTE_OPENAI_API_KEY="fake"
+export REMOTE_OPENAI_BASE_URL="http://${LOCAL_SERVER_ENDPOINT}:${LOCAL_SERVER_PORT}/v1"
+
+# ----------------------------
+# 3) vLLM knobs
+# ----------------------------
+export VLLM_USE_FLASHINFER_SAMPLER=0
+unset VLLM_ATTENTION_BACKEND || true
+
+# FlashInfer allreduce JIT link step may fail with "cannot find -lcuda".
+# Add driver/stub lookup paths and inject a libcuda.so symlink when possible.
+export CUDA_HOME="${CUDA_HOME:-${CONDA_PREFIX}}"
+export PATH="${CUDA_HOME}/bin:${PATH}"
+mkdir -p "${CONDA_PREFIX}/lib64/stubs" "${CONDA_PREFIX}/lib/stubs"
+
+CUDA_DRIVER_LIB=""
+for candidate in \
+  "${CUDA_HOME}/lib64/stubs/libcuda.so" \
+  "${CUDA_HOME}/targets/x86_64-linux/lib/stubs/libcuda.so" \
+  "/usr/local/cuda/lib64/stubs/libcuda.so" \
+  "/usr/lib64/libcuda.so.1" \
+  "/usr/lib/x86_64-linux-gnu/libcuda.so.1"; do
+  if [ -e "${candidate}" ]; then
+    CUDA_DRIVER_LIB="${candidate}"
+    break
+  fi
+done
+
+if [ -n "${CUDA_DRIVER_LIB}" ]; then
+  ln -sf "${CUDA_DRIVER_LIB}" "${CONDA_PREFIX}/lib64/stubs/libcuda.so" || true
+  ln -sf "${CUDA_DRIVER_LIB}" "${CONDA_PREFIX}/lib/stubs/libcuda.so" || true
+fi
+
+export LIBRARY_PATH="${CONDA_PREFIX}/lib64/stubs:${CONDA_PREFIX}/lib/stubs:${CONDA_PREFIX}/lib64:${CONDA_PREFIX}/lib:${LIBRARY_PATH:-}"
+export LD_LIBRARY_PATH="${CONDA_PREFIX}/lib64/stubs:${CONDA_PREFIX}/lib/stubs:${CONDA_PREFIX}/lib64:${CONDA_PREFIX}/lib:/usr/lib64:/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH:-}"
+
+# ----------------------------
+# 4) Model list (merged Gemma checkpoints)
+# ----------------------------
+MERGE_DIR="/home/at0842/aaronwu901225master.ai13/gorilla/berkeley-function-call-leaderboard/merge_lora_model"
+GEMMA_RUN_DIR="${MERGE_DIR}/gemma-4-31B-it-lora-5epoch-zhtw-v6-no-cot-A-method-64-128-256-lr5e-7"
+
+export BFCL_REPETITION_PENALTY="${BFCL_REPETITION_PENALTY:-1.00}"
+echo "BFCL_REPETITION_PENALTY=${BFCL_REPETITION_PENALTY}"
+
+# Format: model_path|bfcl_model_key
+declare -a MODELS=(
+  "${GEMMA_RUN_DIR}/checkpoint-80_merged|google/gemma-4-31B-it-FC-checkpoint-80-merged-5epoch-zhtw-v6-no-cot-A-method-64-128-256-lr5e-7"
+  # "${GEMMA_RUN_DIR}/checkpoint-160_merged|google/gemma-4-31B-it-FC-checkpoint-160-merged-5epoch-zhtw-v6-no-cot-A-method-64-128-256-lr5e-7"
+)
+
+TOTAL_MODELS=${#MODELS[@]}
+
+if [ "${TOTAL_MODELS}" -eq 0 ]; then
+  echo "ERROR: MODELS array is empty."
+  exit 1
+fi
+
+echo "=== Sanity ==="
+echo "CONDA_PREFIX=${CONDA_PREFIX}"
+which python
+python -V
+echo "VLLM_BIN=${VLLM_BIN}"
+"${VLLM_BIN}" --help >/dev/null 2>&1 || true
+if [ -n "${CUDA_DRIVER_LIB}" ]; then
+  echo "CUDA driver lib candidate=${CUDA_DRIVER_LIB}"
+else
+  echo "WARNING: libcuda.so(.1) not found in known paths; FlashInfer allreduce build may fallback."
+fi
+echo "REMOTE_OPENAI_BASE_URL=${REMOTE_OPENAI_BASE_URL}"
+echo "Total Gemma checkpoints=${TOTAL_MODELS}"
+echo "=============="
+
+# ----------------------------
+# 5) Loop checkpoints
+# ----------------------------
+for i in "${!MODELS[@]}"; do
+  MODEL_ENTRY="${MODELS[$i]}"
+  MODEL_PATH="${MODEL_ENTRY%%|*}"
+  BFCL_MODEL_KEY="${MODEL_ENTRY##*|}"
+  SERVED_NAME="${BFCL_MODEL_KEY}"
+  MODEL_IDX=$((i + 1))
+  VLLM_LOG="vllm_server_${SLURM_JOB_ID}_gemma4_fc_model${MODEL_IDX}.log"
+
+  echo ""
+  echo "=========================================="
+  echo "Model ${MODEL_IDX}/${TOTAL_MODELS}"
+  echo "Path: ${MODEL_PATH}"
+  echo "BFCL key: ${BFCL_MODEL_KEY}"
+  echo "=========================================="
+
+  if [ ! -d "${MODEL_PATH}" ]; then
+    echo "ERROR: Model path does not exist: ${MODEL_PATH}"
+    echo "Skipping this model..."
+    continue
+  fi
+
+  if [ ! -f "${MODEL_PATH}/config.json" ]; then
+    echo "ERROR: config.json not found in ${MODEL_PATH}"
+    echo "Skipping this model..."
+    continue
+  fi
+
+  if [ ! -f "${MODEL_PATH}/tokenizer_config.json" ]; then
+    echo "ERROR: tokenizer_config.json not found in ${MODEL_PATH}"
+    echo "Skipping this model..."
+    continue
+  fi
+
+  # Keep tokenizer/config in BFCL aligned with the current served checkpoint.
+  export REMOTE_OPENAI_TOKENIZER_PATH="${MODEL_PATH}"
+
+  echo "Starting vLLM server for ${SERVED_NAME} ..."
+  # TP=2 can trigger FlashInfer allreduce RMS fusion, which JIT-links -lcuda.
+  # Disable that fusion path while keeping Gemma on two GPUs.
+  "${VLLM_BIN}" serve "${MODEL_PATH}" \
+    --served-model-name "${SERVED_NAME}" \
+    --host 0.0.0.0 \
+    --port "${LOCAL_SERVER_PORT}" \
+    --tensor-parallel-size 2 \
+    --dtype bfloat16 \
+    --max-model-len 131072 \
+    --gpu-memory-utilization 0.90 \
+    --enable-auto-tool-choice \
+    --tool-call-parser gemma4 \
+    --compilation-config '{"pass_config":{"fuse_allreduce_rms":false}}' \
+    --disable-custom-all-reduce \
+    --trust-remote-code \
+    > "${VLLM_LOG}" 2>&1 &
+
+  VLLM_PID=$!
+
+  echo "Waiting for vLLM server to be ready..."
+  MAX_WAIT=1800
+  WAIT_TIME=0
+  SERVER_READY=false
+
+  while true; do
+    if ! kill -0 "${VLLM_PID}" 2>/dev/null; then
+      echo "ERROR: vLLM crashed during startup"
+      tail -n 200 "${VLLM_LOG}" || true
+      break
+    fi
+
+    if curl -sf "http://${LOCAL_SERVER_ENDPOINT}:${LOCAL_SERVER_PORT}/health" >/dev/null; then
+      echo "vLLM server is ready"
+      SERVER_READY=true
+      break
+    fi
+
+    sleep 5
+    WAIT_TIME=$((WAIT_TIME + 5))
+
+    if [ $((WAIT_TIME % 60)) -eq 0 ]; then
+      echo "Still waiting... (${WAIT_TIME}s elapsed)"
+    fi
+
+    if [ "${WAIT_TIME}" -ge "${MAX_WAIT}" ]; then
+      echo "ERROR: vLLM did not become ready within ${MAX_WAIT}s"
+      tail -n 200 "${VLLM_LOG}" || true
+      break
+    fi
+  done
+
+  if [ "${SERVER_READY}" != "true" ]; then
+    kill "${VLLM_PID}" 2>/dev/null || true
+    wait "${VLLM_PID}" 2>/dev/null || true
+    echo "Skipping this model due to server startup failure."
+    continue
+  fi
+
+  echo "Running BFCL generate for ${BFCL_MODEL_KEY} ..."
+  if bfcl generate \
+    --model "${BFCL_MODEL_KEY}" \
+    --backend vllm \
+    --skip-server-setup \
+    --test-category all_scoring \
+    --include-input-log \
+    --num-threads 30; then
+    echo "BFCL generation completed for ${BFCL_MODEL_KEY}"
+  else
+    echo "ERROR: BFCL generation failed for ${BFCL_MODEL_KEY}"
+  fi
+
+  echo "Stopping vLLM server..."
+  kill "${VLLM_PID}" 2>/dev/null || true
+  wait "${VLLM_PID}" 2>/dev/null || true
+  echo "vLLM server stopped"
+
+  sleep 10
+done
+
+echo ""
+echo "=========================================="
+echo "All Gemma checkpoints processed"
+echo "=========================================="
