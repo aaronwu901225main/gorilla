@@ -59,8 +59,9 @@ We introduce the Berkeley Function Calling Leaderboard (BFCL), the **first compr
 
 ```bash
 # Create a new Conda environment with Python 3.10
-conda create -n BFCL python=3.10
+conda create -n BFCL python=3.10 -y
 conda activate BFCL
+conda install cuda -c nvidia
 
 # Clone the Gorilla repository
 git clone https://github.com/ShishirPatil/gorilla.git
@@ -91,7 +92,8 @@ If you are using an older GPU (T4/V100), you should use `vllm` instead as it sup
 
 **Using `vllm`:**
 ```bash
-pip install -e .[oss_eval_vllm]
+pip install -U pip uv
+uv pip install "vllm==0.24.0" --torch-backend=auto
 ```
 
 **Using `sglang`:**

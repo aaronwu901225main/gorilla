@@ -364,6 +364,9 @@ class Gemma4Handler(OSSHandler):
 
     @staticmethod
     def _parse_value(value: str) -> Any:
+        # Gemma 4 Unified uses its dedicated escape token for quotes inside
+        # compact tool calls, for example: city:<|"|>Taipei<|"|>.
+        value = value.replace('<|"|>', '"')
         lowered = value.lower()
         if lowered == "true":
             return True
