@@ -42,9 +42,17 @@ mkdir -p "$OFFLOAD_DIR"
 #   --OFFLOAD_DIR "$OFFLOAD_DIR" \
 #   --MAX_SHARD_SIZE 2GB
 
-python merge.py --BASE_MODEL gemma-4-31B-it \
-  --LORA_DIR gemma4_31B_zhtw_lr5e-7_ep5_64_128_256_turn_v6_no_cot_methodA_upload_ver_40 \
-  --OUTPUT_DIR gemma-4-31B-it-lora-5epoch-zhtw-v6-no-cot-A-method-64-128-256-lr5e-7 \
+# python merge.py --BASE_MODEL gemma-4-31B-it \
+#   --LORA_DIR gemma4_31B_zhtw_lr5e-7_ep5_64_128_256_turn_v6_no_cot_methodA_upload_ver_40 \
+#   --OUTPUT_DIR gemma-4-31B-it-lora-5epoch-zhtw-v6-no-cot-A-method-64-128-256-lr5e-7 \
+#   --DTYPE bf16 \
+#   --DEVICE_MAP auto \
+#   --OFFLOAD_DIR "$OFFLOAD_DIR" \
+#   --MAX_SHARD_SIZE 2GB
+
+python merge.py --BASE_MODEL gemma-4-12B-it \
+  --LORA_DIR gemma4_12B_zhtw_6144_lr5e-7_ep5_64_128_256_turn_v6_no_cot_methodA2_1_2_upload_ver40 \
+  --OUTPUT_DIR gemma-4-12B-it-lora-5epoch-zhtw-v6-no-cot-A-method-2-1-2-64-128-256-lr5e-7 \
   --DTYPE bf16 \
   --DEVICE_MAP auto \
   --OFFLOAD_DIR "$OFFLOAD_DIR" \
