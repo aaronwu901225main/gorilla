@@ -15521,6 +15521,19 @@ local_inference_model_map = {
             is_fc_model=True,
             underscore_to_dot=True,
         ),
+        # gemma-4-12B-it (FC)
+        "google/gemma-4-12B-it-FC": ModelConfig(
+            model_name="google/gemma-4-12B-it-FC",
+            display_name="Gemma-4-12B-it(FC)",
+            url="self",
+            org="Google",
+            license="gemma-terms-of-use",
+            model_handler=Gemma4FCHandler,
+            input_price=None,
+            output_price=None,
+            is_fc_model=True,
+            underscore_to_dot=True,
+        ),
 
         # gemma-4-31B-it (FC)
         "google/gemma-4-31B-it-FC": ModelConfig(
