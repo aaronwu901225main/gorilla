@@ -93,7 +93,7 @@ If you are using an older GPU (T4/V100), you should use `vllm` instead as it sup
 **Using `vllm`:**
 ```bash
 pip install -U pip uv
-uv pip install "vllm==0.24.0" --torch-backend=auto
+uv pip install -e ".[oss_eval_vllm]" --torch-backend=cu130
 ```
 
 **Using `sglang`:**
