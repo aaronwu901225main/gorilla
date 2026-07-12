@@ -88,6 +88,7 @@ BASE_MODELS = [
     (r"(meta[/_-]llama[/_-]|Meta\s+Llama\s+)3\.1-8B-Instruct", "meta-llama_Llama-3.1-8B-Instruct"),
     (r"Qwen[/_-]Qwen3-8B-FC", "Qwen_Qwen3-8B-FC"),
     (r"(?:(?:google[/_-])?gemma-4-26B-A4B-it(?:-FC|\(FC\)))", "google_gemma-4-26B-A4B-it-FC"),
+    (r"(?:(?:google[/_-])?gemma-4-12B-it(?:-FC|\(FC\)))", "google_gemma-4-12B-it-FC"),
     (r"(?:(?:google[/_-])?gemma-4-31B-it(?:-FC|\(FC\)))", "google_gemma-4-31B-it-FC"),
     (r"(?:openai[/_-])?gpt-oss-20b", "gpt-oss-20b"),
 ]
@@ -209,6 +210,9 @@ def find_baseline(df: pd.DataFrame, acc_col: str, base_model: str = None):
                            ~s.str.contains(r"LoRA|ckpt|checkpoint", case=False, regex=True)]
         elif base_model == "google_gemma-4-26B-A4B-it-FC":
             base_rows = df[s.str.contains(r"(?:(?:google[/_-])?gemma-4-26B-A4B-it(?:-FC|\(FC\)))", case=False, regex=True) &
+                           ~s.str.contains(r"LoRA|ckpt|checkpoint", case=False, regex=True)]
+        elif base_model == "google_gemma-4-12B-it-FC":
+            base_rows = df[s.str.contains(r"(?:(?:google[/_-])?gemma-4-12B-it(?:-FC|\(FC\)))", case=False, regex=True) &
                            ~s.str.contains(r"LoRA|ckpt|checkpoint", case=False, regex=True)]
         elif base_model == "google_gemma-4-31B-it-FC":
             base_rows = df[s.str.contains(r"(?:(?:google[/_-])?gemma-4-31B-it(?:-FC|\(FC\)))", case=False, regex=True) &
