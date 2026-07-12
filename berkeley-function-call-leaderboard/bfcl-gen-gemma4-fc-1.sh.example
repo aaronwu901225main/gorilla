@@ -7,18 +7,12 @@ if [ ! -x "${VLLM_BIN}" ]; then
   exit 1
 fi
 
-# ----------------------------
-# 2) OpenAI-compatible endpoint for BFCL
-# ----------------------------
 LOCAL_SERVER_ENDPOINT=127.0.0.1
 LOCAL_SERVER_PORT=8012
 
 export REMOTE_OPENAI_API_KEY="fake"
 export REMOTE_OPENAI_BASE_URL="http://${LOCAL_SERVER_ENDPOINT}:${LOCAL_SERVER_PORT}/v1"
 
-# ----------------------------
-# 3) vLLM knobs
-# ----------------------------
 export VLLM_USE_FLASHINFER_SAMPLER=0
 unset VLLM_ATTENTION_BACKEND || true
 
@@ -49,19 +43,12 @@ fi
 export LIBRARY_PATH="${CONDA_PREFIX}/lib64/stubs:${CONDA_PREFIX}/lib/stubs:${CONDA_PREFIX}/lib64:${CONDA_PREFIX}/lib:${LIBRARY_PATH:-}"
 export LD_LIBRARY_PATH="${CONDA_PREFIX}/lib64/stubs:${CONDA_PREFIX}/lib/stubs:${CONDA_PREFIX}/lib64:${CONDA_PREFIX}/lib:/usr/lib64:/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH:-}"
 
-# ----------------------------
-# 4) Model list (merged Gemma checkpoints)
-# ----------------------------
-MERGE_DIR="/home/at0842/aaronwu901225master.ai13/gorilla/berkeley-function-call-leaderboard/merge_lora_model"
-GEMMA_RUN_DIR="${MERGE_DIR}/gemma-4-31B-it-lora-5epoch-zhtw-v6-no-cot-A-method-64-128-256-lr5e-7"
-
 export BFCL_REPETITION_PENALTY="${BFCL_REPETITION_PENALTY:-1.00}"
 echo "BFCL_REPETITION_PENALTY=${BFCL_REPETITION_PENALTY}"
 
 # Format: model_path|bfcl_model_key
 declare -a MODELS=(
-  "${GEMMA_RUN_DIR}/checkpoint-80_merged|google/gemma-4-31B-it-FC-checkpoint-80-merged-5epoch-zhtw-v6-no-cot-A-method-64-128-256-lr5e-7"
-  # "${GEMMA_RUN_DIR}/checkpoint-160_merged|google/gemma-4-31B-it-FC-checkpoint-160-merged-5epoch-zhtw-v6-no-cot-A-method-64-128-256-lr5e-7"
+  "path/to/your/gemma4/model|model_name_in_bfcl(if not added, please add it to gorilla/berkeley-function-call-leaderboard/bfcl_eval/constants/model_config.py and gorilla/berkeley-function-call-leaderboard/bfcl_eval/constants/supported_models.py)"
 )
 
 TOTAL_MODELS=${#MODELS[@]}
@@ -86,9 +73,6 @@ echo "REMOTE_OPENAI_BASE_URL=${REMOTE_OPENAI_BASE_URL}"
 echo "Total Gemma checkpoints=${TOTAL_MODELS}"
 echo "=============="
 
-# ----------------------------
-# 5) Loop checkpoints
-# ----------------------------
 for i in "${!MODELS[@]}"; do
   MODEL_ENTRY="${MODELS[$i]}"
   MODEL_PATH="${MODEL_ENTRY%%|*}"
@@ -122,6 +106,13 @@ for i in "${!MODELS[@]}"; do
     continue
   fi
 
+  # Gemma 4 12B is the newer encoder-free Gemma4 Unified architecture. It is
+  # not supported by the vLLM 0.19.x backend used for the older 31B runs.
+  if ! python bfcl_eval/scripts/check_vllm_gemma4_compat.py "${MODEL_PATH}"; then
+    echo "Skipping this model due to an incompatible vLLM version."
+    continue
+  fi
+
   # Keep tokenizer/config in BFCL aligned with the current served checkpoint.
   export REMOTE_OPENAI_TOKENIZER_PATH="${MODEL_PATH}"
 
@@ -141,6 +132,7 @@ for i in "${!MODELS[@]}"; do
     --compilation-config '{"pass_config":{"fuse_allreduce_rms":false}}' \
     --disable-custom-all-reduce \
     --trust-remote-code \
+    --attention-backend TRITON_ATTN\
     > "${VLLM_LOG}" 2>&1 &
 
   VLLM_PID=$!

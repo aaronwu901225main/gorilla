@@ -6,7 +6,6 @@ export OPENAI_BASE_URL="http://${LOCAL_SERVER_ENDPOINT}:${LOCAL_SERVER_PORT}/v1"
 export VLLM_USE_FLASHINFER_SAMPLER=0
 unset VLLM_ATTENTION_BACKEND || true
 
-
 export CUDA_HOME="${CONDA_PREFIX}"
 export PATH="${CUDA_HOME}/bin:${PATH}"
 export LD_LIBRARY_PATH="${CUDA_HOME}/lib64:${CUDA_HOME}/lib:${LD_LIBRARY_PATH:-}"
@@ -38,10 +37,7 @@ echo "BFCL_REPETITION_PENALTY=${BFCL_REPETITION_PENALTY}"
 # 模型列表
 # 格式：model_path|served_model_name
 declare -a MODELS=(
-  "${MERGE_DIR}/gpt-oss-20b-lora-5epoch-v6data-simple-cot-only-answer-loss-AC-method-2-1-2-64-128-256-lr5e-7-40/checkpoint-40_merged|openai/gpt-oss-20b-checkpoint-40-merged-5epoch-v6data-simple-cot-only-answer-loss-AC-method-2-1-2-64-128-256-lr5e-7-40"
-  "${MERGE_DIR}/gpt-oss-20b-lora-5epoch-v6data-simple-cot-only-answer-loss-AC-method-2-1-2-64-128-256-lr5e-7-40/checkpoint-80_merged|openai/gpt-oss-20b-checkpoint-80-merged-5epoch-v6data-simple-cot-only-answer-loss-AC-method-2-1-2-64-128-256-lr5e-7-40"
-  "${MERGE_DIR}/gpt-oss-20b-lora-5epoch-v6data-simple-cot-only-answer-loss-AC-method-2-1-2-64-128-256-lr5e-7-40/checkpoint-120_merged|openai/gpt-oss-20b-checkpoint-120-merged-5epoch-v6data-simple-cot-only-answer-loss-AC-method-2-1-2-64-128-256-lr5e-7-40"
-  "${MERGE_DIR}/gpt-oss-20b-lora-5epoch-v6data-simple-cot-only-answer-loss-AC-method-2-1-2-64-128-256-lr5e-7-40/checkpoint-160_merged|openai/gpt-oss-20b-checkpoint-160-merged-5epoch-v6data-simple-cot-only-answer-loss-AC-method-2-1-2-64-128-256-lr5e-7-40"
+  "path/to/your/gpt-oss/model|model_name_in_bfcl(if not added, please add it to gorilla/berkeley-function-call-leaderboard/bfcl_eval/constants/model_config.py and gorilla/berkeley-function-call-leaderboard/bfcl_eval/constants/supported_models.py)"
 )
 
 TOTAL_MODELS=${#MODELS[@]}
@@ -91,6 +87,7 @@ for i in "${!MODELS[@]}"; do
     --gpu-memory-utilization 0.90 \
     --trust-remote-code \
     --reasoning-parser openai_gptoss \
+    --attention-backend TRITON_ATTN\
     > "${VLLM_LOG}" 2>&1 &
   
   VLLM_PID=$!
@@ -110,7 +107,7 @@ for i in "${!MODELS[@]}"; do
     
     if curl -sf "http://${LOCAL_SERVER_ENDPOINT}:${LOCAL_SERVER_PORT}/health" >/dev/null; then
       echo "✅ vLLM server is ready!"
-      
+
       echo "🧪 Running BFCL generate for ${SERVED_NAME}..."
       if bfcl generate --model "${SERVED_NAME}" --test-category all_scoring --num-threads 30 --include-input-log; then
         echo "✅ BFCL generation completed for ${SERVED_NAME}!"
