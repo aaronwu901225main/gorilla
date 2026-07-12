@@ -1,12 +1,4 @@
 # this merge script is for merging multiple LoRA checkpoints into a single GPT-OSS model.
-echo "=========================================="
-echo "🚀 GPT-OSS LoRA Merge Job"
-echo "=========================================="
-echo "Job ID: ${SLURM_JOB_ID}"
-echo "Node: $(hostname)"
-echo "Date: $(date)"
-echo ""
-
 BASE_MODEL="path/to/your/gpt-oss-20b"
 
 # LoRA checkpoints 和輸出目錄
