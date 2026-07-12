@@ -1,25 +1,4 @@
-#!/usr/bin/env bash
-#SBATCH -J BFCL-merge-gptoss
-#SBATCH -p h200q
-#SBATCH --gres=gpu:gpu:1
-#SBATCH -c 8
-#SBATCH --mem=64G
-#SBATCH --time=1:00:00
-#SBATCH -o %x-%j.out
-
-set -e
-set -o pipefail
-
-
-# 進 bash 後，載入 conda hook
-source /cm/shared/apps/anaconda/2024.02/etc/profile.d/conda.sh
-
-# 重新 activate
-conda deactivate 2>/dev/null || true
-conda deactivate 2>/dev/null || true
-conda activate merge
-
-
+# this merge script is for merging multiple LoRA checkpoints into a single GPT-OSS model.
 echo "=========================================="
 echo "🚀 GPT-OSS LoRA Merge Job"
 echo "=========================================="
@@ -28,22 +7,11 @@ echo "Node: $(hostname)"
 echo "Date: $(date)"
 echo ""
 
-# ----------------------------
-# 2) 配置路徑
-# ----------------------------
-# Base model 路徑（需要非量化或 BF16 版本）
-# 如果你只有量化版本，腳本會嘗試反量化
-BASE_MODEL="/home/at0842/aaronwu901225master.ai13/gorilla/berkeley-function-call-leaderboard/merge_lora_model/gpt-oss-20b"
+BASE_MODEL="path/to/your/gpt-oss-20b"
 
 # LoRA checkpoints 和輸出目錄
 declare -A LORA_CONFIGS=(
   # 格式: ["LORA_DIR"]="OUTPUT_DIR_NAME"
-  # ["gptoss_20b_all_zhtw_lr5e-7_ep5_64_128_256_base_cot_v6data_only_answer_loss_C_method_upload_ver"]="gpt-oss-20b-lora-5epoch-v6data-base-cot-only-answer-loss-C-method-64-128-256-lr5e-7"
-  # ["gptoss_20b_all_zhtw_lr5e-7_ep5_64_128_256_simple_cot_v6_only_answer_loss_A_method_upload_40_ver"]="gpt-oss-20b-lora-5epoch-v6data-simple-cot-only-answer-loss-A-method-64-128-256-lr5e-7-40"
-  # ["gptoss_20b_all_zhtw_lr5e-7_ep5_64_128_256_simple_cot_v6_only_answer_loss_A_method2_1_2_up_ver"]="gpt-oss-20b-lora-5epoch-v6data-simple-cot-only-answer-loss-A-method-2-1-2-64-128-256-lr5e-7-40"
-  ["gptoss_20b_all_zhtw_lr5e-7_ep5_64_128_256_simple_cot_v6_only_answer_loss_AC_method2_1_2_up_ver"]="gpt-oss-20b-lora-5epoch-v6data-simple-cot-only-answer-loss-AC-method-2-1-2-64-128-256-lr5e-7-40"
-  # ["gptoss_20b_all_zhtw_lr5e-7_ep5_64_128_256_simple_cot_v6data_only_answer_loss_A_method_upload_ver"]="gpt-oss-20b-lora-5epoch-v6data-simple-cot-only-answer-loss-A-method-64-128-256-lr5e-7"
-  # ["gptoss_20b_all_zhtw_lr5e-7_ep5_64_128_256_simple_cot_v6data_only_answer_loss_C_method_upload_ver"]="gpt-oss-20b-lora-5epoch-v6data-simple-cot-only-answer-loss-C-method-64-128-256-lr5e-7"
   # 添加更多配置...
 )
 
@@ -51,12 +19,9 @@ declare -A LORA_CONFIGS=(
 OUTPUT_DTYPE="bfloat16"
 
 # 工作目錄
-WORK_DIR="/home/at0842/aaronwu901225master.ai13/gorilla/berkeley-function-call-leaderboard/merge_lora_model"
+WORK_DIR=""
 cd "${WORK_DIR}"
 
-# ----------------------------
-# 3) 環境檢查
-# ----------------------------
 echo "📋 環境檢查"
 echo "------------------------------------------"
 python -c "import torch; print(f'PyTorch: {torch.__version__}')"
@@ -69,9 +34,6 @@ if python -c "import torch; torch.cuda.is_available()" 2>/dev/null; then
 fi
 echo ""
 
-# ----------------------------
-# 4) 檢查 Base Model
-# ----------------------------
 echo "📦 檢查 Base Model"
 echo "------------------------------------------"
 if [ -d "${BASE_MODEL}" ]; then
@@ -96,9 +58,6 @@ else
 fi
 echo ""
 
-# ----------------------------
-# 5) 處理每個 LoRA 配置
-# ----------------------------
 echo "🔄 開始處理 LoRA Checkpoints"
 echo "=========================================="
 
@@ -141,9 +100,6 @@ for LORA_DIR in "${!LORA_CONFIGS[@]}"; do
   fi
 done
 
-# ----------------------------
-# 6) 總結
-# ----------------------------
 echo ""
 echo "=========================================="
 echo "📊 處理結果總結"
