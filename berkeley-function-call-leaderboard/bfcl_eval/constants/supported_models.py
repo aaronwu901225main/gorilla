@@ -1575,7 +1575,22 @@ SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-480-merged-5epoch-z
 SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-520-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-64-128-256-lr5e-7")
 SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-560-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-64-128-256-lr5e-7")
 SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-600-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-64-128-256-lr5e-7")
-
+# 5epoch-zhtw-v6-10240-no-cot-A-method-2-1-2-64-128-256-lr5e-7
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-40-merged-5epoch-zhtw-v6-10240-no-cot-A-method-2-1-2-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-80-merged-5epoch-zhtw-v6-10240-no-cot-A-method-2-1-2-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-120-merged-5epoch-zhtw-v6-10240-no-cot-A-method-2-1-2-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-160-merged-5epoch-zhtw-v6-10240-no-cot-A-method-2-1-2-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-200-merged-5epoch-zhtw-v6-10240-no-cot-A-method-2-1-2-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-240-merged-5epoch-zhtw-v6-10240-no-cot-A-method-2-1-2-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-280-merged-5epoch-zhtw-v6-10240-no-cot-A-method-2-1-2-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-320-merged-5epoch-zhtw-v6-10240-no-cot-A-method-2-1-2-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-360-merged-5epoch-zhtw-v6-10240-no-cot-A-method-2-1-2-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-400-merged-5epoch-zhtw-v6-10240-no-cot-A-method-2-1-2-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-440-merged-5epoch-zhtw-v6-10240-no-cot-A-method-2-1-2-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-480-merged-5epoch-zhtw-v6-10240-no-cot-A-method-2-1-2-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-520-merged-5epoch-zhtw-v6-10240-no-cot-A-method-2-1-2-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-560-merged-5epoch-zhtw-v6-10240-no-cot-A-method-2-1-2-64-128-256-lr5e-7")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-600-merged-5epoch-zhtw-v6-10240-no-cot-A-method-2-1-2-64-128-256-lr5e-7")
 
 # gemma-4-31B-it (FC)
 SUPPORTED_MODELS.append("google/gemma-4-31B-it-FC")
