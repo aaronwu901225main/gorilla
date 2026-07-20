@@ -1572,6 +1572,10 @@ SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-480-merged-5epoch-v6data-
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-520-merged-5epoch-v6data-apigen-only1-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-560-merged-5epoch-v6data-apigen-only1-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-600-merged-5epoch-v6data-apigen-only1-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-640-merged-5epoch-v6data-apigen-only1-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-680-merged-5epoch-v6data-apigen-only1-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-720-merged-5epoch-v6data-apigen-only1-lr5e-7")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-760-merged-5epoch-v6data-apigen-only1-lr5e-7")
 
 # gemma-4-12B-it (FC)
 SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC")
