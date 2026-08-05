@@ -1608,7 +1608,14 @@ SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-280-merged-5epoch-llamafa
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-320-merged-5epoch-llamafactory-original-train-2-1-2-64-128-256-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-360-merged-5epoch-llamafactory-original-train-2-1-2-64-128-256-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-375-merged-5epoch-llamafactory-original-train-2-1-2-64-128-256-lr5e-7")
-
+# 5epoch-v6data-simple-cot-only-answer-loss-apigen-only1-64-128-256-lr1e-6
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-120-merged-5epoch-v6data-simple-cot-only-answer-loss-apigen-only1-64-128-256-lr1e-6")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-160-merged-5epoch-v6data-simple-cot-only-answer-loss-apigen-only1-64-128-256-lr1e-6")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-200-merged-5epoch-v6data-simple-cot-only-answer-loss-apigen-only1-64-128-256-lr1e-6")
+# 5epoch-v6data-simple-cot-only-answer-loss-A-method2-1-2-64-128-256-lr1e-6
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-120-merged-5epoch-v6data-simple-cot-only-answer-loss-A-method2-1-2-64-128-256-lr1e-6")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-160-merged-5epoch-v6data-simple-cot-only-answer-loss-A-method2-1-2-64-128-256-lr1e-6")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-200-merged-5epoch-v6data-simple-cot-only-answer-loss-A-method2-1-2-64-128-256-lr1e-6")
 
 # gemma-4-12B-it (FC)
 SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC")
