@@ -16186,7 +16186,43 @@ local_inference_model_map = {
             is_fc_model=True,
             underscore_to_dot=True,
         ),
-
+        # 5epoch-v6data-simple-cot-original2-test-64-128-256-lr5e-7
+        "openai/gpt-oss-20b-checkpoint-120-merged-5epoch-v6data-simple-cot-original2-test-64-128-256-lr5e-7": ModelConfig(
+            model_name="openai/gpt-oss-20b-checkpoint-120-merged-5epoch-v6data-simple-cot-original2-test-64-128-256-lr5e-7",
+            display_name="gpt-oss-20b LoRA ckpt120-5epoch-v6data-simple-cot-original2-test-64-128-256-lr5e-7",
+            url="self",
+            org="OpenAI",
+            license="apache-2.0",
+            model_handler=OpenAICompletionsHandler,
+            input_price=None,
+            output_price=None,
+            is_fc_model=True,
+            underscore_to_dot=True,
+        ),
+        "openai/gpt-oss-20b-checkpoint-160-merged-5epoch-v6data-simple-cot-original2-test-64-128-256-lr5e-7": ModelConfig(
+            model_name="openai/gpt-oss-20b-checkpoint-160-merged-5epoch-v6data-simple-cot-original2-test-64-128-256-lr5e-7",
+            display_name="gpt-oss-20b LoRA ckpt160-5epoch-v6data-simple-cot-original2-test-64-128-256-lr5e-7",
+            url="self",
+            org="OpenAI",
+            license="apache-2.0",
+            model_handler=OpenAICompletionsHandler,
+            input_price=None,
+            output_price=None,
+            is_fc_model=True,
+            underscore_to_dot=True,
+        ),
+        "openai/gpt-oss-20b-checkpoint-200-merged-5epoch-v6data-simple-cot-original2-test-64-128-256-lr5e-7": ModelConfig(
+            model_name="openai/gpt-oss-20b-checkpoint-200-merged-5epoch-v6data-simple-cot-original2-test-64-128-256-lr5e-7",
+            display_name="gpt-oss-20b LoRA ckpt200-5epoch-v6data-simple-cot-original2-test-64-128-256-lr5e-7",
+            url="self",
+            org="OpenAI",
+            license="apache-2.0",
+            model_handler=OpenAICompletionsHandler,
+            input_price=None,
+            output_price=None,
+            is_fc_model=True,
+            underscore_to_dot=True,
+        ),
 
 
         # gemma-4-12B-it (FC)
