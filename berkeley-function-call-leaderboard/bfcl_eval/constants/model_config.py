@@ -17613,10 +17613,10 @@ local_inference_model_map = {
             is_fc_model=True,
             underscore_to_dot=True,
         ),
-        # 5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6
-        "google/gemma-4-12B-it-FC-checkpoint-40-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6": ModelConfig(
-            model_name="google/gemma-4-12B-it-FC-checkpoint-40-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6",
-            display_name="Gemma-4-12B-it(FC) LoRA ckpt40-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6",
+        # 5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6
+        "google/gemma-4-12B-it-FC-checkpoint-40-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6": ModelConfig(
+            model_name="google/gemma-4-12B-it-FC-checkpoint-40-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6",
+            display_name="Gemma-4-12B-it(FC) LoRA ckpt40-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6",
             url="self",
             org="Google",
             license="gemma-terms-of-use",
@@ -17626,9 +17626,9 @@ local_inference_model_map = {
             is_fc_model=True,
             underscore_to_dot=True,
         ),
-        "google/gemma-4-12B-it-FC-checkpoint-80-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6": ModelConfig(
-            model_name="google/gemma-4-12B-it-FC-checkpoint-80-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6",
-            display_name="Gemma-4-12B-it(FC) LoRA ckpt80-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6",
+        "google/gemma-4-12B-it-FC-checkpoint-80-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6": ModelConfig(
+            model_name="google/gemma-4-12B-it-FC-checkpoint-80-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6",
+            display_name="Gemma-4-12B-it(FC) LoRA ckpt80-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6",
             url="self",
             org="Google",
             license="gemma-terms-of-use",
@@ -17638,9 +17638,9 @@ local_inference_model_map = {
             is_fc_model=True,
             underscore_to_dot=True,
         ),
-        "google/gemma-4-12B-it-FC-checkpoint-120-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6": ModelConfig(
-            model_name="google/gemma-4-12B-it-FC-checkpoint-120-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6",
-            display_name="Gemma-4-12B-it(FC) LoRA ckpt120-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6",
+        "google/gemma-4-12B-it-FC-checkpoint-120-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6": ModelConfig(
+            model_name="google/gemma-4-12B-it-FC-checkpoint-120-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6",
+            display_name="Gemma-4-12B-it(FC) LoRA ckpt120-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6",
             url="self",
             org="Google",
             license="gemma-terms-of-use",
@@ -17650,9 +17650,9 @@ local_inference_model_map = {
             is_fc_model=True,
             underscore_to_dot=True,
         ),
-        "google/gemma-4-12B-it-FC-checkpoint-160-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6": ModelConfig(
-            model_name="google/gemma-4-12B-it-FC-checkpoint-160-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6",
-            display_name="Gemma-4-12B-it(FC) LoRA ckpt160-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6",
+        "google/gemma-4-12B-it-FC-checkpoint-160-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6": ModelConfig(
+            model_name="google/gemma-4-12B-it-FC-checkpoint-160-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6",
+            display_name="Gemma-4-12B-it(FC) LoRA ckpt160-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6",
             url="self",
             org="Google",
             license="gemma-terms-of-use",
@@ -17662,9 +17662,9 @@ local_inference_model_map = {
             is_fc_model=True,
             underscore_to_dot=True,
         ),
-        "google/gemma-4-12B-it-FC-checkpoint-200-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6": ModelConfig(
-            model_name="google/gemma-4-12B-it-FC-checkpoint-200-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6",
-            display_name="Gemma-4-12B-it(FC) LoRA ckpt200-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6",
+        "google/gemma-4-12B-it-FC-checkpoint-200-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6": ModelConfig(
+            model_name="google/gemma-4-12B-it-FC-checkpoint-200-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6",
+            display_name="Gemma-4-12B-it(FC) LoRA ckpt200-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6",
             url="self",
             org="Google",
             license="gemma-terms-of-use",
@@ -17674,9 +17674,9 @@ local_inference_model_map = {
             is_fc_model=True,
             underscore_to_dot=True,
         ),
-        "google/gemma-4-12B-it-FC-checkpoint-240-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6": ModelConfig(
-            model_name="google/gemma-4-12B-it-FC-checkpoint-240-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6",
-            display_name="Gemma-4-12B-it(FC) LoRA ckpt240-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6",
+        "google/gemma-4-12B-it-FC-checkpoint-240-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6": ModelConfig(
+            model_name="google/gemma-4-12B-it-FC-checkpoint-240-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6",
+            display_name="Gemma-4-12B-it(FC) LoRA ckpt240-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6",
             url="self",
             org="Google",
             license="gemma-terms-of-use",
@@ -17686,9 +17686,9 @@ local_inference_model_map = {
             is_fc_model=True,
             underscore_to_dot=True,
         ),
-        "google/gemma-4-12B-it-FC-checkpoint-280-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6": ModelConfig(
-            model_name="google/gemma-4-12B-it-FC-checkpoint-280-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6",
-            display_name="Gemma-4-12B-it(FC) LoRA ckpt280-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6",
+        "google/gemma-4-12B-it-FC-checkpoint-280-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6": ModelConfig(
+            model_name="google/gemma-4-12B-it-FC-checkpoint-280-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6",
+            display_name="Gemma-4-12B-it(FC) LoRA ckpt280-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6",
             url="self",
             org="Google",
             license="gemma-terms-of-use",
@@ -17698,9 +17698,9 @@ local_inference_model_map = {
             is_fc_model=True,
             underscore_to_dot=True,
         ),
-        "google/gemma-4-12B-it-FC-checkpoint-320-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6": ModelConfig(
-            model_name="google/gemma-4-12B-it-FC-checkpoint-320-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6",
-            display_name="Gemma-4-12B-it(FC) LoRA ckpt320-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6",
+        "google/gemma-4-12B-it-FC-checkpoint-320-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6": ModelConfig(
+            model_name="google/gemma-4-12B-it-FC-checkpoint-320-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6",
+            display_name="Gemma-4-12B-it(FC) LoRA ckpt320-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6",
             url="self",
             org="Google",
             license="gemma-terms-of-use",
@@ -17710,9 +17710,9 @@ local_inference_model_map = {
             is_fc_model=True,
             underscore_to_dot=True,
         ),
-        "google/gemma-4-12B-it-FC-checkpoint-360-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6": ModelConfig(
-            model_name="google/gemma-4-12B-it-FC-checkpoint-360-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6",
-            display_name="Gemma-4-12B-it(FC) LoRA ckpt360-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6",
+        "google/gemma-4-12B-it-FC-checkpoint-360-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6": ModelConfig(
+            model_name="google/gemma-4-12B-it-FC-checkpoint-360-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6",
+            display_name="Gemma-4-12B-it(FC) LoRA ckpt360-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6",
             url="self",
             org="Google",
             license="gemma-terms-of-use",
@@ -17722,9 +17722,9 @@ local_inference_model_map = {
             is_fc_model=True,
             underscore_to_dot=True,
         ),
-        "google/gemma-4-12B-it-FC-checkpoint-370-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6": ModelConfig(
-            model_name="google/gemma-4-12B-it-FC-checkpoint-370-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6",
-            display_name="Gemma-4-12B-it(FC) LoRA ckpt370-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal_train-64-128-256-lr1e-6",
+        "google/gemma-4-12B-it-FC-checkpoint-370-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6": ModelConfig(
+            model_name="google/gemma-4-12B-it-FC-checkpoint-370-merged-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6",
+            display_name="Gemma-4-12B-it(FC) LoRA ckpt370-5epoch-zhtw-v6-6144-no-cot-A-method-2-1-2-llamafactory-oringal-train-64-128-256-lr1e-6",
             url="self",
             org="Google",
             license="gemma-terms-of-use",
