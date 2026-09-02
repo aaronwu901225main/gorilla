@@ -16501,6 +16501,30 @@ local_inference_model_map = {
             is_fc_model=True,
             underscore_to_dot=True,
         ),
+        "openai/gpt-oss-20b-checkpoint-640-merged-5epoch-v6data-simple-cot-aug-all-only-answer-loss-64-128-256-lr5e-7": ModelConfig(
+            model_name="openai/gpt-oss-20b-checkpoint-640-merged-5epoch-v6data-simple-cot-aug-all-only-answer-loss-64-128-256-lr5e-7",
+            display_name="gpt-oss-20b LoRA ckpt640-5epoch-v6data-simple-cot-aug-all-only-answer-loss-64-128-256-lr5e-7",
+            url="self",
+            org="OpenAI",
+            license="apache-2.0",
+            model_handler=OpenAICompletionsHandler,
+            input_price=None,
+            output_price=None,
+            is_fc_model=True,
+            underscore_to_dot=True,
+        ),
+        "openai/gpt-oss-20b-checkpoint-680-merged-5epoch-v6data-simple-cot-aug-all-only-answer-loss-64-128-256-lr5e-7": ModelConfig(
+            model_name="openai/gpt-oss-20b-checkpoint-680-merged-5epoch-v6data-simple-cot-aug-all-only-answer-loss-64-128-256-lr5e-7",
+            display_name="gpt-oss-20b LoRA ckpt680-5epoch-v6data-simple-cot-aug-all-only-answer-loss-64-128-256-lr5e-7",
+            url="self",
+            org="OpenAI",
+            license="apache-2.0",
+            model_handler=OpenAICompletionsHandler,
+            input_price=None,
+            output_price=None,
+            is_fc_model=True,
+            underscore_to_dot=True,
+        ),
 
         # gemma-4-12B-it (FC)
         "google/gemma-4-12B-it-FC": ModelConfig(
