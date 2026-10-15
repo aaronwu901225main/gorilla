@@ -1700,7 +1700,22 @@ SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-200-merged-5epoch-v6data-
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-120-merged-5epoch-v6data-simple-cot-only-answer-loss-A-method-2112-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-160-merged-5epoch-v6data-simple-cot-only-answer-loss-A-method-2112-lr5e-7")
 SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-200-merged-5epoch-v6data-simple-cot-only-answer-loss-A-method-2112-lr5e-7")
-
+# pythonic-gpt-5-gen-data-without-check-fix
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-40-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-80-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-120-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-160-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-200-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-240-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-280-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-320-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-360-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-400-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-440-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-480-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-520-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-560-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-600-merged-pythonic-gpt-5-gen-data-without-check-fix")
 
 # gemma-4-12B-it (FC)
 SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC")
