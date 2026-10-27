@@ -1760,6 +1760,26 @@ SUPPORTED_MODELS.append("openai/gpt-oss-20b-checkpoint-780-merged-pythonic-gpt-5
 
 # gemma-4-12B-it (FC)
 SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC")
+# pythonic-gpt-5-gen-data-without-check-fix
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-40-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-80-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-120-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-160-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-200-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-240-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-280-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-320-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-360-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-400-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-440-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-480-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-520-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-560-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-600-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-640-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-680-merged-pythonic-gpt-5-gen-data-without-check-fix")
+SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-710-merged-pythonic-gpt-5-gen-data-without-check-fix")
+
 # 5epoch-zhtw-6144-no-cot-aug-original-64-128-256-lr1e-6
 SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-40-merged-5epoch-zhtw-6144-no-cot-aug-original-64-128-256-lr1e-6")
 SUPPORTED_MODELS.append("google/gemma-4-12B-it-FC-checkpoint-80-merged-5epoch-zhtw-6144-no-cot-aug-original-64-128-256-lr1e-6")
